@@ -134,9 +134,9 @@ strong{font-weight:600}
 .mega em{display:block;font:800 2.55em/.98 var(--round);font-style:normal;letter-spacing:-.05em;padding-bottom:.06em;margin-left:-.04em}
 .fases li{position:relative;display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center;padding:13px 16px}
 .fases b{font-weight:600}
-.fases li[data-f="1"],.fase[data-f="1"],.mix li[data-f="1"]{--accent:var(--p1);--on-accent:var(--p1on)}
-.fases li[data-f="2"],.fase[data-f="2"],.mix li[data-f="2"]{--accent:var(--p2);--on-accent:var(--p2on)}
-.fases li[data-f="3"],.fase[data-f="3"],.mix li[data-f="3"]{--accent:var(--p3);--on-accent:var(--p3on)}
+.fases li[data-f="1"],.fase[data-f="1"],.mix li[data-f="1"],.stop[data-f="1"]{--accent:var(--p1);--on-accent:var(--p1on)}
+.fases li[data-f="2"],.fase[data-f="2"],.mix li[data-f="2"],.stop[data-f="2"]{--accent:var(--p2);--on-accent:var(--p2on)}
+.fases li[data-f="3"],.fase[data-f="3"],.mix li[data-f="3"],.stop[data-f="3"]{--accent:var(--p3);--on-accent:var(--p3on)}
 
 /* Mapa */
 .fase-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 4px}
@@ -287,6 +287,33 @@ strong{font-weight:600}
 .choice b{font-size:20px;font-weight:700;letter-spacing:-.022em;color:var(--accent)}
 .choice span{font-size:15px;line-height:1.38;color:var(--ink2)}
 .choice:active{transform:scale(.985)}
+
+/* Boneco e mapa em caminho */
+.boneco{display:block;width:100%;height:auto}
+.hero{position:relative}
+.heroeu{position:absolute;right:0;bottom:4px;width:min(92px,24vw)}
+.mapa{position:relative;margin-top:34px}
+.trilho{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.trilho path{fill:none;stroke-width:6;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.trilho .t0{stroke:var(--ink3);stroke-dasharray:1 12}
+.trilho .t1{stroke:var(--ok)}
+.stops{position:relative;display:grid}
+.stop{display:grid;grid-template-columns:25% 1fr;align-items:center}
+.stop.r{grid-template-columns:1fr 25%}
+.stop.r .node{order:2}
+.stop.r .txt{text-align:right;align-items:flex-end}
+.node{position:relative;display:grid;place-items:center;height:100%}
+.dot{position:relative;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--card);color:var(--ink3);font:700 20px/1 var(--round);box-shadow:0 0 0 5px var(--bg)}
+.stop.done .dot{background:var(--ok);color:var(--on-ok)}
+.stop.now .dot{background:var(--accent);color:var(--on-accent)}
+.eu{position:absolute;left:50%;bottom:calc(50% + 20px);width:46px;margin-left:-23px;z-index:2;animation:bob 2.4s ease-in-out infinite;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.txt{display:flex;flex-direction:column;gap:1px;min-width:0;padding:0 2px}
+.fz{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.stop .nm{font-weight:600;line-height:1.25}
+.stop .st{font-size:14px;line-height:1.3;color:var(--ink2)}
+.stop.now .st{color:var(--accent);font-weight:600}
+.stop.locked .nm{color:var(--ink2)}
 
 /* Partida de F1 */
 .lights{display:flex;justify-content:center;gap:10px;padding:14px 12px;background:var(--card);border-radius:16px}
@@ -493,6 +520,8 @@ const hearts = (n, total) => { let h = ''; for(let i = 0; i < total; i++) h += `
 const fbx = (kind, t) => `<p class="fb ${kind}" role="status">${t}</p>`;
 const STAR = `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 1.2l2 4.3 4.7.5-3.5 3.2 1 4.6L8 11.5l-4.2 2.300 1-4.600L1.300 6l4.700-.500z" fill="currentColor"/></svg>`;
 
+const BONECO = `<svg class="boneco" aria-hidden="true" viewBox="0 0 120 160"><defs><linearGradient id="bh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4b2a1b"/><stop offset=".55" stop-color="#683822"/><stop offset="1" stop-color="#a85c30"/></linearGradient></defs><path d="M60 10C35 10 22 27 22 50c0 14-6 22-8 34-2 10 3 17 11 19h70c8-2 13-9 11-19-2-12-8-20-8-34 0-23-13-40-38-40z" fill="url(#bh)"/><rect x="41" y="114" width="17" height="36" rx="8" fill="#bccde2"/><rect x="62" y="114" width="17" height="36" rx="8" fill="#bccde2"/><ellipse cx="48" cy="151" rx="11" ry="5.500" fill="#ffffff" stroke="#c9ccd6" stroke-width="1.200"/><ellipse cx="72" cy="151" rx="11" ry="5.500" fill="#ffffff" stroke="#c9ccd6" stroke-width="1.200"/><rect x="53" y="64" width="14" height="14" fill="#e6b792"/><path d="M39 76h42c7 0 11 4 12 11l3.500 31c.400 3.500-2 6-5.500 6H29c-3.500 0-5.900-2.500-5.500-6L27 87c1-7 5-11 12-11z" fill="#e3c8a2"/><path d="M51 76h18l-3 48H54z" fill="#1c1c1e"/><path d="M51 76l5 21M69 76l-5 21" stroke="#bf9a68" stroke-width="2" stroke-linecap="round" fill="none"/><rect x="71" y="97" width="12" height="11" rx="2" fill="none" stroke="#bf9a68" stroke-width="1.800"/><ellipse cx="60" cy="44" rx="25" ry="26" fill="#f0c4a0"/><path d="M35 40c-4 13-8 25-9 40-1 9 2 15 8 17 3-15 4-34 7-49z" fill="url(#bh)"/><path d="M85 40c4 13 8 25 9 40 1 9-2 15-8 17-3-15-4-34-7-49z" fill="url(#bh)"/><path d="M60 15c-17 0-28 11-29 29 8-3 16-11 22-21 2-3 4-6 7-8z" fill="#4b2a1b"/><path d="M60 15c17 0 28 11 29 29-8-3-16-11-22-21-2-3-4-6-7-8z" fill="#55301e"/><ellipse cx="49.500" cy="45" rx="9.500" ry="5.800" fill="#141414"/><ellipse cx="70.500" cy="45" rx="9.500" ry="5.800" fill="#141414"/><path d="M58 44q2-2.200 4 0" stroke="#141414" stroke-width="2.200" fill="none" stroke-linecap="round"/><path d="M44 43q3-2.500 6-2M65 43q3-2.500 6-2" stroke="#ffffff" stroke-opacity=".35" stroke-width="1.400" fill="none" stroke-linecap="round"/><circle cx="41" cy="55" r="4" fill="#ee8f85" opacity=".45"/><circle cx="79" cy="55" r="4" fill="#ee8f85" opacity=".45"/><path d="M50 57q10 10.500 20 0z" fill="#ffffff" stroke="#7a3b2e" stroke-width="1.700" stroke-linejoin="round"/><path d="M85 87l6 24" stroke="#e3c8a2" stroke-width="12" stroke-linecap="round"/><path d="M89.600 104.500l1.700 7" stroke="#8a5a34" stroke-width="12" stroke-linecap="butt"/><circle cx="92.500" cy="117" r="6.200" fill="#f0c4a0"/><path d="M36 86L21 64" stroke="#e3c8a2" stroke-width="12.500" stroke-linecap="round"/><path d="M25.500 70.500l-5-7.300" stroke="#8a5a34" stroke-width="12.500" stroke-linecap="butt"/><circle cx="17" cy="56" r="6.500" fill="#f0c4a0"/><path d="M14.500 53l-3.500-10M19.500 52.500l2-10.500" stroke="#f0c4a0" stroke-width="4.200" stroke-linecap="round"/></svg>`;
+const ROW = 104;
 const seg = ms => (ms / 1000).toFixed(3).replace('.', ',') + ' s';
 /* Partida de F1: as luzes mexem directamente no ecrã, sem redesenhar, para o tempo de reacção ser justo. */
 const luz = {ph:'idle', timers:[], t0:0};
@@ -585,7 +614,7 @@ function vSplash(){
   return `<div class="splash">
     <div class="hero-torches" aria-hidden="true">${flame(true)}${flame(true)}${flame(true)}</div>
     <p class="eyebrow">Edição de aniversário · 28 de Novembro</p>
-    <h1 class="mega">A Prova dos <em class="grad">Sete</em></h1>
+    <div class="hero"><h1 class="mega">A Prova dos <em class="grad">Sete</em></h1><span class="heroeu">${BONECO}</span></div>
     <p class="lead">Survivor, The Traitors e The Amazing Race, misturados com as Anices de todos os dias. Sete etapas, sete prendas e uma única concorrente: <strong>Ana Rodrigues</strong>.</p>
     <ol class="fases">${FASES.map(f => `<li data-f="${f.n}"><span class="num-s">${f.n}</span><b>${f.nome}</b><span class="muted small">${f.quando}</span></li>`).join('')}</ol>
     ${acts(btn(cont ? 'Continuar o jogo' : 'Começar o jogo', 'start'), cont ? `<button class="link" data-a="formato">Rever o formato</button>` : '', `<button class="link" data-a="pin">Bastidores, só para o apresentador</button>`)}
@@ -619,15 +648,16 @@ function vHub(){
   if(next === 4) out += host('A Fase 2 joga-se à mesa. Espera que os convidados estejam todos sentados.');
   if(next === 5) out += host('A Fase 3 é a contar. O relógio arranca na partida da etapa 5 e só pára no tapete.');
   out += next <= 7 ? btn(`Jogar a etapa ${next}`, 'play') : btn('Ver o final', 'play');
-  FASES.forEach(f => {
-    out += `<section class="fase" data-f="${f.n}"><div class="fase-h"><h2>${f.nome}</h2><span>${f.quando}, ${f.quem}</span></div><ol class="etapas">`;
-    ETAPAS.filter(e => e.f === f.n).forEach(e => {
-      const cls = e.n <= S.done ? 'done' : e.n === next ? 'now' : 'locked';
-      const st = e.n <= S.open ? 'Ganhaste: ' + PRENDAS[e.n - 1].nome : e.n <= S.done ? 'Prenda por abrir' : e.j;
-      out += `<li class="etapa ${cls}"><span class="num">${e.n <= S.done ? CHECK : e.n}</span><span><span class="nm">${e.t}</span><span class="st">${st}</span></span></li>`;
-    });
-    out += `</ol></section>`;
-  });
+  const pos = Math.min(6, S.done), X = i => i % 2 ? 87.5 : 12.5, Y = i => ROW * i + ROW / 2;
+  const troco = i => `M${X(i)} ${Y(i)}C${X(i)} ${Y(i) + ROW} ${X(i + 1)} ${Y(i + 1) - ROW} ${X(i + 1)} ${Y(i + 1)}`;
+  let todo = '', feito = '';
+  for(let i = 0; i < 6; i++){ todo += troco(i); if(i < pos) feito += troco(i); }
+  out += `<div class="mapa"><svg class="trilho" viewBox="0 0 100 ${ROW * 7}" preserveAspectRatio="none" aria-hidden="true"><path class="t0" d="${todo}"/>${feito ? `<path class="t1" d="${feito}"/>` : ''}</svg><ol class="stops" style="grid-auto-rows:${ROW}px">${ETAPAS.map((e, i) => {
+    const cls = e.n <= S.done ? 'done' : e.n === next ? 'now' : 'locked';
+    const st = e.n <= S.open ? 'Ganhaste: ' + PRENDAS[e.n - 1].nome : e.n <= S.done ? 'Prenda por abrir' : e.j;
+    const nova = i === 0 || ETAPAS[i - 1].f !== e.f;
+    return `<li class="stop ${cls}${i % 2 ? ' r' : ''}" data-f="${e.f}"><span class="node">${i === pos ? `<span class="eu" role="img" aria-label="A Ana está aqui">${BONECO}</span>` : ''}<span class="dot">${e.n <= S.done ? CHECK : e.n}</span></span><span class="txt">${nova ? `<span class="fz">${FASES[e.f - 1].nome} · ${FASES[e.f - 1].quando}</span>` : ''}<span class="nm">${e.t}</span><span class="st">${st}</span></span></li>`;
+  }).join('')}</ol></div>`;
   const nf = ALBUM.filter(id => FOTO[id]).length;
   out += `<section class="fase"><div class="fase-h"><h2>Missões do dia</h2><span>Cada uma reacende uma tocha apagada</span></div><div class="etapas">${EXTRAS.map(e => {
     const v = S.x[e.id], ok = !!v && v !== 'n', av = S.open >= e.de && v !== 'n';
@@ -1306,7 +1336,7 @@ function boot(data){
 try{
   if(window.top === window.self && (location.protocol === 'https:' || location.hostname === 'localhost')){
     const link = (rel, href) => { const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l); };
-    link('manifest', 'manifest.webmanifest'); link('apple-touch-icon', 'apple-touch-icon.png');
+    link('manifest', 'manifest.webmanifest'); link('apple-touch-icon', 'apple-touch-icon.png'); link('icon', 'icon-192.png');
     if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 }catch(e){}

@@ -24,7 +24,7 @@
   --accent:var(--p0); --on-accent:var(--p0on);
   --ok:#1d8a3b; --on-ok:#ffffff; --bad:#d70015; --on-bad:#ffffff; --flame:#ff9500;
   --pc:#ffffff; --pc-ink:#1c1c1e; --pc-red:#d70015; --pc-sh:0 0 0 .5px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.13);
-  --gloss:rgba(255,255,255,.55); --scrim:rgba(0,0,0,.38);
+  --gloss:rgba(255,255,255,.55); --scrim:rgba(0,0,0,.38); --lift:0 1px 3px rgba(0,0,0,.14);
   --c0:#ff3b30; --c1:#ffcc00; --c2:#34c759; --c3:#007aff; --c4:#af52de; --c5:#8e8e93;
   --g1:#ff9500; --g2:#ff2d55; --g3:#af52de;
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,"Segoe UI",Roboto,sans-serif;
@@ -294,6 +294,29 @@ strong{font-weight:600}
 .choice span{font-size:15px;line-height:1.38;color:var(--ink2)}
 .choice:active{transform:scale(.985)}
 
+/* App de gestão e app da Mesa Redonda */
+.gt{font-size:17px;font-weight:700;letter-spacing:-.02em}
+.gstat{font-size:13px;font-weight:600;padding:5px 10px;border-radius:999px;max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gstat.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.gstat.bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--fill);border-radius:10px;padding:2px}
+.segb{border:0;background:none;border-radius:8px;min-height:34px;font-size:14px;font-weight:600}
+.segb.on{background:var(--card);box-shadow:var(--lift)}
+.mirror{display:flex;flex-direction:column;gap:16px;min-height:440px;border-radius:24px;padding:0 16px 18px;background:var(--bg);box-shadow:0 0 0 1px var(--sep);overflow:hidden}
+.mirror .bar{position:static;margin:0 -16px;padding:8px 16px 10px}
+.mirror .splash{margin:0 -16px;padding-left:16px;padding-right:16px}
+.mirror [data-a]:not(.h){pointer-events:none}
+.mirror .btn:not(.h),.mirror .mini:not(.h),.mirror .link,.mirror .navb{opacity:.36}
+.mirror .h.sent{opacity:.55;pointer-events:none}
+.lock{pointer-events:none;opacity:.38}
+.juiz{padding:0 4px;text-align:center}
+.url{font-size:14px;line-height:1.35;word-break:break-all;color:var(--ink2)}
+.qr{width:190px;max-width:100%}
+.qr svg{display:block;width:100%;height:auto;border-radius:10px;background:#ffffff;padding:8px}
+.tbad{color:var(--bad);font-weight:600}
+.papel{background:var(--card);border-radius:16px;padding:13px 16px 14px;display:grid;gap:6px;justify-items:start}
+.papel b.w{font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.05}
+
 /* Menu de progresso */
 .sheet-bg{position:fixed;inset:0;z-index:20;background:var(--scrim)}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;max-width:480px;max-height:88%;margin:0 auto;overflow:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:16px 20px 22px;display:grid;gap:14px;animation:up .25s cubic-bezier(.2,.9,.2,1)}
@@ -369,6 +392,17 @@ button.etapa:disabled{cursor:default}
 const KEY = 'prova-dos-sete-v3';
 const PIN = '7777';
 const app = document.getElementById('app');
+
+/* ---------- Três apps e uma ligação ---------- */
+const DB_FIXO = '';                 // endereço da Realtime Database. Vazio: cada aparelho joga sozinho.
+const SALA = 'festa';
+const QS = new URLSearchParams(location.search);
+const LOCAL = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+const DB = ((LOCAL && QS.get('db')) || DB_FIXO).replace(/\/+$/, '');
+const APP = QS.get('app') === 'gerir' ? 'gerir' : QS.get('app') === 'mesa' ? 'mesa' : 'jogo';
+const SOLO = (() => { try{ return window.top === window.self; }catch(e){ return false; } })();
+const ONLINE = !!DB && SOLO;
+const META = {jogo:['A Prova dos Sete', 'Prova dos 7', ''], gerir:['Bastidores', 'Bastidores', '-gerir'], mesa:['Mesa Redonda', 'Mesa Redonda', '-mesa']}[APP];
 
 /* ---------- Conteúdo do jogo ---------- */
 const FASES = [
@@ -514,7 +548,7 @@ const TITULOS = ['campeã dos 0,4%','salva pela última chama','finalista de fer
 /* ---------- Estado ---------- */
 function fresh(){ return {v:3, screen:'splash', intro:false, done:0, torches:3, n:0, step:'', d:{}, after:'', castigo:0, t3:0, t3end:0, pinErr:false, ask:false, open:0, gstep:'', x:{}, xid:'', xd:null, xscore:0, ret:'', menu:false}; }
 function load(){ try{ const o = JSON.parse(localStorage.getItem(KEY) || 'null'); return o && o.v === 3 ? o : null; }catch(e){ return null; } }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function save(){ if(APP !== 'jogo') return; try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 let S = fresh();
 
 /* ---------- Utilitários ---------- */
@@ -561,6 +595,78 @@ function luzPress(){
 function xqEnd(){
   const sc = S.xd ? S.xd.ok : 0; S.xscore = sc; S.xd = null;
   if(sc >= FAQ_MIN){ S.x.xq = S.torches < 3 ? 'r' : 'f'; if(S.torches < 3) S.torches++; } else S.x.xq = 'n';
+}
+
+/* Ligação: API REST da Realtime Database, com escuta por EventSource. */
+const fb = p => `${DB}/prova/${SALA}${p ? '/' + p : ''}.json`;
+const req = (m, p, v) => ONLINE ? fetch(fb(p), v === undefined ? {method: m} : {method: m, body: JSON.stringify(v)}).catch(() => null) : Promise.resolve(null);
+const net = {put: (p, v) => req('PUT', p, v), post: (p, v) => req('POST', p, v), del: p => req('DELETE', p)};
+function setAt(root, path, val){
+  const ks = path.split('/').filter(Boolean);
+  if(!ks.length) return val;
+  if(root === null || typeof root !== 'object') root = {};
+  let o = root;
+  for(let i = 0; i < ks.length - 1; i++){ if(o[ks[i]] === null || typeof o[ks[i]] !== 'object') o[ks[i]] = {}; o = o[ks[i]]; }
+  if(val === null || val === undefined) delete o[ks[ks.length - 1]]; else o[ks[ks.length - 1]] = val;
+  return root;
+}
+/* Cada escuta refaz-se sozinha: ao voltar à app, quando a rede muda, ou se ficar calada tempo de mais. */
+const ESCUTAS = [];
+function abre(w){
+  try{ if(w.es) w.es.close(); }catch(e){}
+  w.data = null; w.last = Date.now();
+  const es = w.es = new EventSource(fb(w.p));
+  es.addEventListener('put', e => { w.last = Date.now(); const m = JSON.parse(e.data); w.data = setAt(w.data, m.path, m.data); w.cb(w.data, m.path); });
+  es.addEventListener('patch', e => { w.last = Date.now(); const m = JSON.parse(e.data); Object.keys(m.data || {}).forEach(k => { w.data = setAt(w.data, (m.path === '/' ? '' : m.path) + '/' + k, m.data[k]); }); w.cb(w.data, m.path + '/*'); });
+  es.addEventListener('keep-alive', () => { w.last = Date.now(); });
+  es.onopen = () => { w.last = Date.now(); };
+}
+function watch(p, cb){
+  if(!ONLINE || typeof EventSource === 'undefined') return;
+  const w = {p, cb}; ESCUTAS.push(w); abre(w);
+}
+const AOVOLTAR = [];
+if(ONLINE){
+  document.addEventListener('visibilitychange', () => { if(!document.hidden){ ESCUTAS.forEach(abre); AOVOLTAR.forEach(f => f()); } });
+  window.addEventListener('online', () => { ESCUTAS.forEach(abre); AOVOLTAR.forEach(f => f()); });
+  setInterval(() => { ESCUTAS.forEach(w => { if(Date.now() - w.last > 75000 || w.es.readyState === 2) abre(w); }); }, 15000);
+}
+
+/* O telemóvel da Ana é a autoridade: publica o estado, recebe comandos do apresentador e gere a Mesa Redonda. */
+const MESA = {jog:{}, voto:{}};
+const LIG = {host:0, hostT:0, was:false, pub:'', mesa:'', t:0, cmd:'', jog:'{}', voto:'{}', on:false};
+const hostOn = () => APP === 'jogo' && Date.now() - LIG.host < 25000;
+function pubMesa(){
+  const d = S.d || {};
+  let o = null;
+  if(S.n === 4 && S.done < 4 && S.step === 'lobby') o = {fase:'lobby'};
+  else if(S.n === 4 && S.done < 4 && d.mode === 'on' && d.players){
+    const P = d.players;
+    o = {fase: S.step, ronda: d.round, jog: P.map(x => ({id: x.id, nm: x.nm, out: !!x.out})), equipa: (d.team || []).map(i => P[i].id), log: d.log || [],
+      sab: S.step === 'mres' ? d.sab : -1, last: S.step === 'ban' && d.last >= 0 ? {nm: P[d.last].nm, t: P[d.last].role === 'T'} : null,
+      tEnd: d.tEnd || 0, res: d.res || '', vid: d.vid || '', quem: S.step === 'fim' ? P.filter(x => x.role === 'T' && !x.out).map(x => x.nm) : []};
+  }
+  if(!o) return;
+  const j = JSON.stringify(o);
+  if(j !== LIG.mesa){ LIG.mesa = j; net.put('mesa/pub', j); }
+}
+function publish(){
+  if(!ONLINE || APP !== 'jogo') return;
+  clearTimeout(LIG.t);
+  LIG.t = setTimeout(() => {
+    const j = JSON.stringify(S);
+    if(j !== LIG.pub){ LIG.pub = j; net.put('jogo', {s: j, t: Date.now()}); }
+    pubMesa();
+  }, 200);
+}
+function fechaVotos(forcar){
+  const d = S.d;
+  if(!(S.screen === 'stage' && S.n === 4 && S.step === 'voto' && d.mode === 'on')) return false;
+  const ids = d.team.map(i => d.players[i].id);
+  if(ids.filter(id => MESA.voto[id]).length < ids.length && !forcar) return true;
+  d.sab = d.team.filter(i => d.players[i].role === 'T' && MESA.voto[d.players[i].id] === 's').length;
+  d.log.push(d.sab === 0); S.step = 'mres';
+  return true;
 }
 
 /* Dica do jogo das cores: primeira jogada da solução mais curta a partir da posição actual. */
@@ -811,11 +917,10 @@ function vPin(){
     + acts(btn('Entrar', 'pinGo'), btn('Voltar', 'home', {cls:'alt small'}));
 }
 
-function vBack(){
-  return bar(true) + tag('Bastidores') + `<h1 class="title">Guião do apresentador</h1>
-    <p class="lead">O jogo corre todo neste telemóvel. Passa-o à Ana quando o ecrã falar com ela e fica com ele quando disser «Apresentador».</p>
-    <h2 class="sec">Para preparar até sábado</h2>
+function guiao(){
+  return `    <h2 class="sec">Para preparar até sábado</h2>
     <ul class="group prep">
+      <li><strong>Três apps.</strong> A do jogo fica no telemóvel da Ana, a de gestão no teu, e a da Mesa Redonda abre-se no telemóvel de cada convidado ao almoço.</li>
       <li><strong>Sete embrulhos numerados.</strong> 1 anchovas, 2 camisola, 3 álbum, 4 máscara, 5 Warriors, 6 Hamilton, 7 bicicleta (com um laço).</li>
       <li><strong>Entrega das prendas.</strong> A app só mostra o nome de cada prenda depois de a Ana a abrir. Entrega o embrulho quando o ecrã disser que ela tem direito a ele.</li>
       <li><strong>Missões do dia.</strong> São oito, espalhadas pelo dia, e aparecem no fim do mapa. Para a do ídolo, esconde um objecto pequeno e pensa numa pista difícil.</li>
@@ -824,7 +929,7 @@ function vBack(){
       <li><strong>Etapa 1.</strong> Uma venda e cinco colheres por esta ordem: mel, mostarda, azeitona, chocolate preto, anchova. Usa outra lata, para não abrires a prenda. A Ana tem de dizer cada nome em holandês.</li>
       <li><strong>Etapa 2.</strong> Uma bola de meias, uma baliza marcada no corredor e um guarda-redes. A Ana remata com o pé mais fraco.</li>
       <li><strong>Etapa 3.</strong> Duas perguntas tuas sobre o vosso 2026, das difíceis. Podes mostrar fotografias do ano e perguntar onde ou quando foram.</li>
-      <li><strong>Etapa 4.</strong> Nove bolas de papel e uma taça. Os nomes de quem está à mesa escrevem-se na hora.</li>
+      <li><strong>Etapa 4.</strong> Nove bolas de papel e uma taça. Cada convidado entra na app da Mesa Redonda com o seu nome. Se faltar rede, a Ana tem a opção de jogar sem telemóveis.</li>
       <li><strong>Etapa 5.</strong> Duas almofadas. Põe o embrulho 5 do outro lado da sala antes da travessia.</li>
       <li><strong>Etapa 6.</strong> Um cesto e a bola de meias, para o caso de a Ana escolher o passe sem olhar no desvio. A outra hipótese é um hot take de 45 segundos, e o júri decide.</li>
       <li><strong>Etapa 7.</strong> Um cartão com «28» dentro do frigorífico, um cartão com «11» debaixo da almofada da Ana e um tapete ao lado da bicicleta.</li>
@@ -836,7 +941,13 @@ function vBack(){
       <li><strong>Lição de holandês.</strong> «Zoek het kaartje in de koelkast» (cartão 28), «Het tweede kaartje ligt onder je kussen» (cartão 11), «A tua última prenda tem duas rodas».</li>
       <li><strong>Quiz de fã.</strong> Missouri, 15, 1906, Peyroteo, 44, 2008, Bellingham, FS1, 0,4%.</li>
       <li><strong>Traidores.</strong> Nem tu sabes quem são, a não ser que te calhe. Se a Ana perder, cumpre o castigo e recebe a prenda na mesma.</li>
-    </ul>
+    </ul>`;
+}
+
+function vBack(){
+  return bar(true) + tag('Bastidores') + `<h1 class="title">Guião do apresentador</h1>
+    <p class="lead">O jogo corre todo neste telemóvel. Passa-o à Ana quando o ecrã falar com ela e fica com ele quando disser «Apresentador».</p>
+    ${guiao()}
     <h2 class="sec">Controlo</h2>
     <p class="muted small">Etapas ganhas: ${S.done} de 7. Toca num número para pôr o jogo no início dessa etapa.</p>
     <div class="jump">${ETAPAS.map(e => `<button class="mini${e.n === S.done + 1 ? ' on ok' : ''}" data-a="jump" data-v="${e.n}" aria-label="Ir para a etapa ${e.n}">${e.n}</button>`).join('')}</div>
@@ -866,10 +977,10 @@ function v1(){
     <p class="lead">Das oito palavras, só cinco vão à mesa. Dizes o que é cada uma, em holandês.</p>`
     + host('Põe a venda à Ana antes de avançares. O ecrã seguinte mostra as respostas.')
     + acts(btn('A Ana já tem a venda', 's1go'));
-  const ok = d.r.filter(x => x === 1).length, all = d.r.every(x => x > 0);
+  const ok = d.r.filter(x => x === 1).length, all = d.r.every(x => x > 0), oculto = hostOn();
   return parte(2, 2) + `<h1 class="title">Cinco colheres</h1>
-    <p class="lead">A Ana prova e diz o nome em holandês. Marca cada resposta.</p>
-    <ul class="group">${PROVAS.map((p, i) => `<li class="chk"><span class="lab"><span class="num-s">${i + 1}</span><span>${p[0]}<br><span class="muted small" lang="nl">${p[1]}</span></span></span>
+    <p class="lead">${oculto ? 'O apresentador marca as tuas respostas no telemóvel dele. Diz o nome de cada coisa em holandês.' : 'A Ana prova e diz o nome em holandês. Marca cada resposta.'}</p>
+    <ul class="group"${oculto ? ' hidden' : ''}>${PROVAS.map((p, i) => `<li class="chk"><span class="lab"><span class="num-s">${i + 1}</span><span>${p[0]}<br><span class="muted small" lang="nl">${p[1]}</span></span></span>
       <button class="mini ok${d.r[i] === 1 ? ' on' : ''}" data-a="s1mark" data-v="${i}:1" aria-pressed="${d.r[i] === 1}">Acertou</button>
       <button class="mini bad${d.r[i] === 2 ? ' on' : ''}" data-a="s1mark" data-v="${i}:2" aria-pressed="${d.r[i] === 2}">Falhou</button></li>`).join('')}</ul>
     <p class="score"><b>${ok}</b> certas em 5. São precisas 4.</p>`
@@ -983,6 +1094,14 @@ function v4(){
       <p class="lead">Bem-vindos à Mesa Redonda. Entre os convidados da Ana há quem tenha vindo almoçar e quem tenha vindo trair.</p>`
       + rules(['Cada jogador vê em segredo de que lado está.', 'São três rondas. Em cada uma há uma missão de grupo e depois a Ana bane um suspeito.', 'Se a Ana banir todos os que a traem até ao fim da terceira ronda, a prenda é dela. Se sobrar alguém, apaga-se uma tocha.'])
       + acts(btn('Inscrever os jogadores', 's4go'));
+    case 'lobby': {
+      const J = Object.keys(MESA.jog).map(id => ({id, nm: MESA.jog[id].nm, t: MESA.jog[id].t || 0})).sort((a, b) => a.t - b.t);
+      return etapaTag() + `<h1 class="title">Quem está à mesa?</h1>
+        <p class="lead">Cada convidado abre a app da Mesa Redonda no seu telemóvel e escreve o nome. A Ana não entra: lidera os fiéis e nunca trai.</p>
+        <ul class="group">${J.map((j, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${esc(j.nm)}</span></span><button class="mini" style="min-width:60px" data-a="s4kick" data-v="${esc(j.id)}">Tirar</button></li>`).join('') || '<li class="chk one"><span class="muted">Ainda ninguém entrou.</span></li>'}</ul>
+        <p class="muted small" style="padding:0 4px">Com 4 ou 5 jogadores, uma pessoa trai. Com 6 ou mais, duas.</p>`
+        + acts(btn(`Distribuir os papéis · ${J.length}`, 's4deal', {dis: J.length < 4}), `<button class="link" data-a="s4local">Jogar sem telemóveis</button>`);
+    }
     case 'nomes': return etapaTag() + `<h1 class="title">Quem está à mesa?</h1>
       <p class="lead">Escreve todos menos a Ana. Ela lidera os fiéis e nunca trai.</p>
       <div class="names">${d.names.map((nm, i) => `<div class="namerow"><label for="name-${i}" class="num-s">${i + 1}</label><input id="name-${i}" class="inp" data-bind="name" data-i="${i}" value="${esc(nm)}" placeholder="Nome" autocomplete="off" maxlength="18">${d.names.length > 4 ? `<button class="mini" style="min-width:60px" data-a="s4del" data-v="${i}" aria-label="Tirar o jogador ${i + 1}">Tirar</button>` : '<span></span>'}</div>`).join('')}</div>
@@ -1001,7 +1120,7 @@ function v4(){
         + acts(btn('Esconder e passar', 's4hide'));
     }
     case 'pronto': return etapaTag() + `<h1 class="title">Papéis entregues</h1>
-      <p class="lead">Devolvam o telemóvel ao apresentador. Ninguém fala do que viu.</p>` + acts(btn('Começar a ronda 1', 's4begin'));
+      <p class="lead">${d.mode === 'on' ? 'Cada jogador tem o seu papel no próprio telemóvel. Ninguém mostra o ecrã a ninguém.' : 'Devolvam o telemóvel ao apresentador. Ninguém fala do que viu.'}</p>` + acts(btn('Começar a ronda 1', 's4begin'));
     case 'missao': {
       const M = MISSOES[d.round - 1];
       return tag(`Ronda ${d.round} de 3 · Missão`) + `<h1 class="title">${M.t}</h1>` + rules(M.r)
@@ -1015,6 +1134,13 @@ function v4(){
       <div class="picks">${active.map(p => `<button class="pick${d.team.includes(p.i) ? ' on' : ''}" data-a="s4tog" data-v="${p.i}" aria-pressed="${d.team.includes(p.i)}">${esc(p.nm)}</button>`).join('')}</div>`
       + acts(btn('Começar a votação', 's4vote0', {dis: d.team.length !== k}));
     case 'voto': {
+      if(d.mode === 'on'){
+        const nv = d.team.filter(i => MESA.voto[P[i].id]).length;
+        return tag('Ronda 3 · Voto secreto') + `<h1 class="title">${nv} de ${d.team.length} votos</h1>
+          <p class="lead">A equipa vota em segredo, cada um no seu telemóvel.</p>
+          <ul class="group">${d.team.map(i => `<li class="chk one"><span class="lab"><span>${esc(P[i].nm)}</span></span><span class="muted small">${MESA.voto[P[i].id] ? 'Votou' : 'A votar'}</span></li>`).join('')}</ul>`
+          + acts(btn('Fechar a votação', 's4close', {cls:'alt small'}));
+      }
       const nm = esc(P[d.team[d.vi]].nm);
       if(!d.shown) return tag(`Voto ${d.vi + 1} de ${d.team.length}`) + `<h1 class="title">Passa o telemóvel a ${nm}</h1>
         <p class="lead">Ninguém mais olha para o ecrã.</p>` + acts(btn(`Sou ${nm}. Votar`, 's4vshow'));
@@ -1256,10 +1382,22 @@ const ACT = {
   s3timer(){ S.d.tEnd = Date.now() + 300000; },
   s3foto(v){ S.d.f[+v] = S.d.f[+v] ? 0 : 1; },
 
-  s4go(){ S.step = 'nomes'; S.d = {names:['','','','',''], err:''}; },
+  s4go(){ if(ONLINE){ S.step = 'lobby'; S.d = {mode:'on'}; } else { S.step = 'nomes'; S.d = {names:['','','','',''], err:''}; } },
+  s4local(){ S.step = 'nomes'; S.d = {names:['','','','',''], err:''}; },
+  s4kick(v){ delete MESA.jog[v]; net.del('in/jog/' + v); },
+  s4close(){ fechaVotos(true); },
   s4add(){ if(S.d.names.length < 12) S.d.names.push(''); },
   s4del(v){ if(S.d.names.length > 4) S.d.names.splice(+v, 1); },
   s4deal(){
+    if(S.d.mode === 'on'){
+      const J = Object.keys(MESA.jog).map(id => ({id, nm: MESA.jog[id].nm, t: MESA.jog[id].t || 0})).sort((a, b) => a.t - b.t);
+      if(J.length < 4) return;
+      const nT = J.length >= 6 ? 2 : 1, trai = shuffle(J.map((_, i) => i)).slice(0, nT), papeis = {};
+      J.forEach((j, i) => { papeis[j.id] = {r: trai.includes(i) ? 'T' : 'F', com: trai.includes(i) ? trai.filter(k => k !== i).map(k => J[k].nm) : []}; });
+      S.d = {mode:'on', players: J.map((j, i) => ({id: j.id, nm: j.nm, role: trai.includes(i) ? 'T' : 'F', out:false})), idx:0, shown:false, round:1, log:[], team:[], vi:0, sab:0, pick:-1, tEnd:0, last:-1, res:''};
+      MESA.voto = {}; net.put('mesa/papel', papeis); net.del('in/voto');
+      S.step = 'pronto'; return;
+    }
     const d = S.d, names = d.names.map(x => x.trim()).filter(Boolean);
     if(names.length < 4){ d.err = 'São precisos pelo menos 4 jogadores além da Ana.'; return; }
     const nT = names.length >= 6 ? 2 : 1, idx = shuffle(names.map((_, i) => i)).slice(0, nT);
@@ -1272,7 +1410,7 @@ const ACT = {
   s4m(v){ const d = S.d; d.log.push(v === '1'); d.pick = -1; d.tEnd = 0; S.step = 'mesa'; },
   s4team(){ S.d.team = []; S.step = 'equipa'; },
   s4tog(v){ const d = S.d, i = +v, at = d.team.indexOf(i), k = Math.min(3, d.players.filter(p => !p.out).length); if(at >= 0) d.team.splice(at, 1); else if(d.team.length < k) d.team.push(i); },
-  s4vote0(){ const d = S.d; d.vi = 0; d.sab = 0; d.shown = false; S.step = 'voto'; },
+  s4vote0(){ const d = S.d; d.vi = 0; d.sab = 0; d.shown = false; if(d.mode === 'on'){ d.vid = Math.random().toString(36).slice(2, 8); MESA.voto = {}; net.del('in/voto'); } S.step = 'voto'; },
   s4vshow(){ S.d.shown = true; },
   s4v(v){ const d = S.d, p = d.players[d.team[d.vi]]; if(v === 's' && p.role === 'T') d.sab++; d.vi++; d.shown = false; if(d.vi >= d.team.length){ d.vi = 0; d.log.push(d.sab === 0); S.step = 'mres'; } },
   s4mesa(){ const d = S.d; d.pick = -1; d.tEnd = 0; S.step = 'mesa'; },
@@ -1326,9 +1464,257 @@ const ACT = {
     else { S.d.code = v; S.d.err = true; } }
 };
 
+/* Com a app de gestão ligada, as decisões do júri ficam trancadas no telemóvel da Ana. */
+const JUIZ = new Set(['s1mark', 's1end', 's2shot', 's3live', 's3foto', 's4m', 'castigoOk', 'extraOk']);
+const juiz = a => JUIZ.has(a) || ((a === 'winNow' || a === 'failGift') && S.screen === 'stage' && ((S.n === 5 && S.step === 'trav') || (S.n === 6 && S.step === 'desvioGo') || (S.n === 7 && S.step === 'tapete')));
+function tranca(){
+  if(!hostOn()) return;
+  let n = 0;
+  app.querySelectorAll('[data-a]').forEach(el => { if(juiz(el.dataset.a)){ el.classList.add('lock'); el.setAttribute('aria-disabled', 'true'); el.tabIndex = -1; n++; } });
+  if(!n || (S.screen === 'stage' && S.n === 1 && S.step === 'play')) return;
+  const nota = document.createElement('p'); nota.className = 'muted small juiz'; nota.textContent = 'O apresentador valida no telemóvel dele.';
+  const a = app.querySelector('.actions'); if(a) a.parentNode.insertBefore(nota, a); else app.appendChild(nota);
+}
+
+/* ---------- Comandos do apresentador (executados no telemóvel da Ana) ---------- */
+const ADMIN = new Set(['jump', 'relight', 'resetYes']);
+function runCmd(c){
+  if(!c || !ACT[c.a]) return;
+  const v = c.v === undefined || c.v === null ? '' : String(c.v);
+  if(ADMIN.has(c.a)){
+    ACT[c.a](v);
+    if(c.a === 'jump') S.screen = 'hub';
+    if(c.a === 'resetYes') S.screen = 'splash';
+    S.menu = false; render(); return;
+  }
+  /* Só vale o que está mesmo no ecrã dela neste momento. */
+  const el = [...app.querySelectorAll('[data-a]')].find(x => x.dataset.a === c.a && (x.dataset.v === undefined ? '' : x.dataset.v) === v);
+  if(!el || el.disabled) return;
+  S.menu = false;
+  if(ACT[c.a](v === '' ? undefined : v, el) !== false) render();
+}
+function ligaJogo(){
+  if(!ONLINE || LIG.on) return; LIG.on = true;
+  try{ LIG.cmd = localStorage.getItem(KEY + '-cmd') || ''; }catch(e){}
+  watch('in', (all, path) => {
+    all = all || {};
+    let again = false;
+    /* Apresentador: o primeiro retrato de cada ligação só conta se for recente; daí em diante, cada sinal é ao vivo. */
+    const h = all.host && all.host.t;
+    if(h && h !== LIG.hostT){ LIG.hostT = h; if(path !== '/' || Math.abs(Date.now() - h) < 30000) LIG.host = Date.now(); }
+    if(LIG.was !== hostOn()){ LIG.was = hostOn(); again = true; }
+    const jog = JSON.stringify(all.jog || {}), voto = JSON.stringify(all.voto || {});
+    if(jog !== LIG.jog){ LIG.jog = jog; MESA.jog = JSON.parse(jog); if(S.screen === 'stage' && S.n === 4 && S.step === 'lobby') again = true; }
+    if(voto !== LIG.voto){ LIG.voto = voto; MESA.voto = JSON.parse(voto); if(fechaVotos(false)) again = true; }
+    const cmds = all.cmd || {};
+    Object.keys(cmds).sort().forEach(k => {
+      const novo = k > LIG.cmd;
+      if(novo){ LIG.cmd = k; try{ localStorage.setItem(KEY + '-cmd', k); }catch(e){} }
+      /* Toques que ficaram em fila enquanto este telemóvel esteve sem rede são antigos: deitam-se fora. */
+      if(novo && path !== '/'){ runCmd(cmds[k]); again = false; }
+      if(novo || path === '/') net.del('in/cmd/' + k);
+    });
+    if(again) render();
+  });
+  net.put('vivo', {t: Date.now()});
+  AOVOLTAR.push(() => { net.put('vivo', {t: Date.now()}); LIG.pub = ''; publish(); });
+  setInterval(() => { net.put('vivo', {t: Date.now()}); if(LIG.was !== hostOn()){ LIG.was = hostOn(); render(); } }, 8000);
+}
+
+/* ---------- App de gestão (telemóvel do apresentador) ---------- */
+const HOST = new Set(['s1go', 's1mark', 's1end', 's2shot', 's3live', 's3next', 's3timer', 's3foto', 'winNow', 'failGift', 'castigoOk', 's4m', 's4timer', 's4begin', 's4close', 's4deal', 's4kick', 's5timer', 's6timer', 'extraOk', 'giftOpen']);
+const GK = KEY + '-gerir';
+const G = {ok:false, tab:'vivo', ask:false, spoil:false, err:false, limpa:false};
+try{ const o = JSON.parse(localStorage.getItem(GK) || '{}'); G.ok = !!o.ok; if(o.tab) G.tab = o.tab; }catch(e){}
+const GL = {jogo:0, vivo:0, vt:0, sj:'', jj:'{}', vj:'{}', jog:{}, on:false, qr:0, err:false};
+const saveG = () => { try{ localStorage.setItem(GK, JSON.stringify({ok: G.ok, tab: G.tab})); }catch(e){} };
+const urlMesa = () => location.origin + location.pathname + '?app=mesa';
+function estadoG(){
+  const vista = GL.vivo && Date.now() - GL.vivo < 25000;
+  return !ONLINE ? ['bad', 'Sem ligação configurada'] : GL.err ? ['bad', 'Base de dados sem resposta'] : vista ? ['ok', 'Ana ligada'] : GL.jogo ? ['bad', 'Telemóvel da Ana sem sinal'] : ['bad', 'À espera do telemóvel da Ana'];
+}
+function ligaGerir(){
+  if(GL.on || !ONLINE) return; GL.on = true;
+  watch('', (all, path) => {
+    all = all || {};
+    let mud = false;
+    const j = all.jogo;
+    if(j && j.s && j.s !== GL.sj){ GL.sj = j.s; try{ S = Object.assign(fresh(), JSON.parse(j.s)); GL.jogo = Date.now(); }catch(e){} mud = true; }
+    const vt = all.vivo && all.vivo.t;
+    if(vt && vt !== GL.vt){ GL.vt = vt; if(path !== '/' || Math.abs(Date.now() - vt) < 30000){ const antes = estadoG()[1]; GL.vivo = Date.now(); if(antes !== estadoG()[1]) mud = true; } }
+    const inn = all.in || {}, jj = JSON.stringify(inn.jog || {}), vj = JSON.stringify(inn.voto || {});
+    if(jj !== GL.jj){ GL.jj = jj; GL.jog = JSON.parse(jj); MESA.jog = GL.jog; mud = true; }
+    if(vj !== GL.vj){ GL.vj = vj; MESA.voto = JSON.parse(vj); if(S.n === 4 && S.step === 'voto') mud = true; }
+    /* No guião não se redesenha a cada toque dela, para não mexer no que estás a ler. */
+    if(mud && G.tab !== 'guiao') renderG();
+  });
+  const pinta = () => { const el = document.getElementById('gstat'), e = estadoG(); if(el && el.textContent !== e[1]){ el.textContent = e[1]; el.className = 'gstat ' + e[0]; } };
+  const sinal = () => net.put('in/host', {t: Date.now()}).then(r => { GL.err = !(r && r.ok); pinta(); });
+  sinal(); AOVOLTAR.push(sinal);
+  setInterval(sinal, 8000);
+}
+function desenhaQR(){
+  const el = document.getElementById('qr'); if(!el) return;
+  const draw = () => { try{ const q = window.qrcode(0, 'M'); q.addData(urlMesa()); q.make(); const x = document.getElementById('qr'); if(x) x.innerHTML = q.createSvgTag({cellSize: 4, margin: 0, scalable: true}); }catch(e){} };
+  if(window.qrcode) return draw();
+  if(GL.qr) return; GL.qr = 1;
+  const sc = document.createElement('script'); sc.src = 'qrcode.js'; sc.onload = draw; document.head.appendChild(sc);
+}
+function renderG(){
+  if(!G.ok){
+    document.documentElement.dataset.fase = '';
+    app.innerHTML = `<span class="tag" style="margin-top:30px">Bastidores</span><h1 class="title">Só para o apresentador</h1>
+      <p class="lead">Esta é a app de gestão: mostra o ecrã da Ana ao vivo, guarda as respostas e controla o jogo à distância.</p>
+      <label class="eyebrow" for="gpin">Código do apresentador</label>
+      <input id="gpin" class="code" style="width:200px" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" data-genter="1">
+      ${G.err ? fbx('bad', 'Código errado.') : ''}` + acts(`<button class="btn" data-g="pin">Entrar</button>`);
+    return;
+  }
+  const tem = !!GL.jogo, e = estadoG();
+  const abas = [['vivo', 'Ao vivo'], ['guiao', 'Guião'], ['mesa', 'Mesa']].map(([k, t]) => `<button class="segb${G.tab === k ? ' on' : ''}" data-g="tab:${k}" aria-pressed="${G.tab === k}">${t}</button>`).join('');
+  let html = `<header class="bar"><div class="bar-row"><b class="gt">Bastidores</b><span class="gstat ${e[0]}" id="gstat">${e[1]}</span></div><div class="seg">${abas}</div></header>`, fase = '';
+  if(G.tab === 'vivo'){
+    if(!tem) html += `<h1 class="title">Ainda sem jogo</h1><p class="lead">${ONLINE ? 'Abre a app do jogo no telemóvel da Ana. Assim que ela arrancar, o ecrã aparece aqui.' : 'Esta versão ainda não tem a base de dados ligada, por isso não há nada para acompanhar.'}</p>`;
+    else { const x = ecra(); fase = x[1]; html += `<p class="muted small" style="padding:0 4px">O ecrã da Ana, ao vivo. Os botões a cheio são os teus: valida a partir daqui.</p><div class="mirror">${x[0]}</div>`; }
+  } else if(G.tab === 'guiao'){
+    html += `<h1 class="title">Guião</h1>` + guiao() + `<h2 class="sec">Controlo à distância</h2>
+      <p class="muted small" style="padding:0 4px">Etapas ganhas: ${tem ? S.done : 0} de 7. Toca num número para pôr o jogo da Ana no início dessa etapa.</p>
+      <div class="jump">${ETAPAS.map(x => `<button class="mini${tem && x.n === S.done + 1 ? ' on ok' : ''}" data-g="jump:${x.n}" aria-label="Pôr o jogo na etapa ${x.n}">${x.n}</button>`).join('')}</div>
+      ${G.ask ? fbx('bad', 'Isto apaga todo o progresso no telemóvel da Ana.') + `<div class="row"><button class="btn bad small" data-g="reset">Apagar tudo</button><button class="btn alt small" data-g="noreset">Cancelar</button></div>`
+              : `<div class="row"><button class="btn alt small" data-g="relight">Reacender tochas</button><button class="btn alt small" data-g="ask">Recomeçar</button></div>`}`;
+  } else {
+    const J = Object.keys(GL.jog).map(id => GL.jog[id]).sort((a, b) => (a.t || 0) - (b.t || 0));
+    const P = tem && S.n === 4 && S.d && S.d.players ? S.d.players : null, L = P || J;
+    html += `<h1 class="title">Mesa Redonda</h1><p class="lead">Cada convidado abre este endereço no seu telemóvel e escreve o nome.</p>
+      <div class="moment"><b class="lbl">Endereço para os convidados</b><span class="url">${esc(urlMesa())}</span><div id="qr" class="qr"></div><button class="mini" data-g="copy">Copiar o endereço</button></div>
+      <h2 class="sec">${P ? 'Jogadores' : 'Inscritos'} · ${L.length}</h2>
+      <ul class="group">${L.map((x, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${esc(x.nm)}${x.out ? ' · fora da mesa' : ''}</span></span>${P && G.spoil ? `<span class="small ${x.role === 'T' ? 'tbad' : 'muted'}">${x.role === 'T' ? 'Trai' : 'Fiel'}</span>` : ''}</li>`).join('') || '<li class="chk one"><span class="muted">Ainda ninguém entrou.</span></li>'}</ul>
+      ${P ? `<button class="link" style="align-self:flex-start" data-g="spoil">${G.spoil ? 'Esconder quem trai' : 'Mostrar quem trai'}</button>` : ''}
+      ${G.limpa ? fbx('bad', 'Isto tira toda a gente da lista. Cada convidado tem de voltar a escrever o nome.') + `<div class="row"><button class="btn bad small" data-g="limpar">Limpar</button><button class="btn alt small" data-g="naolimpar">Cancelar</button></div>`
+                : J.length ? `<button class="link" style="align-self:flex-start" data-g="limpa">Limpar as inscrições</button>` : ''}`;
+  }
+  document.documentElement.dataset.fase = fase;
+  app.innerHTML = html;
+  app.querySelectorAll('.mirror [data-a]').forEach(el => { if(HOST.has(el.dataset.a) && !el.disabled) el.classList.add('h'); else el.setAttribute('aria-disabled', 'true'); });
+  app.querySelectorAll('.mirror input, .mirror [data-p]').forEach(el => { el.disabled = true; });
+  if(G.tab === 'mesa') desenhaQR();
+}
+function clickG(e){
+  const g = e.target.closest('[data-g]');
+  if(g){
+    const [k, v] = g.dataset.g.split(':'), cmd = (a, x) => net.post('in/cmd', {a, v: x || '', t: Date.now()});
+    if(k === 'pin'){ const el = document.getElementById('gpin'); if(el && el.value === PIN){ G.ok = true; G.err = false; ligaGerir(); } else G.err = true; }
+    else if(k === 'tab') G.tab = v;
+    else if(k === 'jump'){ cmd('jump', v); G.tab = 'vivo'; }
+    else if(k === 'relight') cmd('relight');
+    else if(k === 'ask') G.ask = true;
+    else if(k === 'noreset') G.ask = false;
+    else if(k === 'reset'){ G.ask = false; cmd('resetYes'); G.tab = 'vivo'; }
+    else if(k === 'spoil') G.spoil = !G.spoil;
+    else if(k === 'limpa') G.limpa = true;
+    else if(k === 'naolimpar') G.limpa = false;
+    else if(k === 'limpar'){ G.limpa = false; GL.jog = {}; MESA.jog = {}; net.del('in/jog'); }
+    else if(k === 'copy'){ try{ navigator.clipboard.writeText(urlMesa()).catch(() => {}); }catch(x){} g.textContent = 'Copiado'; return; }
+    saveG(); renderG(); return;
+  }
+  const el = e.target.closest('.mirror [data-a].h');
+  if(el){ net.post('in/cmd', {a: el.dataset.a, v: el.dataset.v === undefined ? '' : el.dataset.v, t: Date.now()}); el.classList.add('sent'); setTimeout(() => el.classList.remove('sent'), 2500); }
+}
+
+/* ---------- App da Mesa Redonda (telemóvel de cada convidado) ---------- */
+const MK = KEY + '-mesa';
+const Mz = {pid:'', nm:'', dentro:false, vk:''};
+try{ Object.assign(Mz, JSON.parse(localStorage.getItem(MK) || '{}')); }catch(e){}
+if(!Mz.pid) Mz.pid = 'p' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
+const ML = {pub:null, papel:null, show:false, typing:'', err:'', on:false, pend:false};
+const saveM = () => { try{ localStorage.setItem(MK, JSON.stringify(Mz)); }catch(e){} };
+const votoKey = pb => pb.vid || (pb.ronda + ':' + (pb.equipa || []).join(','));
+function ligaMesa(){
+  if(ML.on || !ONLINE) return; ML.on = true;
+  watch('mesa/pub', v => { try{ ML.pub = v ? JSON.parse(v) : null; }catch(e){ ML.pub = null; } renderM(); });
+  watch('mesa/papel/' + Mz.pid, v => { ML.papel = v || null; renderM(); });
+  /* Se o nome sair da lista (tirado pela Ana ou pelo apresentador), volta-se ao ecrã de entrada. */
+  watch('in/jog/' + Mz.pid, v => {
+    if(ML.pend) return;
+    const dentro = !!(v && v.nm);
+    if(dentro === Mz.dentro) return;
+    Mz.dentro = dentro; if(dentro) Mz.nm = v.nm; else ML.typing = Mz.nm;
+    saveM(); renderM();
+  });
+}
+function renderM(){
+  document.documentElement.dataset.fase = '2';
+  const pb = ML.pub, eu = pb && pb.jog ? pb.jog.find(j => j.id === Mz.pid) : null;
+  let h = `<header class="bar"><div class="bar-row"><b class="gt">Mesa Redonda</b>${Mz.dentro ? `<span class="gstat ok">${esc(Mz.nm)}</span>` : ''}</div></header>`;
+  if(!ONLINE) h += `<h1 class="title">Sem ligação</h1><p class="lead">A Mesa Redonda joga-se com rede. Pede ajuda ao apresentador.</p>`;
+  else if(!Mz.dentro) h += tag('Há traidores à mesa') + `<h1 class="title">Senta-te à mesa</h1>
+    <p class="lead">Entre os convidados da Ana há quem tenha vindo almoçar e quem tenha vindo trair. Escreve o teu nome para receberes o teu papel em segredo.</p>
+    <label class="eyebrow" for="mnome">O teu nome</label>
+    <input id="mnome" class="inp" maxlength="18" autocomplete="off" placeholder="Nome" value="${esc(ML.typing)}" data-menter="1">
+    ${ML.err ? fbx('bad', ML.err) : ''}` + acts(`<button class="btn" data-m="join"${ML.pend ? ' disabled' : ''}>${ML.pend ? 'A entrar…' : 'Entrar'}</button>`);
+  else if(!pb || pb.fase === 'lobby' || !pb.jog) h += tag('Inscrição feita') + `<h1 class="title">Estás à mesa, ${esc(Mz.nm)}</h1>
+    <p class="lead">Quando a Ana distribuir os papéis, o teu aparece aqui. Deixa esta página aberta.</p>` + acts(`<button class="btn alt small" data-m="sair">Mudar o nome</button>`);
+  else if(!eu) h += tag('Jogo a decorrer') + `<h1 class="title">Ficaste de fora</h1>
+    <p class="lead">Os papéis já estavam distribuídos quando entraste. Podes assistir, mas não jogas esta partida.</p>`;
+  else {
+    const T = ML.papel && ML.papel.r === 'T', com = (ML.papel && ML.papel.com) || [], M = MISSOES[Math.min(3, Math.max(1, pb.ronda || 1)) - 1];
+    h += `<div class="papel"><b class="lbl">O teu papel</b>${ML.show && ML.papel ? `<b class="w ${T ? 'tbad' : ''}" style="${T ? '' : 'color:var(--ok)'}">${T ? 'Traição' : 'Lealdade'}</b><span>${T ? 'Estás contra a Ana. Sabota as missões sem dar nas vistas e não te deixes banir.' + (com.length ? ' Trai contigo: ' + com.map(esc).join(', ') + '.' : '') : 'Estás do lado da Ana. Cumpre as missões e ajuda-a a descobrir quem trai.'}</span>` : `<span class="muted">Escondido. Vê-o sem ninguém ao lado.</span>`}<button class="mini" data-m="papel">${ML.show ? 'Esconder' : 'Ver o meu papel'}</button></div>`;
+    if(eu.out) h += fbx('bad', 'Saíste da mesa. Podes assistir, mas já não votas nem vais em missões.');
+    const nomes = (pb.equipa || []).map(id => (pb.jog.find(j => j.id === id) || {}).nm).filter(Boolean).map(esc).join(', ');
+    const okM = pb.log && pb.log.length ? pb.log[pb.log.length - 1] : true;
+    switch(pb.fase){
+      case 'pronto': h += tag('Antes da ronda 1') + `<h1 class="title">Papéis entregues</h1><p class="lead">Vê o teu em segredo. O jogo começa quando a Ana der o sinal.</p>`; break;
+      case 'missao': h += tag(`Ronda ${pb.ronda} de 3 · Missão`) + `<h1 class="title">${M.t}</h1>` + rules(M.r) + `<p class="muted small" style="padding:0 4px">${M.nota}</p>`; break;
+      case 'equipa': h += tag('Ronda 3 · Equipa') + `<h1 class="title">A Ana escolhe a equipa</h1><p class="lead">Quem for escolhido vota em segredo no seu telemóvel.</p>`; break;
+      case 'voto':
+        if((pb.equipa || []).includes(Mz.pid) && !eu.out){
+          h += Mz.vk === votoKey(pb) ? tag('Ronda 3 · Voto secreto') + `<h1 class="title">Voto entregue</h1><p class="lead">À espera do resto da equipa.</p>`
+            : tag('Ronda 3 · Voto secreto') + `<h1 class="title">O teu voto</h1><p class="lead">Foste para a missão. Ninguém vê o que escolhes.</p><p class="muted small" style="padding:0 4px">Se fores fiel, o teu voto conta sempre como cumprir, carregues onde carregares.</p>`
+              + (ML.err ? fbx('bad', ML.err) : '') + acts(`<button class="btn alt" data-m="voto:c"${ML.pend ? ' disabled' : ''}>Cumprir a missão</button><button class="btn alt" data-m="voto:s"${ML.pend ? ' disabled' : ''}>Sabotar a missão</button>`);
+        } else h += tag('Ronda 3 · Voto secreto') + `<h1 class="title">A equipa está a votar</h1><p class="lead">Na missão: ${nomes}.</p>`;
+        break;
+      case 'mres': h += tag('Ronda 3 · Missão') + `<h1 class="title role ${pb.sab ? 'bad' : 'ok'}">${pb.sab ? 'Sabotada' : 'Cumprida'}</h1><p class="lead">Votos de sabotagem: <strong>${Math.max(0, pb.sab)}</strong>.</p>`; break;
+      case 'mesa': h += tag(`Ronda ${pb.ronda} de 3 · Mesa Redonda`) + `<h1 class="title">Quem trai a Ana?</h1><p class="lead">A missão ${okM ? 'foi cumprida' : 'falhou'}. Discutam. Depois a Ana bane uma pessoa.</p>${pb.tEnd ? `<div class="timer"><span class="clock big" id="mz-clock">${fmt(pb.tEnd - Date.now())}</span></div>` : ''}`; break;
+      case 'ban': h += pb.last ? tag(`${esc(pb.last.nm)} sai da mesa`) + `<h1 class="title role ${pb.last.t ? 'bad' : 'ok'}">${pb.last.t ? 'Traição' : 'Lealdade'}</h1><p class="lead">${pb.last.t ? 'A Ana apanhou uma pessoa que a traía.' : 'A Ana baniu uma pessoa fiel.'}</p>` : ''; break;
+      case 'fim': h += pb.res === 'win' ? tag('Fim do jogo') + `<h1 class="title">Mesa limpa</h1><p class="lead">A Ana baniu toda a gente que a traía.</p>`
+        : tag('Fim do jogo') + `<h1 class="title">A traição venceu</h1><p class="lead">Ficou por apanhar: <strong>${(pb.quem || []).map(esc).join(' e ')}</strong>.</p>`; break;
+      default: h += `<h1 class="title">Mesa Redonda</h1><p class="lead">O jogo continua no telemóvel da Ana.</p>`;
+    }
+  }
+  app.innerHTML = h;
+}
+function clickM(e){
+  const m = e.target.closest('[data-m]'); if(!m) return;
+  const [k, v] = m.dataset.m.split(':');
+  if(k === 'join'){
+    const el = document.getElementById('mnome'), nm = (el ? el.value : ML.typing).trim().slice(0, 18);
+    if(!nm){ ML.err = 'Escreve o teu nome primeiro.'; }
+    else {
+      ML.pend = true; ML.err = ''; ML.typing = nm;
+      net.put('in/jog/' + Mz.pid, {nm, t: Date.now()}).then(r => {
+        ML.pend = false;
+        if(r && r.ok){ Mz.nm = nm; Mz.dentro = true; saveM(); } else ML.err = 'Não deu para entrar. Vê se tens rede e tenta outra vez.';
+        renderM();
+      });
+    }
+  }
+  else if(k === 'sair'){ Mz.dentro = false; ML.typing = Mz.nm; saveM(); ML.pend = true; net.del('in/jog/' + Mz.pid).then(() => { ML.pend = false; }); }
+  else if(k === 'papel') ML.show = !ML.show;
+  else if(k === 'voto' && ML.pub && !ML.pend){
+    const chave = votoKey(ML.pub);
+    ML.pend = true; ML.err = '';
+    net.put('in/voto/' + Mz.pid, v === 's' ? 's' : 'c').then(r => {
+      ML.pend = false;
+      if(r && r.ok){ Mz.vk = chave; saveM(); } else ML.err = 'O voto não seguiu. Vê se tens rede e tenta outra vez.';
+      renderM();
+    });
+  }
+  renderM();
+}
+
 /* ---------- Desenho ---------- */
 let lastKey = '';
-function render(){
+function ecra(){
   let html, fase = '';
   const n = Math.min(7, Math.max(1, S.n || 1));
   switch(S.screen){
@@ -1345,9 +1731,16 @@ function render(){
     case 'back': html = vBack(); break;
     default: html = vSplash();
   }
+  return [html, fase];
+}
+function render(){
+  if(APP === 'gerir') return renderG();
+  if(APP === 'mesa') return renderM();
+  const [html, fase] = ecra();
   if(!(S.screen === 'stage' && S.n === 6 && S.step === 'luz')) luzReset();
   document.documentElement.dataset.fase = fase;
   app.innerHTML = html + (S.menu ? vMenu() : '');
+  tranca();
   luzPaint();
   const d = S.d || {};
   const key = [S.screen, S.n, S.step, S.gstep, S.xid, d.q, d.idx, d.vi, d.round, d.li, d.shown].join('|');
@@ -1358,24 +1751,30 @@ function render(){
     if(fb) (app.querySelector('.actions') || fb).scrollIntoView({block:'nearest'});
   }
   save();
+  publish();
 }
 
 document.addEventListener('click', e => {
+  if(APP === 'gerir') return clickG(e);
+  if(APP === 'mesa') return clickM(e);
   const el = e.target.closest('[data-a]');
-  if(!el || el.disabled || !ACT[el.dataset.a]) return;
+  if(!el || el.disabled || el.classList.contains('lock') || !ACT[el.dataset.a]) return;
   if(el.dataset.a !== 'menu') S.menu = false;
   if(ACT[el.dataset.a](el.dataset.v, el) !== false) render();
 });
-document.addEventListener('pointerdown', e => { if(e.target.closest && e.target.closest('[data-p="luz"]')) luzPress(); });
+document.addEventListener('pointerdown', e => { if(APP === 'jogo' && e.target.closest && e.target.closest('[data-p="luz"]')) luzPress(); });
 document.addEventListener('input', e => {
   const t = e.target, b = t.dataset && t.dataset.bind;
-  if(!b) return;
+  if(t.id === 'mnome') ML.typing = t.value;
+  if(!b || APP !== 'jogo') return;
   if(b === 'name' && S.d.names) S.d.names[+t.dataset.i] = t.value;
   else if(b === 'code'){ t.value = t.value.replace(/\D/g, '').slice(0, 2); S.d.code = t.value; }
   save();
 });
 document.addEventListener('keydown', e => {
-  const a = e.key === 'Enter' && e.target.dataset && e.target.dataset.enter;
+  if(e.key !== 'Enter' || !e.target.dataset) return;
+  if(e.target.dataset.genter || e.target.dataset.menter){ e.preventDefault(); const b = app.querySelector('.actions .btn'); if(b) b.click(); return; }
+  const a = APP === 'jogo' && e.target.dataset.enter;
   if(a && ACT[a]){ e.preventDefault(); ACT[a](); render(); }
 });
 setInterval(() => {
@@ -1383,6 +1782,14 @@ setInterval(() => {
   if(c && S.t3 && !S.t3end) c.textContent = fmt(Date.now() - S.t3);
   const m = document.getElementById('mesa-clock');
   if(m && S.d && S.d.tEnd){ const left = S.d.tEnd - Date.now(); m.textContent = fmt(left); m.classList.toggle('over', left <= 0); }
+  const mz = document.getElementById('mz-clock');
+  if(mz && ML.pub && ML.pub.tEnd){ const left = ML.pub.tEnd - Date.now(); mz.textContent = fmt(left); mz.classList.toggle('over', left <= 0); }
+  if(APP === 'gerir'){
+    const sc = document.getElementById('sc-clock'), xq = document.getElementById('xq-clock');
+    if(sc && S.d && S.d.tEnd) sc.textContent = fmt(Math.max(0, S.d.tEnd - Date.now()) + 999);
+    if(xq && S.xd && S.xd.tEnd) xq.textContent = fmt(Math.max(0, S.xd.tEnd - Date.now()) + 999);
+  }
+  if(APP !== 'jogo') return;
   if(S.screen === 'extra' && S.xd && S.xd.tEnd){
     const left = S.xd.tEnd - Date.now(), el = document.getElementById('xq-clock');
     if(left <= 0){ xqEnd(); render(); } else if(el) el.textContent = fmt(left + 999);
@@ -1410,6 +1817,8 @@ function confetti(){
 
 /* ---------- Arranque ---------- */
 function boot(data){
+  if(APP === 'gerir'){ if(G.ok) ligaGerir(); return renderG(); }
+  if(APP === 'mesa'){ ligaMesa(); return renderM(); }
   const o = data && data.v === 3 ? data : load();
   if(o) S = Object.assign(fresh(), o);
   if(S.screen === 'pin' || S.screen === 'back' || S.screen === 'intro' || S.screen === 'intro2') S.screen = 'splash';
@@ -1419,17 +1828,20 @@ function boot(data){
   if(S.step === 'luz' && S.d && !S.d.tries) S.d = {tries:[]};
   render();
   loadFotos().then(() => { if(Object.keys(FOTO).length) render(); });
+  ligaJogo();
 }
+document.title = META[0];
+(document.querySelector('meta[name="apple-mobile-web-app-title"]') || {}).content = META[1];
 /* Fora do Claude (alojada num endereço próprio) a página instala-se como app. */
 try{
   if(window.top === window.self && (location.protocol === 'https:' || location.hostname === 'localhost')){
     const link = (rel, href) => { const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l); };
-    link('manifest', 'manifest.webmanifest'); link('apple-touch-icon', 'apple-touch-icon.png'); link('icon', 'icon-192.png');
+    link('manifest', `manifest${META[2]}.webmanifest`); link('apple-touch-icon', `apple-touch-icon${META[2]}.png`); link('icon', `icon${META[2]}-192.png`);
     if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 }catch(e){}
 const hot = window.claude && window.claude.hot;
-if(hot && hot.snapshot) hot.snapshot(() => S);
+if(hot && hot.snapshot && APP === 'jogo') hot.snapshot(() => S);
 if(hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {});
 })();
 </script>

@@ -24,7 +24,7 @@
   --accent:var(--p0); --on-accent:var(--p0on);
   --ok:#1d8a3b; --on-ok:#ffffff; --bad:#d70015; --on-bad:#ffffff; --flame:#ff9500;
   --pc:#ffffff; --pc-ink:#1c1c1e; --pc-red:#d70015; --pc-sh:0 0 0 .5px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.13);
-  --gloss:rgba(255,255,255,.55);
+  --gloss:rgba(255,255,255,.55); --scrim:rgba(0,0,0,.38);
   --c0:#ff3b30; --c1:#ffcc00; --c2:#34c759; --c3:#007aff; --c4:#af52de; --c5:#8e8e93;
   --g1:#ff9500; --g2:#ff2d55; --g3:#af52de;
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,"Segoe UI",Roboto,sans-serif;
@@ -71,7 +71,9 @@ strong{font-weight:600}
 /* Barra de navegação */
 .bar{position:sticky;top:0;z-index:5;margin:0 -20px;padding:8px 20px 10px;display:grid;gap:8px;background:var(--bg);background:color-mix(in srgb,var(--bg) 76%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 .5px 0 var(--sep)}
 .bar-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:34px}
-.bar-name{background:none;border:0;padding:6px 0;font-size:15px;font-weight:600}
+.navb{display:inline-flex;align-items:center;gap:5px;background:none;border:0;padding:6px 6px 6px 0;color:var(--accent);font-size:16px;font-weight:500}
+.navb svg{flex:none}
+.navb.menu{background:var(--fill);border-radius:999px;padding:6px 11px;color:var(--ink);font:600 14px/1 var(--round);font-variant-numeric:tabular-nums}
 .bar-right{display:flex;align-items:center;gap:12px}
 .torches{display:flex;gap:3px}
 .torch{width:15px;height:17px;fill:var(--flame)}
@@ -200,9 +202,13 @@ strong{font-weight:600}
 .no{animation:no .25s}
 
 /* Cores */
-.tubes{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;padding-top:28px}
+.tubes{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;padding:28px 0 20px}
 .tube{width:100%;aspect-ratio:10/37;border:1.5px solid var(--ink3);border-top:0;border-radius:0 0 999px 999px;background:var(--fill);display:flex;flex-direction:column-reverse;align-items:center;gap:3px;padding:5px 0 6px}
+.tube{position:relative}
 .tube.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.tube.hf,.tube.ht{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.tube.hf::after,.tube.ht::after{content:"de";position:absolute;left:50%;bottom:-20px;transform:translateX(-50%);font:700 12px/1 var(--round);letter-spacing:.04em;text-transform:uppercase;color:var(--ok)}
+.tube.ht::after{content:"para"}
 .ball{width:calc(100% - 6px);aspect-ratio:1;border-radius:50%;flex:none;transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
 .tube.sel .ball:last-child{transform:translateY(-20px)}
 .c0{background:radial-gradient(circle at 32% 28%,var(--gloss),transparent 46%),var(--c0)}
@@ -224,7 +230,7 @@ strong{font-weight:600}
 /* Castigo, prenda, final */
 .castigo{background:var(--card);border-radius:16px;padding:14px 16px;display:grid;gap:4px;font-size:19px;font-weight:600;letter-spacing:-.018em;line-height:1.3}
 .castigo .lbl{color:var(--bad)}
-.gift{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:36px 0 8px}
+.gift{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px 0 8px}
 .gift .tag{align-self:center;margin:0}
 .gift .n{font:800 min(50vw,200px)/1 var(--round);letter-spacing:-.04em;padding:0 .06em;animation:rise .7s cubic-bezier(.2,.9,.2,1) both}
 .gift h1{font-size:clamp(30px,8.8vw,38px);line-height:1.08;font-weight:700;letter-spacing:-.03em;text-wrap:balance;animation:rise .7s .12s cubic-bezier(.2,.9,.2,1) both}
@@ -287,6 +293,17 @@ strong{font-weight:600}
 .choice b{font-size:20px;font-weight:700;letter-spacing:-.022em;color:var(--accent)}
 .choice span{font-size:15px;line-height:1.38;color:var(--ink2)}
 .choice:active{transform:scale(.985)}
+
+/* Menu de progresso */
+.sheet-bg{position:fixed;inset:0;z-index:20;background:var(--scrim)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;max-width:480px;max-height:88%;margin:0 auto;overflow:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:16px 20px 22px;display:grid;gap:14px;animation:up .25s cubic-bezier(.2,.9,.2,1)}
+@keyframes up{from{transform:translateY(28px);opacity:0}}
+.stats.four{grid-template-columns:repeat(4,1fr);gap:8px}
+.stats.four .stat{padding:10px 6px;justify-items:center;text-align:center}
+.stats.four .lbl{font-size:10.5px}
+.stats.four b{font-size:22px}
+.won small{display:block;font-size:13.5px;font-weight:400;color:var(--ink2)}
+.num-s.ok{background:var(--ok);color:var(--on-ok)}
 
 /* Boneco e mapa em caminho */
 .boneco{display:block;width:100%;height:auto}
@@ -495,7 +512,7 @@ const NAIPES = ['espadas','copas','ouros','paus'];
 const TITULOS = ['campeã dos 0,4%','salva pela última chama','finalista de ferro','única sobrevivente'];
 
 /* ---------- Estado ---------- */
-function fresh(){ return {v:3, screen:'splash', intro:false, done:0, torches:3, n:0, step:'', d:{}, after:'', castigo:0, t3:0, t3end:0, pinErr:false, ask:false, open:0, gstep:'', x:{}, xid:'', xd:null, xscore:0}; }
+function fresh(){ return {v:3, screen:'splash', intro:false, done:0, torches:3, n:0, step:'', d:{}, after:'', castigo:0, t3:0, t3end:0, pinErr:false, ask:false, open:0, gstep:'', x:{}, xid:'', xd:null, xscore:0, ret:'', menu:false}; }
 function load(){ try{ const o = JSON.parse(localStorage.getItem(KEY) || 'null'); return o && o.v === 3 ? o : null; }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 let S = fresh();
@@ -544,6 +561,36 @@ function luzPress(){
 function xqEnd(){
   const sc = S.xd ? S.xd.ok : 0; S.xscore = sc; S.xd = null;
   if(sc >= FAQ_MIN){ S.x.xq = S.torches < 3 ? 'r' : 'f'; if(S.torches < 3) S.torches++; } else S.x.xq = 'n';
+}
+
+/* Dica do jogo das cores: primeira jogada da solução mais curta a partir da posição actual. */
+function dica(tubes){
+  const done = t => t.every(x => !x.length || (x.length === 4 && x.every(c => c === x[0])));
+  const key = t => t.map(x => x.join('')).sort().join('|');
+  const seen = new Set([key(tubes)]);
+  let front = [[tubes, null]];
+  while(front.length){
+    const next = [];
+    for(const [t, first] of front){
+      for(let a = 0; a < t.length; a++){
+        const A = t[a]; if(!A.length || (A.length === 4 && A.every(c => c === A[0]))) continue;
+        const c = A[A.length - 1]; let vazio = false;
+        for(let b = 0; b < t.length; b++){
+          if(a === b) continue; const B = t[b]; if(B.length >= 4) continue;
+          if(!B.length){ if(vazio || A.every(x => x === c)) continue; vazio = true; }
+          else if(B[B.length - 1] !== c) continue;
+          const u = t.map(x => x.slice()); u[b].push(u[a].pop());
+          const k = key(u); if(seen.has(k)) continue; seen.add(k);
+          const f = first || [a, b];
+          if(done(u)) return {r:'ok', move:f};
+          next.push([u, f]);
+        }
+      }
+    }
+    if(seen.size > 250000) return {r:'cap'};
+    front = next;
+  }
+  return {r:'none'};
 }
 
 /* Fotografias: ficam em memória e, quando o telemóvel deixa, no IndexedDB. */
@@ -601,11 +648,32 @@ const ICO = {
   telemovel: `<svg viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M7 1.500h6A2.500 2.500 0 0 1 15.500 4v12A2.500 2.500 0 0 1 13 18.500H7A2.500 2.500 0 0 1 4.500 16V4A2.500 2.500 0 0 1 7 1.500zm0 1.800a.7.7 0 0 0-.7.7v12a.7.7 0 0 0 .7.7h6a.7.7 0 0 0 .7-.7V4a.7.7 0 0 0-.7-.7zm3 12.200a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>`
 };
 
-function bar(){
+const CHEV = `<svg viewBox="0 0 11 18" width="11" height="18" aria-hidden="true"><path d="M9 2L2.5 9 9 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const LISTA = `<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+function bar(lite){
+  const voltar = `<button class="navb" data-a="back">${CHEV}<span>Voltar</span></button>`;
+  if(lite) return `<header class="bar"><div class="bar-row">${voltar}</div></header>`;
   let t = ''; for(let i = 0; i < 3; i++) t += flame(i < S.torches);
   let tr = ''; for(let k = 1; k <= 7; k++) tr += `<i class="${k <= S.done ? 'done' : k === S.done + 1 ? 'now' : ''}"></i>`;
   const clock = S.t3 && !S.t3end ? `<span class="clock" id="clock" aria-label="Tempo da Corrida Final">${fmt(Date.now() - S.t3)}</span>` : '';
-  return `<header class="bar"><div class="bar-row"><button class="bar-name" data-a="hub" aria-label="A Prova dos Sete, voltar ao mapa">A Prova dos Sete</button><div class="bar-right">${clock}<span class="torches" role="img" aria-label="${S.torches} de 3 tochas acesas">${t}</span></div></div><div class="track" role="img" aria-label="${S.done} de 7 etapas ganhas">${tr}</div></header>`;
+  return `<header class="bar"><div class="bar-row">${voltar}<div class="bar-right">${clock}<span class="torches" role="img" aria-label="${S.torches} de 3 tochas acesas">${t}</span><button class="navb menu" data-a="menu" aria-label="Ver o progresso: ${S.open} de 7 prendas">${LISTA}<span>${S.open}/7</span></button></div></div><div class="track" role="img" aria-label="${S.done} de 7 etapas ganhas">${tr}</div></header>`;
+}
+function vMenu(){
+  const nx = EXTRAS.filter(e => S.x[e.id] && S.x[e.id] !== 'n').length, nf = ALBUM.filter(id => FOTO[id]).length;
+  return `<div class="sheet-bg" data-a="menuClose"></div><aside class="sheet" role="dialog" aria-modal="true" aria-label="Progresso">
+    <div class="shift"><h2 class="sec" style="margin:0">Progresso</h2><button class="mini" data-a="menuClose">Fechar</button></div>
+    <div class="stats four">
+      <div class="stat"><span class="lbl">Prendas</span><b>${S.open}/7</b></div>
+      <div class="stat"><span class="lbl">Tochas</span><b>${S.torches}/3</b></div>
+      <div class="stat"><span class="lbl">Missões</span><b>${nx}/${EXTRAS.length}</b></div>
+      <div class="stat"><span class="lbl">Fotos</span><b>${nf}</b></div>
+    </div>
+    <ol class="group won">${ETAPAS.map(e => {
+      const st = e.n <= S.open ? 'Ganhaste: ' + PRENDAS[e.n - 1].nome : e.n <= S.done ? 'Prenda por abrir' : e.n === S.done + 1 ? 'A seguir' : 'Bloqueada';
+      return `<li><span class="num-s${e.n <= S.done ? ' ok' : ''}">${e.n <= S.done ? CHECK : e.n}</span><span>${e.t}<small>${st}</small></span></li>`;
+    }).join('')}</ol>
+    <div class="row">${btn('Mapa', 'hub', {cls:'alt small'})}${btn('Álbum', 'album', {cls:'alt small'})}</div>
+  </aside>`;
 }
 
 /* ---------- Ecrãs gerais ---------- */
@@ -622,7 +690,7 @@ function vSplash(){
 }
 
 function vIntro(){
-  return tag('O formato') + `<h1 class="title">Três programas e as tuas Anices, <span class="grad">num só jogo</span></h1>
+  return bar(true) + tag('O formato') + `<h1 class="title">Três programas e as tuas Anices, <span class="grad">num só jogo</span></h1>
     <p class="lead">Hoje a tua vida é um reality show: os três programas de que mais gostas, misturados com o que fazes todos os dias no telemóvel.</p>
     <ul class="mix">
       <li data-f="1"><span class="ico">${ICO.chama}</span><b>Survivor</b><span>De manhã, na Ilha: provas, três tochas e um júri que são os teus pais.</span></li>
@@ -634,7 +702,7 @@ function vIntro(){
 }
 
 function vIntro2(){
-  return tag('Antes de começar') + `<h1 class="title">Uma prenda já tu conheces</h1>
+  return bar(true) + tag('Antes de começar') + `<h1 class="title">Uma prenda já tu conheces</h1>
     <p class="lead">Os teus bilhetes para o Warriors foram confiscados pela produção. Ficam no cofre do jogo até os resgatares na Corrida Final.</p>
     <p class="lead">As outras seis, nem imaginas o que são.</p>`
     + rules(['Cada etapa tem duas ou três provas e acaba numa prenda.', 'Cada prova falhada apaga uma tocha e dá castigo, mas o jogo continua.', 'Pelo dia fora há missões extra, e cada uma reacende uma tocha apagada.'])
@@ -647,7 +715,7 @@ function vHub(){
   out += `<h1 class="title">${S.done === 0 ? 'Tudo por ganhar' : S.done >= 7 ? 'Sete em sete' : S.done + ' de 7 prendas'}</h1>`;
   if(next === 4) out += host('A Fase 2 joga-se à mesa. Espera que os convidados estejam todos sentados.');
   if(next === 5) out += host('A Fase 3 é a contar. O relógio arranca na partida da etapa 5 e só pára no tapete.');
-  out += next <= 7 ? btn(`Jogar a etapa ${next}`, 'play') : btn('Ver o final', 'play');
+  out += S.open < S.done ? btn(`Abrir a prenda n.º ${S.open + 1}`, 'giftBack') : next <= 7 ? btn(`Jogar a etapa ${next}`, 'play') : btn('Ver o final', 'play');
   const pos = Math.min(6, S.done), X = i => i % 2 ? 87.5 : 12.5, Y = i => ROW * i + ROW / 2;
   const troco = i => `M${X(i)} ${Y(i)}C${X(i)} ${Y(i) + ROW} ${X(i + 1)} ${Y(i + 1) - ROW} ${X(i + 1)} ${Y(i + 1)}`;
   let todo = '', feito = '';
@@ -678,13 +746,13 @@ function vFail(){
 
 function vGift(){
   const p = PRENDAS[S.n - 1], n = S.n;
-  if(S.gstep !== 'open') return `<div class="gift">${tag(`Etapa ${n} ganha`)}
+  if(S.gstep !== 'open') return bar() + `<div class="gift">${tag(`Etapa ${n} ganha`)}
     <div class="n grad" aria-hidden="true">${n}</div>
     <h1>${n === 5 ? 'Recuperaste a prenda n.º 5' : 'Tens direito à prenda n.º ' + n}</h1>
     <p class="lead">${n === 7 ? 'Esta não tem embrulho. Olha bem à tua volta.' : n === 5 ? 'Abre o embrulho que foste buscar ao outro lado da sala.' : `Pede o embrulho n.º ${n} ao apresentador e abre-o.`}</p>
     <p class="muted small">O nome da prenda só aparece aqui depois de a abrires.</p>
   </div>` + acts(btn(n === 7 ? 'Já vi a prenda' : 'Já abri a prenda', 'giftOpen'));
-  return `<div class="gift">${tag(p.tag || 'Prenda desbloqueada')}
+  return bar() + `<div class="gift">${tag(p.tag || 'Prenda desbloqueada')}
     <div class="n small grad" aria-hidden="true">${n}</div>
     <h1>${p.nome}</h1>
     <p class="lead">${p.nota}</p>
@@ -735,7 +803,7 @@ function vAlbum(){
 }
 
 function vPin(){
-  return tag('Bastidores') + `<h1 class="title">Só para o apresentador</h1>
+  return bar(true) + tag('Bastidores') + `<h1 class="title">Só para o apresentador</h1>
     <p class="lead">Do outro lado estão as respostas e as prendas todas. A Ana não pode ver.</p>
     <label class="eyebrow" for="pin">Código do apresentador</label>
     <input id="pin" class="code" style="width:200px" data-enter="pinGo" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" value="">
@@ -744,7 +812,7 @@ function vPin(){
 }
 
 function vBack(){
-  return tag('Bastidores') + `<h1 class="title">Guião do apresentador</h1>
+  return bar(true) + tag('Bastidores') + `<h1 class="title">Guião do apresentador</h1>
     <p class="lead">O jogo corre todo neste telemóvel. Passa-o à Ana quando o ecrã falar com ela e fica com ele quando disser «Apresentador».</p>
     <h2 class="sec">Para preparar até sábado</h2>
     <ul class="group prep">
@@ -984,7 +1052,7 @@ function vCores(){
   if(S.step === 'brief') return etapaTag() + `<h1 class="title">O resgate dos Warriors</h1>
     <p class="lead">A Corrida Final faz-se a contar: três etapas seguidas, e o relógio só pára no tapete do Pit Stop.</p>
     <p class="lead">Primeiro vais buscar o que já era teu. Os bilhetes ficaram em território inimigo, entre seis gangues de seis cores.</p>`
-    + rules(['No telemóvel: põe cada cor no seu copo. São seis cores e só há um copo vazio.', 'Na sala: atravessa o território inimigo sem tocar no chão, com duas almofadas e 90 segundos.', 'O relógio da corrida não pára entre provas.'])
+    + rules(['No telemóvel: põe cada cor no seu copo. São seis cores e só há um copo vazio. De reserva tens três dicas e um copo extra.', 'Na sala: atravessa o território inimigo sem tocar no chão, com duas almofadas e 90 segundos.', 'O relógio da corrida não pára entre provas.'])
     + acts(btn('Partida', 'sortGo'));
   if(S.step === 'trav') return parte(2, 2) + `<h1 class="title">A travessia</h1>
     <p class="lead">As cores estão arrumadas e o caminho está livre. Os teus bilhetes estão do outro lado da sala, e o chão é território inimigo.</p>`
@@ -994,10 +1062,10 @@ function vCores(){
     + acts(`<div class="row">${btn('Chegou aos bilhetes', 'winNow', {cls:'ok'})}${btn('Não chegou', 'failGift', {cls:'bad'})}</div>`);
   return parte(1, 2) + `<h1 class="title">O resgate dos Warriors</h1>
     <p class="muted small">Uma bola só entra em copo vazio ou em cima da mesma cor. Quatro por copo.</p>
-    <div class="tubes">${d.tubes.map((t, i) => `<button class="tube${d.sel === i ? ' sel' : ''}" data-a="sortT" data-v="${i}" aria-label="Copo ${i + 1}, ${t.length} ${t.length === 1 ? 'bola' : 'bolas'}">${t.map(c => `<span class="ball c${c}"></span>`).join('')}</button>`).join('')}</div>
-    <p class="score"><b>${d.moves}</b> jogadas. O mínimo possível são ${NIVEL_MIN}.</p>
-    ${d.won ? fbx('ok', d.moves <= NIVEL_MIN ? 'Cada gangue no seu território, e no mínimo de jogadas.' : 'Cada gangue no seu território.') : ''}`
-    + acts(d.won ? btn('Continuar', 'sortDone') : `<div class="row">${btn('Anular', 'sortUndo', {cls:'alt small', dis: !d.hist.length})}${btn('Recomeçar', 'sortGo', {cls:'alt small'})}</div>`);
+    <div class="tubes" style="grid-template-columns:repeat(${d.tubes.length},1fr)">${d.tubes.map((t, i) => `<button class="tube${d.sel === i ? ' sel' : ''}${d.hint && d.hint[0] === i ? ' hf' : d.hint && d.hint[1] === i ? ' ht' : ''}" data-a="sortT" data-v="${i}" aria-label="Copo ${i + 1}, ${t.length} ${t.length === 1 ? 'bola' : 'bolas'}${d.hint && d.hint[0] === i ? ', dica: tira daqui' : d.hint && d.hint[1] === i ? ', dica: põe aqui' : ''}">${t.map(c => `<span class="ball c${c}"></span>`).join('')}</button>`).join('')}</div>
+    <p class="score"><b>${d.moves}</b> jogadas.${d.extra ? '' : ` O mínimo possível são ${NIVEL_MIN}.`}</p>
+    ${d.won ? fbx('ok', !d.extra && d.moves <= NIVEL_MIN ? 'Cada gangue no seu território, e no mínimo de jogadas.' : 'Cada gangue no seu território.') : d.msg ? fbx('bad', d.msg) : d.hint ? fbx('ok', 'Dica: tira a bola do copo «de» e põe-na no copo «para».') : ''}`
+    + acts(d.won ? btn('Continuar', 'sortDone') : `<div class="row">${btn(`Dica · ${d.dicas}`, 'sortHint', {cls:'small', dis: d.dicas <= 0 || !!d.hint})}${btn(d.extra ? 'Copo extra usado' : 'Copo extra · 1', 'sortExtra', {cls:'small', dis: d.extra})}</div><div class="row">${btn('Anular', 'sortUndo', {cls:'alt small', dis: !d.hist.length})}${btn('Recomeçar', 'sortGo', {cls:'alt small'})}</div>`);
 }
 
 /* ---------- Etapa 6: paciência ---------- */
@@ -1110,11 +1178,24 @@ const ACT = {
   formato(){ S.screen = 'intro'; },
   introNext(){ S.screen = S.intro ? 'splash' : 'intro2'; },
   introOk(){ S.intro = true; S.screen = 'hub'; },
-  hub(){ S.screen = 'hub'; },
+  hub(){ if(S.screen === 'stage' || S.screen === 'fail' || S.screen === 'gift') S.ret = S.screen; S.screen = 'hub'; },
   home(){ S.screen = 'splash'; S.pinErr = false; S.ask = false; },
+  back(){
+    switch(S.screen){
+      case 'intro2': S.screen = 'intro'; break;
+      case 'stage': case 'fail': case 'gift': S.ret = S.screen; S.screen = 'hub'; break;
+      case 'extra': case 'album': case 'final': S.screen = 'hub'; break;
+      default: S.screen = 'splash'; S.pinErr = false; S.ask = false;
+    }
+  },
+  menu(){ S.menu = !S.menu; },
+  menuClose(){ S.menu = false; },
+  giftBack(){ if(S.open < S.done){ S.n = S.open + 1; S.gstep = 'lock'; S.screen = 'gift'; } },
   play(){
     const n = S.done + 1;
     if(n > 7){ S.screen = 'final'; return; }
+    if(S.ret === 'fail' && S.n === n){ S.ret = ''; S.screen = 'fail'; return; }
+    S.ret = '';
     if(S.n !== n || !S.step){ S.n = n; S.step = 'brief'; S.d = {}; }
     S.screen = 'stage';
   },
@@ -1122,8 +1203,8 @@ const ACT = {
   failGift(){ fail('gift'); },
   castigoOk(){ if(S.after === 'gift') win(); else { S.screen = 'stage'; S.step = S.after; } },
   giftOpen(){ S.gstep = 'open'; S.open = Math.max(S.open, S.n); },
-  giftOk(){ if(S.done >= 7){ S.screen = 'final'; setTimeout(confetti, 60); } else S.screen = 'hub'; },
-  extra(v){ const e = EXTRAS.find(x => x.id === v); if(!e || S.open < e.de || S.x[v] === 'n') return false; S.xid = v; S.xd = null; S.screen = 'extra'; },
+  giftOk(){ if(S.open < S.done){ S.n = S.open + 1; S.gstep = 'lock'; } else if(S.done >= 7){ S.screen = 'final'; setTimeout(confetti, 60); } else S.screen = 'hub'; },
+  extra(v){ const e = EXTRAS.find(x => x.id === v); if(!e || S.open < e.de || S.x[v] === 'n') return false; if(S.xid !== v) S.xd = null; S.xid = v; S.screen = 'extra'; },
   xqGo(){ if(!S.x.xq) S.xd = {i:0, ok:0, tEnd: Date.now() + FAQ_T}; },
   xqAns(v){ const x = S.xd; if(!x) return false; if(FAQ[x.i].a === +v) x.ok++; x.i++; if(x.i >= FAQ.length || Date.now() > x.tEnd) xqEnd(); },
   extraOk(){ const e = EXTRAS.find(x => x.id === S.xid); if(e && !e.quiz && !S.x[S.xid]){ S.x[S.xid] = S.torches < 3 ? 'r' : 'f'; if(S.torches < 3) S.torches++; } },
@@ -1132,7 +1213,7 @@ const ACT = {
 
   pin(){ S.screen = 'pin'; S.pinErr = false; },
   pinGo(){ const el = document.getElementById('pin'); if(el && el.value === PIN){ S.screen = 'back'; S.pinErr = false; } else S.pinErr = true; },
-  jump(v){ const n = +v; S.intro = true; S.done = n - 1; S.open = n - 1; S.n = 0; S.step = ''; S.d = {}; if(n <= 5) S.t3 = 0; S.t3end = 0; },
+  jump(v){ const n = +v; S.intro = true; S.ret = ''; S.done = n - 1; S.open = n - 1; S.n = 0; S.step = ''; S.d = {}; if(n <= 5) S.t3 = 0; S.t3end = 0; },
   relight(){ S.torches = 3; },
   resetAsk(){ S.ask = true; }, resetNo(){ S.ask = false; },
   resetYes(){ S = fresh(); S.screen = 'back'; clearFotos(); },
@@ -1201,18 +1282,24 @@ const ACT = {
   s4next(){ const d = S.d, left = d.players.filter(p => p.role === 'T' && !p.out).length;
     if(left === 0){ d.res = 'win'; S.step = 'fim'; } else if(d.round >= 3){ d.res = 'lose'; S.step = 'fim'; } else { d.round++; S.step = 'missao'; } },
 
-  sortGo(){ startClock(); S.step = 'play'; S.d = {tubes: NIVEL.map(t => t.slice()), sel:-1, hist:[], moves:0, won:false}; },
+  sortGo(){ startClock(); const o = S.step === 'play' && S.d && S.d.tubes ? S.d : null;
+    S.step = 'play'; S.d = {tubes: NIVEL.map(t => t.slice()).concat(o && o.extra ? [[]] : []), sel:-1, hist:[], moves:0, won:false, dicas: o ? o.dicas : 3, extra: !!(o && o.extra), hint:null, msg:''}; },
   sortT(v){ const d = S.d, i = +v; if(d.won) return;
     if(d.sel < 0){ if(d.tubes[i].length) d.sel = i; return; }
     if(d.sel === i){ d.sel = -1; return; }
     const A = d.tubes[d.sel], B = d.tubes[i], c = A[A.length - 1];
     if(B.length < 4 && (!B.length || B[B.length - 1] === c)){
-      B.push(A.pop()); d.hist.push([d.sel, i]); d.moves++; d.sel = -1;
+      B.push(A.pop()); d.hist.push([d.sel, i]); d.moves++; d.sel = -1; d.hint = null; d.msg = '';
       d.won = d.tubes.every(t => !t.length || (t.length === 4 && t.every(x => x === t[0])));
     } else d.sel = B.length ? i : -1; },
+  sortHint(){ const d = S.d; if(d.won || d.hint || d.dicas <= 0) return;
+    const h = dica(d.tubes);
+    if(h.r === 'ok'){ d.hint = h.move; d.dicas--; d.msg = ''; d.sel = -1; }
+    else d.msg = h.r === 'none' ? 'Este caminho não tem saída. Anula jogadas ou recomeça.' : 'Não encontrei uma dica a tempo. Anula umas jogadas e tenta outra vez.'; },
+  sortExtra(){ const d = S.d; if(d.extra || d.won) return; d.extra = true; d.tubes.push([]); d.hint = null; d.msg = ''; d.sel = -1; },
   sortDone(){ S.step = 'trav'; S.d = {tEnd:0}; },
   s5timer(){ S.d.tEnd = Date.now() + 90000; },
-  sortUndo(){ const d = S.d, m = d.hist.pop(); if(m){ d.tubes[m[0]].push(d.tubes[m[1]].pop()); d.moves--; d.sel = -1; } },
+  sortUndo(){ const d = S.d, m = d.hist.pop(); if(m){ d.tubes[m[0]].push(d.tubes[m[1]].pop()); d.moves--; d.sel = -1; d.hint = null; d.msg = ''; } },
 
   luzGo(){ startClock(); luzReset(); S.step = 'luz'; S.d = {tries:[]}; },
   luzOk(){ S.step = 'play'; S.d = dealGolf(1); },
@@ -1260,12 +1347,12 @@ function render(){
   }
   if(!(S.screen === 'stage' && S.n === 6 && S.step === 'luz')) luzReset();
   document.documentElement.dataset.fase = fase;
-  app.innerHTML = html;
+  app.innerHTML = html + (S.menu ? vMenu() : '');
   luzPaint();
   const d = S.d || {};
   const key = [S.screen, S.n, S.step, S.gstep, S.xid, d.q, d.idx, d.vi, d.round, d.li, d.shown].join('|');
   if(key !== lastKey){ window.scrollTo(0, 0); lastKey = key; }
-  else {
+  else if(!S.menu){
     /* Actualização no mesmo ecrã: garantir que o aviso e o botão seguinte ficam à vista. */
     const fb = app.querySelector('.fb');
     if(fb) (app.querySelector('.actions') || fb).scrollIntoView({block:'nearest'});
@@ -1276,6 +1363,7 @@ function render(){
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]');
   if(!el || el.disabled || !ACT[el.dataset.a]) return;
+  if(el.dataset.a !== 'menu') S.menu = false;
   if(ACT[el.dataset.a](el.dataset.v, el) !== false) render();
 });
 document.addEventListener('pointerdown', e => { if(e.target.closest && e.target.closest('[data-p="luz"]')) luzPress(); });
@@ -1327,7 +1415,7 @@ function boot(data){
   if(S.screen === 'pin' || S.screen === 'back' || S.screen === 'intro' || S.screen === 'intro2') S.screen = 'splash';
   if(S.d && S.d.lock && S.d.cards){ S.d.open.forEach(i => { S.d.cards[i].up = false; }); S.d.open = []; S.d.lock = false; }
   S.ask = false; S.pinErr = false;
-  if(S.done > S.open && S.screen !== 'gift') S.open = S.done;
+  S.menu = false;
   if(S.step === 'luz' && S.d && !S.d.tries) S.d = {tries:[]};
   render();
   loadFotos().then(() => { if(Object.keys(FOTO).length) render(); });

@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex, nofollow">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Prova dos 7">
+<title>A Prova dos Sete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Plano: linguagem iOS. Fundo agrupado, cartões de cantos largos, tipo de sistema com títulos
+     grandes e apertados, um acento por fase. Acompanha o tema claro ou escuro de quem vê. */
+  color-scheme:light;
+  --bg:#f2f2f7; --card:#ffffff; --fill:rgba(118,118,128,.12); --sep:rgba(60,60,67,.17);
+  --ink:#000000; --ink2:rgba(60,60,67,.76); --ink3:rgba(60,60,67,.34);
+  --p0:#0071e3; --p0on:#ffffff; --p1:#d9500a; --p1on:#ffffff; --p2:#8e44d6; --p2on:#ffffff; --p3:#0071e3; --p3on:#ffffff;
+  --accent:var(--p0); --on-accent:var(--p0on);
+  --ok:#1d8a3b; --on-ok:#ffffff; --bad:#d70015; --on-bad:#ffffff; --flame:#ff9500;
+  --pc:#ffffff; --pc-ink:#1c1c1e; --pc-red:#d70015; --pc-sh:0 0 0 .5px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.13);
+  --gloss:rgba(255,255,255,.55);
+  --c0:#ff3b30; --c1:#ffcc00; --c2:#34c759; --c3:#007aff; --c4:#af52de; --c5:#8e8e93;
+  --g1:#ff9500; --g2:#ff2d55; --g3:#af52de;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,"Segoe UI",Roboto,sans-serif;
+  --round:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Inter",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#000000; --card:#1c1c1e; --fill:rgba(118,118,128,.26); --sep:rgba(84,84,88,.62);
+    --ink:#ffffff; --ink2:rgba(235,235,245,.7); --ink3:rgba(235,235,245,.3);
+    --p0:#0a84ff; --p1:#ff9f0a; --p1on:#2b1700; --p2:#bf5af2; --p2on:#21063a; --p3:#0a84ff;
+    --ok:#30d158; --on-ok:#00230c; --bad:#ff453a; --on-bad:#2a0300; --flame:#ff9f0a;
+    --pc:#f2f2f7; --pc-sh:0 0 0 .5px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.5);
+    --c0:#ff453a; --c1:#ffd60a; --c2:#30d158; --c3:#0a84ff; --c4:#bf5af2; --c5:#98989d;
+    --g1:#ff9f0a; --g2:#ff375f; --g3:#bf5af2;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#000000; --card:#1c1c1e; --fill:rgba(118,118,128,.26); --sep:rgba(84,84,88,.62);
+  --ink:#ffffff; --ink2:rgba(235,235,245,.7); --ink3:rgba(235,235,245,.3);
+  --p0:#0a84ff; --p1:#ff9f0a; --p1on:#2b1700; --p2:#bf5af2; --p2on:#21063a; --p3:#0a84ff;
+  --ok:#30d158; --on-ok:#00230c; --bad:#ff453a; --on-bad:#2a0300; --flame:#ff9f0a;
+  --pc:#f2f2f7; --pc-sh:0 0 0 .5px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.5);
+  --c0:#ff453a; --c1:#ffd60a; --c2:#30d158; --c3:#0a84ff; --c4:#bf5af2; --c5:#98989d;
+  --g1:#ff9f0a; --g2:#ff375f; --g3:#bf5af2;
+}
+:root[data-fase="1"]{--accent:var(--p1);--on-accent:var(--p1on)}
+:root[data-fase="2"]{--accent:var(--p2);--on-accent:var(--p2on)}
+:root[data-fase="3"]{--accent:var(--p3);--on-accent:var(--p3on)}
+
+*{box-sizing:border-box}
+html{height:100%;background:var(--bg)}
+body{margin:0;min-height:100%;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font:400 17px/1.42 var(--sans);letter-spacing:-.012em;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+#app{flex:1;width:100%;max-width:480px;margin:0 auto;padding:0 20px 28px;display:flex;flex-direction:column;gap:16px}
+#app>.tag:first-child{margin-top:30px}
+button,input{font:inherit;letter-spacing:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:2px}
+p,h1,h2,ol,ul{margin:0}
+ol,ul{padding:0;list-style:none}
+strong{font-weight:600}
+
+/* Barra de navegação */
+.bar{position:sticky;top:0;z-index:5;margin:0 -20px;padding:8px 20px 10px;display:grid;gap:8px;background:var(--bg);background:color-mix(in srgb,var(--bg) 76%,transparent);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 .5px 0 var(--sep)}
+.bar-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:34px}
+.bar-name{background:none;border:0;padding:6px 0;font-size:15px;font-weight:600}
+.bar-right{display:flex;align-items:center;gap:12px}
+.torches{display:flex;gap:3px}
+.torch{width:15px;height:17px;fill:var(--flame)}
+.torch.off{fill:var(--ink3)}
+.clock{font:600 16px/1 var(--round);font-variant-numeric:tabular-nums;color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,transparent);padding:6px 10px;border-radius:999px}
+.clock.big{font-size:40px;font-weight:700;background:none;padding:0;letter-spacing:-.02em}
+.clock.over{color:var(--bad)}
+.track{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.track i{height:4px;border-radius:2px;background:var(--fill)}
+.track i.done{background:var(--accent)}
+.track i.now{background:var(--ink3)}
+
+/* Tipografia */
+.tag{align-self:flex-start;display:inline-flex;font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,transparent);padding:5px 11px;border-radius:999px;margin-top:6px}
+.tag.bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 13%,transparent)}
+.title{font-size:clamp(32px,9.2vw,40px);line-height:1.08;font-weight:700;letter-spacing:-.03em;text-wrap:balance}
+.title.role{font-size:clamp(56px,17vw,76px);letter-spacing:-.045em}
+.title.ok{color:var(--ok)} .title.bad{color:var(--bad)}
+.lead{max-width:34em}
+.muted{color:var(--ink2)} .small{font-size:15px}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
+.sec{font-size:22px;font-weight:700;letter-spacing:-.022em;margin-top:10px}
+.lbl{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+.num-s{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font:700 13px/1 var(--round);font-variant-numeric:tabular-nums}
+.grad{color:var(--g2);background:linear-gradient(110deg,var(--g1),var(--g2) 52%,var(--g3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Listas agrupadas */
+.rules,.group,.fases,.etapas,.mix{background:var(--card);border-radius:16px;overflow:hidden}
+.rules{counter-reset:r}
+.rules li{counter-increment:r;position:relative;display:grid;grid-template-columns:24px 1fr;gap:12px;align-items:start;padding:13px 16px}
+.rules li::before{content:counter(r);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font:700 13px/1 var(--round)}
+.rules li+li::after,.group>li+li::after,.fases li+li::after,.etapa+.etapa::after,.mix li+li::after{content:"";position:absolute;top:0;left:52px;right:0;height:.5px;background:var(--sep)}
+.group>li{position:relative}
+.group>li+li::after{left:16px}
+.host{background:var(--fill);border-radius:14px;padding:11px 14px 12px;display:grid;gap:3px;font-size:15px;line-height:1.38}
+
+/* Botões */
+.actions{display:grid;gap:10px;margin-top:auto;padding-top:10px}
+.btn{display:block;width:100%;min-height:52px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent);font-size:17px;font-weight:600;padding:14px 18px;text-align:center;transition:transform .12s,opacity .12s}
+.btn.alt{background:var(--fill);color:var(--accent)}
+.btn.small{min-height:46px;font-size:16px;padding:11px 14px}
+.btn.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.btn.bad{background:color-mix(in srgb,var(--bad) 13%,transparent);color:var(--bad)}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.btn:active:not(:disabled){transform:scale(.975);opacity:.85}
+.row{display:flex;gap:10px} .row>*{flex:1;min-width:0}
+.link{background:none;border:0;align-self:center;color:var(--accent);padding:10px 8px;font-size:15px}
+.mini{min-width:78px;min-height:40px;border:0;border-radius:999px;background:var(--fill);font-weight:600;font-size:14px;padding:8px 12px}
+.mini.on.ok{background:var(--ok);color:var(--on-ok)}
+.mini.on.bad{background:var(--bad);color:var(--on-bad)}
+.fb{padding:11px 14px;border-radius:12px;font-weight:600;font-size:15px}
+.fb.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.fb.bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+
+/* Entrada */
+.splash{flex:1;display:flex;flex-direction:column;gap:18px;margin:0 -20px;padding:max(40px,7vh) 20px 0;background:radial-gradient(52% 58% at 80% 34%,color-mix(in srgb,var(--g2) 24%,transparent),transparent 72%) no-repeat,radial-gradient(50% 55% at 16% 14%,color-mix(in srgb,var(--g1) 26%,transparent),transparent 72%) no-repeat,radial-gradient(46% 50% at 46% 82%,color-mix(in srgb,var(--g3) 20%,transparent),transparent 74%) no-repeat;background-size:100% 380px}
+.hero-torches{display:flex;gap:6px}
+.hero-torches .torch{width:22px;height:25px}
+.mega{font-size:clamp(38px,11vw,50px);line-height:1.02;font-weight:700;letter-spacing:-.035em}
+.mega em{display:block;font:800 2.55em/.98 var(--round);font-style:normal;letter-spacing:-.05em;padding-bottom:.06em;margin-left:-.04em}
+.fases li{position:relative;display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center;padding:13px 16px}
+.fases b{font-weight:600}
+.fases li[data-f="1"],.fase[data-f="1"],.mix li[data-f="1"]{--accent:var(--p1);--on-accent:var(--p1on)}
+.fases li[data-f="2"],.fase[data-f="2"],.mix li[data-f="2"]{--accent:var(--p2);--on-accent:var(--p2on)}
+.fases li[data-f="3"],.fase[data-f="3"],.mix li[data-f="3"]{--accent:var(--p3);--on-accent:var(--p3on)}
+
+/* Mapa */
+.fase-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 4px}
+.fase-h h2{font-size:20px;font-weight:700;letter-spacing:-.022em;white-space:nowrap}
+.fase-h span{font-size:13px;line-height:1.3;color:var(--ink2);text-align:right}
+.etapas{margin-top:8px}
+.etapa{position:relative;display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:center;padding:11px 16px}
+.etapa+.etapa::after{left:60px}
+.etapa .num{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--fill);color:var(--ink2);font:700 15px/1 var(--round)}
+.etapa .nm{font-weight:600;line-height:1.25;display:block}
+.etapa .st{font-size:14px;color:var(--ink2);display:block}
+.etapa.done .num{background:var(--ok);color:var(--on-ok)}
+.etapa.now .num{background:var(--accent);color:var(--on-accent)}
+.etapa.now .st{color:var(--accent);font-weight:600}
+.etapa.locked .nm{color:var(--ink2)}
+
+/* Provas com validação */
+.chk{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 12px 10px 16px}
+.chk.one{grid-template-columns:1fr auto}
+.lab{display:flex;gap:10px;align-items:center}
+.chk.one .lab{align-items:flex-start;font-size:16px;line-height:1.38}
+.score{font-size:15px;color:var(--ink2);padding:0 4px}
+.score b{font:700 22px/1 var(--round);color:var(--ink);margin-right:2px;font-variant-numeric:tabular-nums}
+.shots{display:flex;gap:10px}
+.shot{width:48px;height:48px;border-radius:50%;background:var(--fill);display:grid;place-items:center;font:700 17px/1 var(--round);color:var(--ink2)}
+.shot.g{background:var(--ok);color:var(--on-ok)}
+.shot.m{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
+.q{font-size:clamp(24px,7vw,28px);line-height:1.15;font-weight:700;letter-spacing:-.025em;text-wrap:balance}
+.opts{display:grid;gap:8px}
+.opt{min-height:54px;text-align:left;padding:14px 16px;background:var(--card);border:0;border-radius:14px;font-weight:500}
+.opt:disabled{cursor:default;color:var(--ink)}
+.opt.right{box-shadow:inset 0 0 0 2px var(--ok);color:var(--ok)}
+.opt.wrong{box-shadow:inset 0 0 0 2px var(--bad);color:var(--bad)}
+
+/* Traidores */
+.names{display:grid;gap:8px}
+.namerow{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center}
+.inp{min-height:48px;width:100%;background:var(--card);border:0;border-radius:12px;padding:10px 14px}
+.inp::placeholder{color:var(--ink3)}
+.phrase{background:var(--card);border-radius:16px;padding:14px 16px;display:grid;gap:6px}
+.phrase q{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.25;quotes:"«" "»"}
+.picks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pick{min-height:52px;background:var(--card);border:0;border-radius:14px;font-weight:600;padding:8px 10px;overflow-wrap:anywhere}
+.pick.on{background:var(--accent);color:var(--on-accent)}
+.timer{display:flex;align-items:center;min-height:48px}
+
+/* Paciência */
+.golf{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;align-items:start;min-height:calc((min(100vw,480px) - 70px)/6*3.2)}
+.gcol{display:grid}
+.pc{display:grid;grid-template-rows:auto 1fr;aspect-ratio:5/7;width:100%;border:0;border-radius:9px;background:var(--pc);color:var(--pc-ink);padding:4px 6px 3px;text-align:left;font:700 18px/1 var(--round);box-shadow:var(--pc-sh)}
+.pc.red{color:var(--pc-red)}
+.pc .su{align-self:end;justify-self:end;font:400 19px/1 "Times New Roman",serif}
+.gcol .pc+.pc{margin-top:-80%}
+.pc.back{background:linear-gradient(135deg,var(--g1),var(--g2) 55%,var(--g3));box-shadow:inset 0 0 0 3px var(--pc),var(--pc-sh)}
+.slot{aspect-ratio:5/7;border:1.5px dashed var(--ink3);border-radius:9px}
+.deckrow{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;align-items:end;margin-top:6px}
+.deck{display:grid;gap:6px;justify-items:center}
+.deck:nth-child(1){grid-column:2} .deck:nth-child(2){grid-column:5}
+.deck .lbl{white-space:nowrap}
+@keyframes no{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.no{animation:no .25s}
+
+/* Cores */
+.tubes{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;padding-top:28px}
+.tube{width:100%;aspect-ratio:10/37;border:1.5px solid var(--ink3);border-top:0;border-radius:0 0 999px 999px;background:var(--fill);display:flex;flex-direction:column-reverse;align-items:center;gap:3px;padding:5px 0 6px}
+.tube.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.ball{width:calc(100% - 6px);aspect-ratio:1;border-radius:50%;flex:none;transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+.tube.sel .ball:last-child{transform:translateY(-20px)}
+.c0{background:radial-gradient(circle at 32% 28%,var(--gloss),transparent 46%),var(--c0)}
+.c1{background:radial-gradient(circle at 32% 28%,var(--gloss),transparent 46%),var(--c1)}
+.c2{background:radial-gradient(circle at 32% 28%,var(--gloss),transparent 46%),var(--c2)}
+.c3{background:radial-gradient(circle at 32% 28%,var(--gloss),transparent 46%),var(--c3)}
+.c4{background:radial-gradient(circle at 32% 28%,var(--gloss),transparent 46%),var(--c4)}
+.c5{background:radial-gradient(circle at 32% 28%,var(--gloss),transparent 46%),var(--c5)}
+
+/* Lição */
+.prompt{font-size:clamp(26px,7.6vw,32px);line-height:1.12;font-weight:700;letter-spacing:-.028em;text-wrap:balance}
+.answer{min-height:68px;box-shadow:0 .5px 0 var(--sep);display:flex;flex-wrap:wrap;gap:8px;padding:8px 0 14px;align-content:flex-start}
+.bank{display:flex;flex-wrap:wrap;gap:8px}
+.tile{min-height:44px;padding:9px 14px;background:var(--card);border:0;border-radius:12px;font-weight:500;box-shadow:0 0 0 .5px var(--sep),0 1.5px 0 var(--sep)}
+.tile:disabled{opacity:.3;cursor:default;color:var(--ink)}
+.answer .tile:disabled{opacity:1}
+.code{width:150px;font:700 44px/1 var(--round);text-align:center;letter-spacing:.1em;background:var(--card);border:0;border-radius:16px;padding:14px 8px 12px;font-variant-numeric:tabular-nums}
+
+/* Castigo, prenda, final */
+.castigo{background:var(--card);border-radius:16px;padding:14px 16px;display:grid;gap:4px;font-size:19px;font-weight:600;letter-spacing:-.018em;line-height:1.3}
+.castigo .lbl{color:var(--bad)}
+.gift{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:36px 0 8px}
+.gift .tag{align-self:center;margin:0}
+.gift .n{font:800 min(50vw,200px)/1 var(--round);letter-spacing:-.04em;padding:0 .06em;animation:rise .7s cubic-bezier(.2,.9,.2,1) both}
+.gift h1{font-size:clamp(30px,8.8vw,38px);line-height:1.08;font-weight:700;letter-spacing:-.03em;text-wrap:balance;animation:rise .7s .12s cubic-bezier(.2,.9,.2,1) both}
+@keyframes rise{from{transform:translateY(22px) scale(.95);opacity:0}to{transform:none;opacity:1}}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--card);border-radius:16px;padding:13px 16px 14px;display:grid;gap:2px}
+.stat b{font:700 34px/1.1 var(--round);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.won li{display:flex;gap:12px;align-items:center;padding:12px 16px;font-weight:500}
+.prep li{padding:12px 16px;font-size:15px;line-height:1.4}
+.jump{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.jump .mini{min-width:0;padding:0;aspect-ratio:1;font:700 16px/1 var(--round)}
+.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9}
+
+/* Formato */
+.mix li{position:relative;display:grid;grid-template-columns:36px 1fr;column-gap:12px;align-items:center;padding:11px 16px}
+.mix li+li::after{left:64px}
+.mix li.manias{--accent:var(--g2);--on-accent:#ffffff}
+.ico{grid-row:1/span 2;width:36px;height:36px;border-radius:10px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+.ico svg{width:20px;height:20px;fill:currentColor}
+.mix b{font-weight:600}
+.mix li>span:last-child{grid-column:2;font-size:14.5px;line-height:1.36;color:var(--ink2)}
+
+/* Pares de palavras */
+.pairs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.paircol{display:grid;gap:7px;align-content:start}
+.pair{min-height:46px;background:var(--card);border:0;border-radius:12px;font-weight:500;padding:8px 10px;box-shadow:0 0 0 .5px var(--sep),0 1.5px 0 var(--sep)}
+.pair.on{box-shadow:inset 0 0 0 2px var(--accent);color:var(--accent)}
+.pair.done{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);box-shadow:none;cursor:default}
+
+/* Turno de etiquetas */
+.shift{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.lives{display:flex;gap:3px}
+.heart{width:17px;height:16px;fill:var(--bad)}
+.heart.off{fill:var(--ink3)}
+.timebar{height:6px;border-radius:3px;background:var(--fill);overflow:hidden;margin-top:-6px}
+.timebar i{display:block;height:100%;border-radius:3px;background:var(--accent);transform-origin:left center;animation:shrink 100s linear forwards}
+@keyframes shrink{to{transform:scaleX(0)}}
+.parcel{background:var(--card);border-radius:18px;padding:14px 16px 12px;display:grid;gap:10px;box-shadow:var(--pc-sh)}
+.lrow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
+.lrow>div{display:grid;gap:1px;min-width:0}
+.lrow.specs{grid-template-columns:auto 1fr;gap:24px;padding-top:10px;box-shadow:0 -.5px 0 var(--sep)}
+.dest b{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.dest span:not(.lbl){font-size:16px;line-height:1.3}
+.pais{justify-items:end}
+.pais b{font:800 34px/1 var(--round);letter-spacing:-.01em}
+.specs b{font:700 19px/1.25 var(--round);font-variant-numeric:tabular-nums}
+.parcel::after{content:"";height:20px;opacity:.82;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px,var(--ink) 10px 13px,transparent 13px 15px)}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bin{min-height:54px;background:var(--card);border:0;border-radius:14px;font-weight:600;font-size:16px;padding:8px 10px}
+.bin:active{transform:scale(.97)}
+
+/* Jogo da memória */
+.mem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mc{aspect-ratio:1;border:0;border-radius:14px;padding:0;background:linear-gradient(135deg,var(--g1),var(--g2) 55%,var(--g3));font-size:30px;line-height:1;display:grid;place-items:center}
+.mc.up,.mc.ok{background:var(--card)}
+.mc.ok{opacity:.5}
+
+/* Desvio */
+.choice{display:grid;gap:4px;text-align:left;background:var(--card);border:0;border-radius:16px;padding:16px}
+.choice b{font-size:20px;font-weight:700;letter-spacing:-.022em;color:var(--accent)}
+.choice span{font-size:15px;line-height:1.38;color:var(--ink2)}
+.choice:active{transform:scale(.985)}
+
+/* Partida de F1 */
+.lights{display:flex;justify-content:center;gap:10px;padding:14px 12px;background:var(--card);border-radius:16px}
+.lights i{width:44px;height:44px;border-radius:50%;background:var(--fill)}
+.lights i.on{background:var(--c0);box-shadow:0 0 18px color-mix(in srgb,var(--c0) 70%,transparent)}
+.pad{min-height:150px;border:0;border-radius:20px;background:var(--accent);color:var(--on-accent);font-size:22px;font-weight:700;letter-spacing:-.02em;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.pad[data-ph="arm"]{background:var(--fill);color:var(--ink2)}
+.pad[data-ph="go"]{background:var(--ok);color:var(--on-ok)}
+.tries{display:flex;flex-wrap:wrap;gap:6px;min-height:32px}
+.try{font:600 14px/1 var(--round);padding:8px 11px;border-radius:999px;font-variant-numeric:tabular-nums}
+.try.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.try.bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+
+/* Missões e álbum */
+button.etapa{width:100%;border:0;background:none;text-align:left;font:inherit;letter-spacing:inherit;color:inherit}
+button.etapa:disabled{cursor:default}
+.moment{background:var(--card);border-radius:16px;padding:13px 16px 14px;display:grid;gap:8px;justify-items:start}
+.moment img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;display:block}
+.album{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}
+.ph{display:grid;gap:6px;align-content:start;background:none;border:0;padding:0;text-align:left;font-size:14px;line-height:1.3;color:var(--ink)}
+.ph .box{aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--fill);display:grid;place-items:center;color:var(--ink3);font:300 44px/1 var(--round)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph.locked{opacity:.5;cursor:default}
+.gift .n.small{font-size:min(30vw,120px)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<input type="file" id="cam" accept="image/*" hidden>
+<noscript><p style="padding:24px">Este jogo precisa de JavaScript ligado.</p></noscript>
+<script>
+(() => {
+'use strict';
+const KEY = 'prova-dos-sete-v3';
+const PIN = '7777';
+const app = document.getElementById('app');
+
+/* ---------- Conteúdo do jogo ---------- */
+const FASES = [
+  {n:1, nome:'A Ilha', quando:'Manhã', quem:'em casa, com os pais no júri'},
+  {n:2, nome:'A Mesa Redonda', quando:'Almoço', quem:'com todos os convidados'},
+  {n:3, nome:'A Corrida Final', quando:'Tarde', quem:'contra o relógio'}
+];
+const ETAPAS = [
+  {n:1, f:1, t:'Banquete às cegas', j:'Lição de holandês · prova às cegas'},
+  {n:2, f:1, t:'Penáltis de imunidade', j:'Turno na Sendcloud · penáltis'},
+  {n:3, f:1, t:'Memória de 2026', j:'Jogo da memória · perguntas · fotografias'},
+  {n:4, f:2, t:'Há traidores à mesa', j:'Papéis secretos · três missões · banimentos'},
+  {n:5, f:3, t:'O resgate dos Warriors', j:'Bilhetes no cofre · copos de cores · travessia'},
+  {n:6, f:3, t:'Luzes apagadas', j:'Partida de F1 · paciência · desvio'},
+  {n:7, f:3, t:'A última lição', j:'Lição de holandês · caça aos cartões'}
+];
+const PRENDAS = [
+  {nome:'Anchovas do Mercadona', nota:'Em qualquer ilha, a primeira recompensa é sempre comida.'},
+  {nome:'Camisola da Liga Europa', nota:'Imunidade ganha. Veste-a já, que ainda vai ser precisa.'},
+  {nome:'Álbum de fotografias de 2026', nota:'O teu 2026 inteiro em papel. Só faltava a fotografia de hoje.'},
+  {nome:'Máscara Omnilux', nota:'Num jogo de traidores, a única máscara que interessa.'},
+  {nome:'Bilhetes para Warriors', nota:'Estavam no cofre desde o início do jogo. Voltam a ser teus.', tag:'Prenda recuperada'},
+  {nome:'Bilhetes para Hamilton', nota:'Luzes apagadas, pano a subir. Não é o Lewis, é o musical. Com o Warriors, fica sessão dupla de Lin-Manuel Miranda.'},
+  {nome:'Bicicleta eléctrica Cortina', nota:'Duas rodas, um motor e um laço. É tua.'}
+];
+const MOMENTOS = [
+  'A vencedora com a lata na mão e a venda ainda na testa.',
+  'A camisola vestida e pose de golo.',
+  'O álbum aberto na última página, com o júri atrás.',
+  'A máscara posta, ao lado de quem te traiu.',
+  'Os bilhetes na mão, em cima das almofadas.',
+  'Os dois juntos, com os bilhetes novos.',
+  'Em cima da bicicleta, no tapete do Pit Stop, com toda a gente.'
+];
+/* Missões do dia: `de` é o número de prendas abertas a partir do qual a missão fica disponível. */
+const EXTRAS = [
+  {id:'x1', de:0, q:'Ao acordar', t:'Confessionário de abertura', r:'Antes de saíres do quarto, grava um vídeo de 20 segundos: como te sentes e quem achas que te vai trair hoje.', f:'Um retrato do confessionário, despenteada e tudo.'},
+  {id:'x2', de:1, q:'Durante a manhã', t:'O ídolo escondido', r:'Há um ídolo de imunidade escondido em casa. O apresentador dá-te uma única pista, e tens até ao almoço para o encontrar.', f:'O ídolo na mão, no sítio onde estava.', h:'Dá a pista em voz alta, uma só vez. Confirma quando a Ana aparecer com o ídolo.'},
+  {id:'xq', de:2, q:'A meio da manhã', t:'Quiz de fã', quiz:true, r:'Nove perguntas sobre as tuas Anices de bancada: Chiefs, Sporting, Lewis Hamilton, os teus podcasts e um certo discurso. Tens 65 segundos, uma só tentativa, e precisas de sete certas.'},
+  {id:'x3', de:3, q:'Ao almoço', t:'Brinde em holandês', r:'Antes da sobremesa, levanta-te e faz um brinde com pelo menos quatro frases em holandês. A mesa decide se convenceu.', f:'O brinde, de copo no ar.'},
+  {id:'x4', de:4, q:'Depois do almoço', t:'Fotografia de elenco', r:'Junta toda a gente para a fotografia oficial do programa: tu ao centro, e quem te traiu a apontar para um inocente.', f:'O elenco completo.'},
+  {id:'x5', de:7, q:'Ao fim da tarde', t:'Volta de honra', r:'Leva a prenda n.º 7 a dar uma volta ao quarteirão e traz uma fotografia tirada no ponto mais longe de casa.', f:'A prova de que foste até lá.'},
+  {id:'x7', de:7, q:'Ao fim da tarde', t:'Episódio especial', r:'Gravem os dois um episódio de dois minutos sobre a Corrida Final, ao estilo do P1: tu és a piloto, o apresentador faz as perguntas. Tem de acabar com a tua previsão para o resto da noite.', f:'Os dois ao microfone.'},
+  {id:'x6', de:7, q:'À noite', t:'O discurso dos 0,4%', r:'De pé e de copo na mão, faz o teu discurso de desfile de campeã, ao estilo do Mamdani na festa dos Knicks. Chama pelo nome toda a gente que jogou hoje, suplentes incluídos. Conta o momento do dia em que só tinhas 0,4% de hipóteses. E fecha a dizer que ganhaste à tua maneira. Depois junta as sete prendas para a fotografia de família.', f:'As sete prendas juntas, contigo no meio.'}
+];
+const ALBUM = ['x1','g1','x2','g2','g3','x3','g4','x4','g5','g6','g7','x5','x7','x6'];
+const FAQ = [
+  {q:'Em que estado jogam os Kansas City Chiefs?', o:['Kansas','Missouri','Nebraska','Oklahoma'], a:1},
+  {q:'Que número usa Patrick Mahomes?', o:['12','15','17','87'], a:1},
+  {q:'Em que ano foi fundado o Sporting?', o:['1893','1904','1906','1910'], a:2},
+  {q:'Quem é o melhor marcador de sempre do Sporting?', o:['Yazalde','Jordão','Liedson','Peyroteo'], a:3},
+  {q:'Com que número corre Lewis Hamilton?', o:['7','33','44','77'], a:2},
+  {q:'Em que ano ganhou Lewis Hamilton o primeiro título mundial?', o:['2007','2008','2010','2014'], a:1},
+  {q:'Qual é o apelido do Tommy do P1?', o:['Gallagher','Bellingham','Brundle','Clarkson'], a:1},
+  {q:'Em que canal passa o First Things First?', o:['ESPN','NFL Network','FS1','CBS Sports'], a:2},
+  {q:'No discurso do desfile dos Knicks, que hipótese davam os modelos à equipa a meio do jogo 4?', o:['0,4%','4%','14%','40%'], a:0}
+];
+const FAQ_T = 65000, FAQ_MIN = 7;
+const LUZ_MAX = 350, LUZ_OK = 3;
+const CASTIGOS = [
+  'Canta os parabéns a ti própria em holandês.',
+  'Faz um discurso de vencedora de 30 segundos, com agradecimentos ao júri.',
+  'Dança 20 segundos sem música. O júri dá nota.',
+  'Imita o apresentador até alguém se rir.',
+  'Diz cinco palavras em holandês que ainda ninguém disse hoje.',
+  'Canta o teu cântico preferido do Sporting, de pé e de mão no peito.',
+  'Relata os próximos 30 segundos da festa como se fosse a última volta de um Grande Prémio.'
+];
+const PROVAS = [['Mel','honing'],['Mostarda','mosterd'],['Azeitona','olijf'],['Chocolate preto','pure chocolade'],['Anchova','ansjovis']];
+const PARES = [['honing','mel'],['mosterd','mostarda'],['olijf','azeitona'],['pure chocolade','chocolate preto'],['ansjovis','anchova'],['pindakaas','manteiga de amendoim'],['augurk','pepino em conserva'],['kaneel','canela']];
+const PARES_ERROS = 2;
+const TURNO = 100000, TURNO_MIN = 10;
+const PERGUNTAS = {
+  A:{q:'Leva documentos aduaneiros?', o:['Sim','Não']},
+  P:{q:'Que peso se cobra?', o:['Até 5 kg','5 a 10 kg','10 a 20 kg','20 a 30 kg']},
+  S:{q:'Que sobretaxa leva?', o:['Zona remota','Sobredimensão','Excesso de peso','Nenhuma']},
+  E:{q:'Onde está o erro?', o:['Código postal','País','Peso','Não há erro']}
+};
+const ENCOMENDAS = [
+  {t:'A', n:'L. Meier', m:'Bahnhofstrasse 21', cp:'8001', c:'Zürich', p:'CH', kg:'2,0', d:'30 × 20 × 10', a:0, w:'A Suíça está fora da UE.'},
+  {t:'A', n:'C. Santana', m:'Calle Triana 48', cp:'35002', c:'Las Palmas', p:'ES', kg:'1,5', d:'25 × 20 × 10', a:0, w:'As Canárias estão fora da zona de IVA da UE.'},
+  {t:'A', n:'R. Freitas', m:'Rua da Carreira 90', cp:'9000-042', c:'Funchal', p:'PT', kg:'3,0', d:'30 × 30 × 15', a:1, w:'A Madeira está dentro da zona de IVA da UE.'},
+  {t:'A', n:'S. Byrne', m:'12 Grafton Street', cp:'D02 X285', c:'Dublin', p:'IE', kg:'4,0', d:'40 × 30 × 20', a:1, w:'A Irlanda faz parte da UE.'},
+  {t:'P', n:'J. de Boer', m:'Oudegracht 110', cp:'3511 AW', c:'Utrecht', p:'NL', kg:'8,0', d:'60 × 40 × 40', a:2, w:'Volumétrico: 96 000 ÷ 5000 = 19,2 kg.'},
+  {t:'P', n:'M. Sousa', m:'Rua de Cedofeita 300', cp:'4050-174', c:'Porto', p:'PT', kg:'3,0', d:'50 × 50 × 50', a:3, w:'Volumétrico: 125 000 ÷ 5000 = 25 kg.'},
+  {t:'P', n:'A. Romero', m:'Calle Sierpes 15', cp:'41004', c:'Sevilla', p:'ES', kg:'4,0', d:'40 × 30 × 20', a:0, w:'Volumétrico: 24 000 ÷ 5000 = 4,8 kg. Passa os 4 kg reais, mas fica abaixo de 5.'},
+  {t:'P', n:'E. Peeters', m:'Veldstraat 44', cp:'9000', c:'Gent', p:'BE', kg:'12,0', d:'40 × 30 × 30', a:2, w:'Volumétrico: 36 000 ÷ 5000 = 7,2 kg. Cobra-se o real, 12 kg.'},
+  {t:'S', n:'T. Visser', m:'Weverstraat 8', cp:'1791 AB', c:'Den Burg, Texel', p:'NL', kg:'5,0', d:'30 × 20 × 10', a:0, w:'Texel é uma ilha.'},
+  {t:'S', n:'P. Girard', m:'Rue de la République 60', cp:'69002', c:'Lyon', p:'FR', kg:'12,0', d:'150 × 20 × 20', a:1, w:'O lado maior tem 150 cm.'},
+  {t:'S', n:'K. Schmidt', m:'Torstraße 101', cp:'10119', c:'Berlin', p:'DE', kg:'31,0', d:'40 × 40 × 40', a:2, w:'31 kg passa o limite dos 30.'},
+  {t:'S', n:'H. Claes', m:'Meir 70', cp:'2000', c:'Antwerpen', p:'BE', kg:'29,5', d:'118 × 30 × 30', a:3, w:'29,5 kg e 118 cm ficam os dois abaixo do limite.'},
+  {t:'E', n:'F. Machado', m:'Avenida da Liberdade 500', cp:'4710-251', c:'Braga', p:'ES', kg:'2,0', d:'30 × 20 × 15', a:1, w:'Braga e o código 4710-251 são de Portugal, não de Espanha.'},
+  {t:'E', n:'N. Jansen', m:'Stratumseind 30', cp:'5611', c:'Eindhoven', p:'NL', kg:'1,0', d:'20 × 15 × 10', a:0, w:'Faltam as duas letras do código neerlandês.'},
+  {t:'E', n:'O. Lambert', m:'Rue Faidherbe 9', cp:'59000', c:'Lille', p:'FR', kg:'0,0', d:'35 × 25 × 10', a:2, w:'Uma encomenda não pesa 0 kg.'},
+  {t:'E', n:'V. Dubois', m:'Rue Neuve 25', cp:'1000', c:'Bruxelles', p:'BE', kg:'2,5', d:'30 × 20 × 20', a:3, w:'Na Bélgica o código tem mesmo quatro algarismos.'}
+];
+const MEMO = ['\u{1F4F7}','✈️','\u{1F3D6}️','⚽','\u{1F384}','\u{1F382}','☀️','\u{1F377}'];
+const MEM_MAX = 16;
+const GOLF_DEALS = 3;
+const DESVIO = {
+  passe:{t:'Passe sem olhar', s:0, r:'À Mahomes: cinco passes com a bola de meias para um cesto a três metros, a olhar para o lado contrário. Precisas de acertar três.'},
+  hot:{t:'Hot take', s:45, r:'Ao estilo do First Things First: 45 segundos a defender a tua opinião mais impopular sobre o dia de hoje, sem te rires e sem dizeres «tipo».'}
+};
+const QUIZ = [
+  {q:'Quem marcou o golo que deu o Mundial de 2026 à Espanha?', o:['Lamine Yamal','Mikel Oyarzabal','Ferran Torres','Mikel Merino'], a:2},
+  {q:'Os Jogos Olímpicos de Inverno de 2026 foram em Milão e em que outra cidade?', o:['Turim','Innsbruck','Cortina d’Ampezzo','Chamonix'], a:2},
+  {q:'Com que canção a Bulgária ganhou a Eurovisão de 2026?', o:['Michelle','Wasted Love','Choke Me','Bangaranga'], a:3},
+  {live:true, q:'Esta pergunta é do apresentador, sobre o vosso 2026.'},
+  {live:true, q:'Mais uma do apresentador, sobre o vosso 2026.'}
+];
+const QUIZ_MIN = 4;
+const FOTOS = [
+  'A fotografia que falta ao teu 2026: o retrato de hoje, com toda a gente da casa.',
+  'Um retrato do júri a rir. A rir a sério, não a fingir.',
+  'Uma natureza-morta com as duas prendas que já ganhaste.'
+];
+const MISSOES = [
+  {t:'Telefone estragado',
+   r:['A Ana lê a frase em silêncio e di-la ao ouvido de quem está à sua direita.','A frase dá a volta à mesa, de ouvido em ouvido.','A última pessoa diz em voz alta o que ouviu. Se bater certo, a missão está cumprida.'],
+   frase:'Sete prendas, três tochas e alguém a trair nesta mesa.',
+   nota:'Quem trai pode trocar uma palavra. Quem é fiel passa a frase tal como a ouviu.'},
+  {t:'Pontaria',
+   r:['A Ana escolhe três jogadores.','Cada um atira três bolas de papel para a taça, a três passos de distância.','Cinco bolas dentro em nove e a missão está cumprida.'],
+   nota:'Quem trai pode falhar de propósito. Convém que pareça azar.'},
+  {t:'Voto secreto',
+   r:['A Ana escolhe a equipa da última missão.','Cada escolhido vota em segredo no telemóvel: cumprir ou sabotar.','Basta um voto de sabotagem para a missão falhar.'],
+   nota:'O voto de quem é fiel conta sempre como cumprir, carregue onde carregar.'}
+];
+const LICOES = [
+  {de:'pt', label:'Escreve em holandês', frase:'Procura o cartão no frigorífico.', resp:['zoek','het','kaartje','in','de','koelkast'], extra:['een','op','kast','vriezer','zoekt'], ok:'Agora faz o que a frase manda.', nl:'Zoek het kaartje in de koelkast.'},
+  {de:'pt', label:'Escreve em holandês', frase:'O segundo cartão está debaixo da tua almofada.', resp:['het','tweede','kaartje','ligt','onder','je','kussen'], extra:['de','staat','op','deken','eerste'], ok:'Agora faz o que a frase manda.', nl:'Het tweede kaartje ligt onder je kussen.'},
+  {de:'nl', label:'Escreve em português', frase:'Je laatste cadeau heeft twee wielen.', resp:['a','tua','última','prenda','tem','duas','rodas'], extra:['três','pernas','caixa','primeira','teu','dois'], ok:'Duas rodas.', pre:'28 e 11. É o dia de hoje. Falta uma frase, e esta lê-se ao contrário.'}
+];
+const CODIGOS = {c1:'28', c2:'11'};
+/* Nível de cores verificado com um solver: tem solução, e a mais curta tem 33 jogadas. */
+const NIVEL = [[5,3,4,1],[0,3,0,5],[1,2,3,1],[4,1,3,2],[4,0,5,0],[2,5,2,4],[]];
+const NIVEL_MIN = 33;
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const SUITS = ['♠︎','♥︎','♦︎','♣︎'];
+const NAIPES = ['espadas','copas','ouros','paus'];
+const TITULOS = ['campeã dos 0,4%','salva pela última chama','finalista de ferro','única sobrevivente'];
+
+/* ---------- Estado ---------- */
+function fresh(){ return {v:3, screen:'splash', intro:false, done:0, torches:3, n:0, step:'', d:{}, after:'', castigo:0, t3:0, t3end:0, pinErr:false, ask:false, open:0, gstep:'', x:{}, xid:'', xd:null, xscore:0}; }
+function load(){ try{ const o = JSON.parse(localStorage.getItem(KEY) || 'null'); return o && o.v === 3 ? o : null; }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+let S = fresh();
+
+/* ---------- Utilitários ---------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rnd = n => Math.floor(Math.random() * n);
+function shuffle(a){ for(let i = a.length - 1; i > 0; i--){ const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function fmt(ms){ let s = Math.max(0, Math.floor(ms / 1000)); const m = Math.floor(s / 60); s %= 60; return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; }
+const adj = (a, b) => { const x = (a - b + 13) % 13; return x === 1 || x === 12; };
+
+const flame = on => `<svg class="torch${on ? '' : ' off'}" viewBox="0 0 16 17" aria-hidden="true"><path d="M8 1c1 3 5 4.500 5 9.500a5 5 0 0 1-10 0C3 8 4.500 7 5.500 5c1 1.500 1.500 2 2 2.500C8 5.500 8 3 8 1z"/></svg>`;
+const CHECK = `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3.500 8.500l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CROSS = `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round"/></svg>`;
+const tag = (t, c = '') => `<span class="tag ${c}">${t}</span>`;
+const rules = a => `<ol class="rules">${a.map(x => `<li><span>${x}</span></li>`).join('')}</ol>`;
+const host = t => `<aside class="host"><b class="lbl">Apresentador</b><span>${t}</span></aside>`;
+const btn = (label, a, {v = '', cls = '', dis = false} = {}) => `<button class="btn ${cls}" data-a="${a}"${v !== '' ? ` data-v="${v}"` : ''}${dis ? ' disabled' : ''}>${label}</button>`;
+const acts = (...b) => `<div class="actions">${b.join('')}</div>`;
+const etapaTag = () => tag(`Etapa ${S.n} de 7`);
+const hearts = (n, total) => { let h = ''; for(let i = 0; i < total; i++) h += `<svg class="heart${i < n ? '' : ' off'}" viewBox="0 0 16 15" aria-hidden="true"><path d="M8 14.2S1 9.7 1 5a3.6 3.6 0 0 1 7-1.2A3.6 3.6 0 0 1 15 5c0 4.7-7 9.2-7 9.2z"/></svg>`; return h; };
+const fbx = (kind, t) => `<p class="fb ${kind}" role="status">${t}</p>`;
+const STAR = `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 1.2l2 4.3 4.7.5-3.5 3.2 1 4.6L8 11.5l-4.2 2.300 1-4.600L1.300 6l4.700-.500z" fill="currentColor"/></svg>`;
+
+const seg = ms => (ms / 1000).toFixed(3).replace('.', ',') + ' s';
+/* Partida de F1: as luzes mexem directamente no ecrã, sem redesenhar, para o tempo de reacção ser justo. */
+const luz = {ph:'idle', timers:[], t0:0};
+function luzReset(){ luz.timers.forEach(clearTimeout); luz.timers = []; luz.ph = 'idle'; }
+function luzPaint(){ const pad = document.getElementById('pad'); if(!pad) return; pad.dataset.ph = luz.ph; pad.textContent = luz.ph === 'arm' ? 'Espera pelas luzes' : luz.ph === 'go' ? 'Agora!' : 'Alinhar na grelha'; }
+function luzPress(){
+  const d = S.d;
+  if(S.screen !== 'stage' || S.n !== 6 || S.step !== 'luz' || !d.tries || d.tries.length >= 5) return;
+  if(luz.ph === 'idle'){
+    luz.ph = 'arm'; luzPaint();
+    document.querySelectorAll('.lights i').forEach(x => x.classList.remove('on'));
+    for(let i = 0; i < 5; i++) luz.timers.push(setTimeout(() => { const el = document.querySelectorAll('.lights i')[i]; if(el) el.classList.add('on'); }, 550 * (i + 1)));
+    luz.timers.push(setTimeout(() => {
+      document.querySelectorAll('.lights i').forEach(x => x.classList.remove('on'));
+      luz.ph = 'go'; luz.t0 = performance.now(); luzPaint();
+    }, 550 * 5 + 600 + Math.random() * 2400));
+  } else if(luz.ph === 'arm'){ luzReset(); d.tries.push(-1); render(); }
+  else { const ms = Math.max(1, Math.round(performance.now() - luz.t0)); luzReset(); d.tries.push(ms); render(); }
+}
+function xqEnd(){
+  const sc = S.xd ? S.xd.ok : 0; S.xscore = sc; S.xd = null;
+  if(sc >= FAQ_MIN){ S.x.xq = S.torches < 3 ? 'r' : 'f'; if(S.torches < 3) S.torches++; } else S.x.xq = 'n';
+}
+
+/* Fotografias: ficam em memória e, quando o telemóvel deixa, no IndexedDB. */
+const FOTO = {};
+let idb = null, pend = '';
+const cam = document.getElementById('cam');
+const livre = id => id[0] === 'g' ? +id.slice(1) <= S.open : EXTRAS.some(e => e.id === id && S.open >= e.de);
+const legenda = id => { if(id[0] === 'g'){ const n = +id.slice(1); return n <= S.open ? PRENDAS[n - 1].nome : `Prenda n.º ${n}`; } return EXTRAS.find(e => e.id === id).t; };
+const fotoCard = (id, texto) => `<div class="moment"><b class="lbl">Momento para a fotografia</b><span>${texto}</span>${FOTO[id] ? `<img src="${FOTO[id]}" alt="Fotografia do momento">` : ''}<button class="mini" data-a="foto" data-v="${id}">${FOTO[id] ? 'Trocar a fotografia' : 'Juntar ao álbum'}</button></div>`;
+function loadFotos(){
+  return new Promise(done => {
+    try{
+      const rq = indexedDB.open('prova-dos-sete', 1);
+      rq.onupgradeneeded = () => rq.result.createObjectStore('fotos');
+      rq.onerror = rq.onblocked = () => done();
+      rq.onsuccess = () => {
+        idb = rq.result;
+        try{
+          const cur = idb.transaction('fotos').objectStore('fotos').openCursor();
+          cur.onerror = () => done();
+          cur.onsuccess = () => { const c = cur.result; if(c){ FOTO[c.key] = URL.createObjectURL(c.value); c.continue(); } else done(); };
+        }catch(e){ done(); }
+      };
+    }catch(e){ done(); }
+  });
+}
+function saveFoto(id, blob){
+  if(FOTO[id]) URL.revokeObjectURL(FOTO[id]);
+  FOTO[id] = URL.createObjectURL(blob);
+  try{ if(idb) idb.transaction('fotos', 'readwrite').objectStore('fotos').put(blob, id); }catch(e){}
+}
+function clearFotos(){
+  Object.keys(FOTO).forEach(k => { URL.revokeObjectURL(FOTO[k]); delete FOTO[k]; });
+  try{ if(idb) idb.transaction('fotos', 'readwrite').objectStore('fotos').clear(); }catch(e){}
+}
+cam.addEventListener('change', () => {
+  const f = cam.files && cam.files[0], id = pend; pend = '';
+  if(!f || !id) return;
+  const url = URL.createObjectURL(f), im = new Image();
+  im.onerror = () => URL.revokeObjectURL(url);
+  im.onload = () => {
+    const k = Math.min(1, 1400 / Math.max(im.naturalWidth, im.naturalHeight)), cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(im.naturalWidth * k)); cv.height = Math.max(1, Math.round(im.naturalHeight * k));
+    cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+    URL.revokeObjectURL(url);
+    cv.toBlob(b => { if(b){ saveFoto(id, b); render(); } }, 'image/jpeg', .82);
+  };
+  im.src = url;
+});
+const parte = (i, n, extra = '') => tag(`Etapa ${S.n} · Prova ${i} de ${n}${extra ? ' · ' + extra : ''}`);
+const ICO = {
+  chama: `<svg viewBox="0 0 16 17" aria-hidden="true"><path d="M8 1c1 3 5 4.5 5 9.5a5 5 0 0 1-10 0C3 8 4.5 7 5.5 5c1 1.5 1.5 2 2 2.5C8 5.5 8 3 8 1z"/></svg>`,
+  mascara: `<svg viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M2.5 5.5h15v3.2a7.5 7.5 0 0 1-15 0zM7 10.4a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4zm6 0a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4z"/></svg>`,
+  bandeira: `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.2 2.6a1 1 0 0 1 2 0V3h9.300a.6.6 0 0 1 .5.940L13.4 7.500l2.600 3.560a.6.6 0 0 1-.5.940H6.200v5.400a1 1 0 0 1-2 0z"/></svg>`,
+  telemovel: `<svg viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M7 1.500h6A2.500 2.500 0 0 1 15.500 4v12A2.500 2.500 0 0 1 13 18.500H7A2.500 2.500 0 0 1 4.500 16V4A2.500 2.500 0 0 1 7 1.500zm0 1.800a.7.7 0 0 0-.7.7v12a.7.7 0 0 0 .7.7h6a.7.7 0 0 0 .7-.7V4a.7.7 0 0 0-.7-.7zm3 12.200a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>`
+};
+
+function bar(){
+  let t = ''; for(let i = 0; i < 3; i++) t += flame(i < S.torches);
+  let tr = ''; for(let k = 1; k <= 7; k++) tr += `<i class="${k <= S.done ? 'done' : k === S.done + 1 ? 'now' : ''}"></i>`;
+  const clock = S.t3 && !S.t3end ? `<span class="clock" id="clock" aria-label="Tempo da Corrida Final">${fmt(Date.now() - S.t3)}</span>` : '';
+  return `<header class="bar"><div class="bar-row"><button class="bar-name" data-a="hub" aria-label="A Prova dos Sete, voltar ao mapa">A Prova dos Sete</button><div class="bar-right">${clock}<span class="torches" role="img" aria-label="${S.torches} de 3 tochas acesas">${t}</span></div></div><div class="track" role="img" aria-label="${S.done} de 7 etapas ganhas">${tr}</div></header>`;
+}
+
+/* ---------- Ecrãs gerais ---------- */
+function vSplash(){
+  const cont = S.intro || S.done > 0;
+  return `<div class="splash">
+    <div class="hero-torches" aria-hidden="true">${flame(true)}${flame(true)}${flame(true)}</div>
+    <p class="eyebrow">Edição de aniversário · 28 de Novembro</p>
+    <h1 class="mega">A Prova dos <em class="grad">Sete</em></h1>
+    <p class="lead">Survivor, The Traitors e The Amazing Race, misturados com as Anices de todos os dias. Sete etapas, sete prendas e uma única concorrente: <strong>Ana Rodrigues</strong>.</p>
+    <ol class="fases">${FASES.map(f => `<li data-f="${f.n}"><span class="num-s">${f.n}</span><b>${f.nome}</b><span class="muted small">${f.quando}</span></li>`).join('')}</ol>
+    ${acts(btn(cont ? 'Continuar o jogo' : 'Começar o jogo', 'start'), cont ? `<button class="link" data-a="formato">Rever o formato</button>` : '', `<button class="link" data-a="pin">Bastidores, só para o apresentador</button>`)}
+  </div>`;
+}
+
+function vIntro(){
+  return tag('O formato') + `<h1 class="title">Três programas e as tuas Anices, <span class="grad">num só jogo</span></h1>
+    <p class="lead">Hoje a tua vida é um reality show: os três programas de que mais gostas, misturados com o que fazes todos os dias no telemóvel.</p>
+    <ul class="mix">
+      <li data-f="1"><span class="ico">${ICO.chama}</span><b>Survivor</b><span>De manhã, na Ilha: provas, três tochas e um júri que são os teus pais.</span></li>
+      <li data-f="2"><span class="ico">${ICO.mascara}</span><b>The Traitors</b><span>Ao almoço, na Mesa Redonda: papéis secretos, missões e banimentos.</span></li>
+      <li data-f="3"><span class="ico">${ICO.bandeira}</span><b>The Amazing Race</b><span>À tarde, na Corrida Final: contra o relógio, com um desvio e um Pit Stop.</span></li>
+      <li class="manias"><span class="ico">${ICO.telemovel}</span><b>As Anices</b><span>As tuas manias de todos os dias: holandês, copos de cores, paciência, etiquetas da Sendcloud, e ainda Fórmula 1, Chiefs, Sporting e podcasts. Cada etapa junta uma prova a sério e uma Anice.</span></li>
+    </ul>`
+    + acts(btn('Continuar', 'introNext'));
+}
+
+function vIntro2(){
+  return tag('Antes de começar') + `<h1 class="title">Uma prenda já tu conheces</h1>
+    <p class="lead">Os teus bilhetes para o Warriors foram confiscados pela produção. Ficam no cofre do jogo até os resgatares na Corrida Final.</p>
+    <p class="lead">As outras seis, nem imaginas o que são.</p>`
+    + rules(['Cada etapa tem duas ou três provas e acaba numa prenda.', 'Cada prova falhada apaga uma tocha e dá castigo, mas o jogo continua.', 'Pelo dia fora há missões extra, e cada uma reacende uma tocha apagada.'])
+    + acts(btn('Aceito o desafio', 'introOk'));
+}
+
+function vHub(){
+  const next = S.done + 1;
+  let out = bar() + tag('Mapa do jogo');
+  out += `<h1 class="title">${S.done === 0 ? 'Tudo por ganhar' : S.done >= 7 ? 'Sete em sete' : S.done + ' de 7 prendas'}</h1>`;
+  if(next === 4) out += host('A Fase 2 joga-se à mesa. Espera que os convidados estejam todos sentados.');
+  if(next === 5) out += host('A Fase 3 é a contar. O relógio arranca na partida da etapa 5 e só pára no tapete.');
+  out += next <= 7 ? btn(`Jogar a etapa ${next}`, 'play') : btn('Ver o final', 'play');
+  FASES.forEach(f => {
+    out += `<section class="fase" data-f="${f.n}"><div class="fase-h"><h2>${f.nome}</h2><span>${f.quando}, ${f.quem}</span></div><ol class="etapas">`;
+    ETAPAS.filter(e => e.f === f.n).forEach(e => {
+      const cls = e.n <= S.done ? 'done' : e.n === next ? 'now' : 'locked';
+      const st = e.n <= S.open ? 'Ganhaste: ' + PRENDAS[e.n - 1].nome : e.n <= S.done ? 'Prenda por abrir' : e.j;
+      out += `<li class="etapa ${cls}"><span class="num">${e.n <= S.done ? CHECK : e.n}</span><span><span class="nm">${e.t}</span><span class="st">${st}</span></span></li>`;
+    });
+    out += `</ol></section>`;
+  });
+  const nf = ALBUM.filter(id => FOTO[id]).length;
+  out += `<section class="fase"><div class="fase-h"><h2>Missões do dia</h2><span>Cada uma reacende uma tocha apagada</span></div><div class="etapas">${EXTRAS.map(e => {
+    const v = S.x[e.id], ok = !!v && v !== 'n', av = S.open >= e.de && v !== 'n';
+    return `<button class="etapa ${ok ? 'done' : av ? 'now' : 'locked'}" data-a="extra" data-v="${e.id}"${av ? '' : ' disabled'}><span class="num">${ok ? CHECK : v === 'n' ? CROSS : STAR}</span><span><span class="nm">${e.t}</span><span class="st">${ok ? 'Cumprida' : v === 'n' ? 'Falhada' : e.q}</span></span></button>`;
+  }).join('')}</div></section>`;
+  out += btn(`Álbum do dia · ${nf} ${nf === 1 ? 'fotografia' : 'fotografias'}`, 'album', {cls:'alt'});
+  out += `<button class="link" data-a="pin">Bastidores, só para o apresentador</button>`;
+  return out;
+}
+
+function vFail(){
+  const left = S.torches;
+  return bar() + tag('Conselho', 'bad') + `<h1 class="title">Apagou-se uma tocha</h1>
+    <p class="lead">${left > 0 ? `Restam ${left}. A prova continua, mas primeiro há castigo.` : 'Ficaste sem tochas. Os modelos dão-te 0,4% de hipóteses, e tu sabes o que se faz com 0,4%. Primeiro, o castigo.'}</p>
+    <div class="castigo"><b class="lbl">Castigo</b><span>${CASTIGOS[S.castigo]}</span></div>`
+    + acts(btn('Castigo cumprido', 'castigoOk'));
+}
+
+function vGift(){
+  const p = PRENDAS[S.n - 1], n = S.n;
+  if(S.gstep !== 'open') return `<div class="gift">${tag(`Etapa ${n} ganha`)}
+    <div class="n grad" aria-hidden="true">${n}</div>
+    <h1>${n === 5 ? 'Recuperaste a prenda n.º 5' : 'Tens direito à prenda n.º ' + n}</h1>
+    <p class="lead">${n === 7 ? 'Esta não tem embrulho. Olha bem à tua volta.' : n === 5 ? 'Abre o embrulho que foste buscar ao outro lado da sala.' : `Pede o embrulho n.º ${n} ao apresentador e abre-o.`}</p>
+    <p class="muted small">O nome da prenda só aparece aqui depois de a abrires.</p>
+  </div>` + acts(btn(n === 7 ? 'Já vi a prenda' : 'Já abri a prenda', 'giftOpen'));
+  return `<div class="gift">${tag(p.tag || 'Prenda desbloqueada')}
+    <div class="n small grad" aria-hidden="true">${n}</div>
+    <h1>${p.nome}</h1>
+    <p class="lead">${p.nota}</p>
+  </div>` + fotoCard('g' + n, MOMENTOS[n - 1]) + acts(btn(n === 7 ? 'Ver o resultado final' : 'Continuar', 'giftOk'));
+}
+
+function vFinal(){
+  const tempo = S.t3 && S.t3end ? fmt(S.t3end - S.t3) : '', nx = EXTRAS.filter(e => S.x[e.id] && S.x[e.id] !== 'n').length, fotos = ALBUM.filter(id => FOTO[id]);
+  return bar() + tag('Pit Stop') + `<h1 class="title">Ana, chegaste <span class="grad">ao fim</span></h1>
+    <p class="lead">Sete etapas, sete prendas. Acabas o jogo como <strong>${TITULOS[S.torches]}</strong>.</p>
+    <div class="stats">
+      <div class="stat"><span class="lbl">Tochas acesas</span><b>${S.torches}/3</b></div>
+      ${tempo ? `<div class="stat"><span class="lbl">Corrida Final</span><b>${tempo}</b></div>` : ''}
+      <div class="stat"><span class="lbl">Missões do dia</span><b>${nx}/${EXTRAS.length}</b></div>
+      <div class="stat"><span class="lbl">Fotografias</span><b>${fotos.length}</b></div>
+    </div>
+    <ol class="group won">${PRENDAS.map((p, i) => `<li><span class="num-s">${i + 1}</span><span>${p.nome}</span></li>`).join('')}</ol>
+    ${fotos.length ? `<h2 class="sec">O dia em fotografias</h2><div class="album">${fotos.map(id => `<div class="ph"><span class="box"><img src="${FOTO[id]}" alt=""></span><span>${legenda(id)}</span></div>`).join('')}</div>` : ''}
+    <p class="lead"><strong>Parabéns, Ana.</strong></p>`
+    + acts(btn('Abrir o álbum', 'album', {cls:'alt'}), btn('Rever o mapa', 'hub', {cls:'alt'}));
+}
+
+function vExtra(){
+  const e = EXTRAS.find(x => x.id === S.xid) || EXTRAS[0], ok = S.x[e.id], x = S.xd;
+  const cab = bar() + tag('Missão do dia · ' + e.q);
+  if(e.quiz && x && !ok){
+    const Q = FAQ[x.i];
+    return cab + `<div class="shift"><span class="eyebrow">Pergunta ${x.i + 1} de ${FAQ.length}</span><span class="clock" id="xq-clock">${fmt(x.tEnd - Date.now() + 999)}</span></div>
+      <h1 class="q">${Q.q}</h1>
+      <div class="opts">${Q.o.map((o, i) => `<button class="opt" data-a="xqAns" data-v="${i}">${o}</button>`).join('')}</div>
+      <p class="score"><b>${x.ok}</b> certas. São precisas ${FAQ_MIN}.</p>`;
+  }
+  const fim = ok === 'n' ? fbx('bad', `Ficaste com ${S.xscore} em ${FAQ.length}. Esta missão não reacende nada.`)
+    : ok ? fbx('ok', (e.quiz ? `${S.xscore} em ${FAQ.length}. ` : '') + (ok === 'r' ? 'Missão cumprida. Reacendeu-se uma tocha.' : 'Missão cumprida. As tochas já estavam todas acesas.')) : '';
+  return cab + `<h1 class="title">${e.t}</h1><p class="lead">${e.r}</p>`
+    + (e.h ? host(e.h) : '')
+    + (e.f ? fotoCard(e.id, e.f) : '')
+    + fim
+    + acts(ok ? btn('Voltar ao mapa', 'hub') : e.quiz ? btn('Começar o quiz', 'xqGo') + btn('Mais tarde', 'hub', {cls:'alt'}) : `<div class="row">${btn('Cumprida', 'extraOk', {cls:'ok'})}${btn('Mais tarde', 'hub', {cls:'alt'})}</div>`);
+}
+
+function vAlbum(){
+  const n = ALBUM.filter(id => FOTO[id]).length;
+  return bar() + tag('Álbum do dia') + `<h1 class="title">${n} ${n === 1 ? 'fotografia' : 'fotografias'}</h1>
+    <p class="muted small" style="padding:0 4px">Tira primeiro a fotografia com a câmara, para ficar na galeria, e depois junta-a aqui. O álbum fica guardado só neste telemóvel.</p>
+    <div class="album">${ALBUM.map(id => { const av = livre(id), f = FOTO[id]; return `<button class="ph${av ? '' : ' locked'}" data-a="foto" data-v="${id}"${av ? '' : ' disabled'} aria-label="${f ? 'Trocar' : 'Juntar'} fotografia: ${legenda(id)}"><span class="box">${f ? `<img src="${f}" alt="">` : av ? '+' : ''}</span><span>${legenda(id)}</span></button>`; }).join('')}</div>`
+    + acts(btn('Voltar ao mapa', 'hub', {cls:'alt'}));
+}
+
+function vPin(){
+  return tag('Bastidores') + `<h1 class="title">Só para o apresentador</h1>
+    <p class="lead">Do outro lado estão as respostas e as prendas todas. A Ana não pode ver.</p>
+    <label class="eyebrow" for="pin">Código do apresentador</label>
+    <input id="pin" class="code" style="width:200px" data-enter="pinGo" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" value="">
+    ${S.pinErr ? '<p class="fb bad" role="alert">Código errado.</p>' : ''}`
+    + acts(btn('Entrar', 'pinGo'), btn('Voltar', 'home', {cls:'alt small'}));
+}
+
+function vBack(){
+  return tag('Bastidores') + `<h1 class="title">Guião do apresentador</h1>
+    <p class="lead">O jogo corre todo neste telemóvel. Passa-o à Ana quando o ecrã falar com ela e fica com ele quando disser «Apresentador».</p>
+    <h2 class="sec">Para preparar até sábado</h2>
+    <ul class="group prep">
+      <li><strong>Sete embrulhos numerados.</strong> 1 anchovas, 2 camisola, 3 álbum, 4 máscara, 5 Warriors, 6 Hamilton, 7 bicicleta (com um laço).</li>
+      <li><strong>Entrega das prendas.</strong> A app só mostra o nome de cada prenda depois de a Ana a abrir. Entrega o embrulho quando o ecrã disser que ela tem direito a ele.</li>
+      <li><strong>Missões do dia.</strong> São oito, espalhadas pelo dia, e aparecem no fim do mapa. Para a do ídolo, esconde um objecto pequeno e pensa numa pista difícil.</li>
+      <li><strong>Fotografias.</strong> Depois de cada prenda e de cada missão a app pede uma fotografia. Tira-a com a câmara e junta-a ao álbum.</li>
+      <li><strong>Bilhetes do Warriors.</strong> A Ana já sabe que existem, por isso o jogo começa por confiscá-los. Guarda-os tu até à etapa 5.</li>
+      <li><strong>Etapa 1.</strong> Uma venda e cinco colheres por esta ordem: mel, mostarda, azeitona, chocolate preto, anchova. Usa outra lata, para não abrires a prenda. A Ana tem de dizer cada nome em holandês.</li>
+      <li><strong>Etapa 2.</strong> Uma bola de meias, uma baliza marcada no corredor e um guarda-redes. A Ana remata com o pé mais fraco.</li>
+      <li><strong>Etapa 3.</strong> Duas perguntas tuas sobre o vosso 2026, das difíceis. Podes mostrar fotografias do ano e perguntar onde ou quando foram.</li>
+      <li><strong>Etapa 4.</strong> Nove bolas de papel e uma taça. Os nomes de quem está à mesa escrevem-se na hora.</li>
+      <li><strong>Etapa 5.</strong> Duas almofadas. Põe o embrulho 5 do outro lado da sala antes da travessia.</li>
+      <li><strong>Etapa 6.</strong> Um cesto e a bola de meias, para o caso de a Ana escolher o passe sem olhar no desvio. A outra hipótese é um hot take de 45 segundos, e o júri decide.</li>
+      <li><strong>Etapa 7.</strong> Um cartão com «28» dentro do frigorífico, um cartão com «11» debaixo da almofada da Ana e um tapete ao lado da bicicleta.</li>
+    </ul>
+    <h2 class="sec">Respostas</h2>
+    <ul class="group prep">
+      <li><strong>Perguntas de 2026.</strong> Ferran Torres, Cortina d’Ampezzo, Bangaranga. A quarta e a quinta são tuas.</li>
+      <li><strong>Ementa em holandês.</strong> Honing, mosterd, olijf, pure chocolade, ansjovis. As outras três da lição (pindakaas, augurk, kaneel) são para baralhar.</li>
+      <li><strong>Lição de holandês.</strong> «Zoek het kaartje in de koelkast» (cartão 28), «Het tweede kaartje ligt onder je kussen» (cartão 11), «A tua última prenda tem duas rodas».</li>
+      <li><strong>Quiz de fã.</strong> Missouri, 15, 1906, Peyroteo, 44, 2008, Bellingham, FS1, 0,4%.</li>
+      <li><strong>Traidores.</strong> Nem tu sabes quem são, a não ser que te calhe. Se a Ana perder, cumpre o castigo e recebe a prenda na mesma.</li>
+    </ul>
+    <h2 class="sec">Controlo</h2>
+    <p class="muted small">Etapas ganhas: ${S.done} de 7. Toca num número para pôr o jogo no início dessa etapa.</p>
+    <div class="jump">${ETAPAS.map(e => `<button class="mini${e.n === S.done + 1 ? ' on ok' : ''}" data-a="jump" data-v="${e.n}" aria-label="Ir para a etapa ${e.n}">${e.n}</button>`).join('')}</div>
+    ${S.ask
+      ? `<p class="fb bad" role="alert">Isto apaga todo o progresso.</p><div class="row">${btn('Apagar tudo', 'resetYes', {cls:'bad small'})}${btn('Cancelar', 'resetNo', {cls:'alt small'})}</div>`
+      : `<div class="row">${btn('Reacender tochas', 'relight', {cls:'alt small'})}${btn('Recomeçar', 'resetAsk', {cls:'alt small'})}</div>`}`
+    + acts(btn('Sair dos bastidores', 'home'));
+}
+
+/* ---------- Etapa 1: banquete ---------- */
+function v1(){
+  const d = S.d;
+  if(S.step === 'brief') return etapaTag() + `<h1 class="title">Banquete às cegas</h1>
+    <p class="lead">Bem-vinda à Ilha, Ana. A primeira etapa tem uma lição e um banquete, e a lição é a ementa.</p>`
+    + rules(['No telemóvel: liga oito palavras holandesas às portuguesas. Podes errar duas vezes. À terceira apaga-se uma tocha.', 'À mesa: das oito, só cinco aparecem. Provas de olhos vendados e dizes o que é, em holandês.', 'Quatro certas em cinco e a prenda é tua. Menos do que isso apaga uma tocha.'])
+    + acts(btn('Começar a lição', 's1pares'));
+  if(S.step === 'pares'){
+    const all = d.ok.every(Boolean), out = d.err > PARES_ERROS, left = Math.max(0, PARES_ERROS + 1 - d.err);
+    const col = (side, order, sel) => order.map(i => `<button class="pair${d.ok[i] ? ' done' : ''}${sel === i ? ' on' : ''}" data-a="pairTap" data-v="${side}:${i}"${d.ok[i] || out ? ' disabled' : ''}${side === 'L' ? ' lang="nl"' : ''}>${PARES[i][side === 'L' ? 0 : 1]}</button>`).join('');
+    return parte(1, 2) + `<div class="shift"><span class="eyebrow">Lição do dia · a ementa</span><span class="lives" role="img" aria-label="${left} de ${PARES_ERROS + 1} vidas">${hearts(left, PARES_ERROS + 1)}</span></div>
+      <h1 class="prompt">Liga os pares</h1>
+      <div class="pairs"><div class="paircol">${col('L', d.L, d.selL)}</div><div class="paircol">${col('R', d.R, d.selR)}</div></div>
+      ${all ? fbx('ok', 'Oito em oito. Cinco destas vão à mesa.') : out ? fbx('bad', 'Três erros. Perdes uma tocha.') : d.bad ? fbx('bad', 'Esse par não existe. Perdeste uma vida.') : ''}`
+      + acts(out ? btn('Continuar', 's1paresFail') : btn('Continuar', 's1venda', {dis: !all}));
+  }
+  if(S.step === 'venda') return parte(2, 2) + `<h1 class="title">Agora, de olhos vendados</h1>
+    <p class="lead">Das oito palavras, só cinco vão à mesa. Dizes o que é cada uma, em holandês.</p>`
+    + host('Põe a venda à Ana antes de avançares. O ecrã seguinte mostra as respostas.')
+    + acts(btn('A Ana já tem a venda', 's1go'));
+  const ok = d.r.filter(x => x === 1).length, all = d.r.every(x => x > 0);
+  return parte(2, 2) + `<h1 class="title">Cinco colheres</h1>
+    <p class="lead">A Ana prova e diz o nome em holandês. Marca cada resposta.</p>
+    <ul class="group">${PROVAS.map((p, i) => `<li class="chk"><span class="lab"><span class="num-s">${i + 1}</span><span>${p[0]}<br><span class="muted small" lang="nl">${p[1]}</span></span></span>
+      <button class="mini ok${d.r[i] === 1 ? ' on' : ''}" data-a="s1mark" data-v="${i}:1" aria-pressed="${d.r[i] === 1}">Acertou</button>
+      <button class="mini bad${d.r[i] === 2 ? ' on' : ''}" data-a="s1mark" data-v="${i}:2" aria-pressed="${d.r[i] === 2}">Falhou</button></li>`).join('')}</ul>
+    <p class="score"><b>${ok}</b> certas em 5. São precisas 4.</p>`
+    + acts(btn('Fechar a prova', 's1end', {dis: !all}));
+}
+
+/* ---------- Etapa 2: penáltis ---------- */
+function etiqueta(e){
+  return `<div class="parcel">
+    <div class="lrow"><div class="dest"><span class="lbl">Destinatário</span><b>${e.n}</b><span>${e.m}</span><span>${e.cp} ${e.c}</span></div><div class="pais"><span class="lbl">País</span><b>${e.p}</b></div></div>
+    <div class="lrow specs"><div><span class="lbl">Peso</span><b>${e.kg} kg</b></div><div><span class="lbl">Dimensões em cm</span><b>${e.d}</b></div></div>
+  </div>`;
+}
+function v2(){
+  const d = S.d;
+  if(S.step === 'brief') return etapaTag() + `<h1 class="title">Penáltis de imunidade</h1>
+    <p class="lead">Na Ilha, a imunidade ganha-se à bola. Mas antes do jogo há um turno de trabalho para fazer.</p>`
+    + rules(['No telemóvel: um turno na Sendcloud. Doze etiquetas para conferir em 100 segundos, e dez têm de sair certas.', 'No corredor: cinco penáltis com a bola de meias, todos com o pé mais fraco. Precisas de três golos.', 'Cada prova falhada apaga uma tocha.'])
+    + acts(btn('Ver as regras do turno', 's2regras'));
+  if(S.step === 'regras') return parte(1, 2) + `<p class="eyebrow">Turno na Sendcloud</p><h1 class="title">Regras do armazém</h1>
+    <ul class="group prep">
+      <li><strong>Origem.</strong> Tudo sai de Eindhoven.</li>
+      <li><strong>Alfândega.</strong> Leva documentos o que sai da UE ou da zona de IVA da UE.</li>
+      <li><strong>Peso a cobrar.</strong> O maior entre o real e o volumétrico: comprimento × largura × altura ÷ 5000.</li>
+      <li><strong>Sobretaxas.</strong> Mais de 30 kg é excesso de peso. Lado maior acima de 120 cm é sobredimensão. Ilha é zona remota.</li>
+      <li><strong>Etiqueta.</strong> O código postal tem de bater com o país, e nada pesa zero.</li>
+    </ul>
+    <p class="muted small" style="padding:0 4px">O relógio arranca quando picares o ponto.</p>`
+    + acts(btn('Picar o ponto', 's2sc'));
+  if(S.step === 'sc'){
+    const e = ENCOMENDAS[d.order[d.i]], Q = PERGUNTAS[e.t], gone = Math.max(0, Date.now() - (d.tEnd - TURNO));
+    return parte(1, 2) + `<div class="shift"><span class="eyebrow">Etiqueta ${d.i + 1} de ${d.order.length}</span><span class="clock" id="sc-clock">${fmt(d.tEnd - Date.now() + 999)}</span></div>
+      <div class="timebar"><i style="animation-duration:${TURNO}ms;animation-delay:-${gone}ms"></i></div>
+      ${etiqueta(e)}
+      <h1 class="q">${Q.q}</h1>
+      <div class="bins">${Q.o.map((o, i) => `<button class="bin" data-a="s2bin" data-v="${i}">${o}</button>`).join('')}</div>
+      <p class="muted small" style="padding:0 4px">Volumétrico: C × L × A ÷ 5000. Limites: 30 kg e 120 cm.</p>`;
+  }
+  if(S.step === 'scres'){
+    const pass = d.ok >= TURNO_MIN, falta = d.order.length - d.i;
+    return parte(1, 2) + `<h1 class="title">${d.ok} em ${d.order.length}</h1>
+      <p class="lead">${pass ? 'Turno cumprido. Podes ir para o relvado.' : falta ? `Acabou o turno com ${falta} ${falta === 1 ? 'etiqueta' : 'etiquetas'} por conferir. Perdes uma tocha.` : 'Não chegou às dez. Perdes uma tocha.'}</p>
+      ${d.wrong.length ? `<h2 class="sec">Onde falhaste</h2><ul class="group prep">${d.wrong.map(k => { const e = ENCOMENDAS[k], Q = PERGUNTAS[e.t]; return `<li><strong>${e.c}, ${e.p}.</strong> ${Q.q} ${Q.o[e.a]}. ${e.w}</li>`; }).join('')}</ul>` : ''}`
+      + acts(btn('Continuar', 's2scres'));
+  }
+  if(S.step === 'marca') return parte(2, 2) + `<h1 class="title">Agora, à bola</h1>
+    <p class="lead">Hoje o corredor chama-se Alvalade.</p>`
+    + rules(['Cinco remates com a bola de meias, da marca que o júri fizer no chão. Todos com o pé mais fraco.', 'Na baliza fica quem o júri escolher.', 'Três golos e a prenda é tua. Três defesas apagam uma tocha.'])
+    + acts(btn('Ir para a marca', 's2go'));
+  const g = d.shots.filter(x => x === 1).length, m = d.shots.length - g, end = g >= 3 || m >= 3;
+  const dots = [0,1,2,3,4].map(i => { const s = d.shots[i]; return `<span class="shot${s === 1 ? ' g' : s === 0 ? ' m' : ''}">${s === 1 ? CHECK : s === 0 ? CROSS : i + 1}</span>`; }).join('');
+  return parte(2, 2) + `<h1 class="title">${end ? `${g} ${g === 1 ? 'golo' : 'golos'} em ${d.shots.length}` : `Remate ${d.shots.length + 1} de 5`}</h1>
+    <div class="shots" role="img" aria-label="${g} golos, ${m} defesas">${dots}</div>`
+    + (g >= 3 ? `<p class="lead">Três golos. A imunidade é tua.</p>` + acts(btn('Receber a prenda', 'winNow'))
+      : m >= 3 ? `<p class="lead">Três defesas. Hoje ganhou a baliza.</p>` + acts(btn('Continuar', 'failGift'))
+      : `<p class="lead">Pé mais fraco. O júri decide o que foi golo.</p>` + acts(`<div class="row">${btn('Golo', 's2shot', {v:'1', cls:'ok'})}${btn('Defendido', 's2shot', {v:'0', cls:'bad'})}</div>`));
+}
+
+/* ---------- Etapa 3: memória ---------- */
+function v3(){
+  const d = S.d;
+  if(S.step === 'brief') return etapaTag() + `<h1 class="title">Memória de 2026</h1>
+    <p class="lead">A última etapa da Ilha puxa pelo ano que está a acabar: primeiro os dedos, depois a cabeça, no fim a câmara.</p>`
+    + rules([`No telemóvel: um jogo da memória com oito pares e só ${MEM_MAX} tentativas.`, `Cinco perguntas sobre 2026: três do mundo, duas da vossa vida. Precisas de ${QUIZ_MIN} certas.`, 'Três fotografias em cinco minutos, tiradas com a tua câmara e aprovadas pelo júri.'])
+    + acts(btn('Começar', 's3mem'));
+  if(S.step === 'mem'){
+    const all = d.cards.every(c => c.ok), out = !all && !d.lock && d.moves >= MEM_MAX;
+    return parte(1, 3) + `<p class="eyebrow">Jogo da memória</p><h1 class="prompt">Encontra os oito pares</h1>
+      <div class="mem">${d.cards.map((c, i) => `<button class="mc${c.ok ? ' ok' : c.up ? ' up' : ''}" data-a="memTap" data-v="${i}" aria-label="Carta ${i + 1}${c.up || c.ok ? ', virada' : ''}">${c.up || c.ok ? MEMO[c.k] : ''}</button>`).join('')}</div>
+      <p class="score"><b>${d.moves}</b> de ${MEM_MAX} tentativas</p>
+      ${all ? fbx('ok', 'Memória em forma.') : out ? fbx('bad', `Acabaram as ${MEM_MAX} tentativas. Perdes uma tocha.`) : ''}`
+      + acts(out ? btn('Continuar', 's3memFail') : btn('Continuar', 's3go', {dis: !all}));
+  }
+  if(S.step === 'quiz'){
+    const Q = QUIZ[d.q], done = d.ans !== null, last = d.q === QUIZ.length - 1;
+    let body;
+    if(Q.live){
+      body = host('Faz a tua pergunta em voz alta e diz se a Ana acertou.')
+        + (done ? fbx(d.ans === 'ok' ? 'ok' : 'bad', d.ans === 'ok' ? 'Certa.' : 'Errada.')
+                : `<div class="row">${btn('Certa', 's3live', {v:'ok', cls:'ok small'})}${btn('Errada', 's3live', {v:'no', cls:'bad small'})}</div>`);
+    } else {
+      body = `<div class="opts">${Q.o.map((o, i) => `<button class="opt${done && i === Q.a ? ' right' : done && i === d.ans ? ' wrong' : ''}" data-a="s3ans" data-v="${i}"${done ? ' disabled' : ''}>${o}</button>`).join('')}</div>`
+        + (done ? fbx(d.ans === Q.a ? 'ok' : 'bad', d.ans === Q.a ? 'Certa.' : 'Errada. Era ' + Q.o[Q.a] + '.') : '');
+    }
+    return parte(2, 3, `Pergunta ${d.q + 1} de ${QUIZ.length}`) + `<h1 class="q">${Q.q}</h1>` + body
+      + `<p class="score"><b>${d.score}</b> certas. São precisas ${QUIZ_MIN}.</p>`
+      + acts(btn(last ? 'Ver o resultado' : 'Pergunta seguinte', 's3next', {dis: !done}));
+  }
+  if(S.step === 'quizres'){
+    const pass = d.score >= QUIZ_MIN;
+    return parte(2, 3) + `<h1 class="title">${d.score} em ${QUIZ.length}</h1>
+      <p class="lead">${pass ? 'A cabeça passou. Agora a câmara.' : 'Não chegou. Perdes uma tocha e depois segues para a câmara.'}</p>`
+      + acts(btn('Continuar', 's3res'));
+  }
+  const all = d.f.every(x => x);
+  return parte(3, 3) + `<h1 class="title">Três fotografias</h1>
+    <p class="lead">A Ana fotografa, o júri aprova. Tudo em cinco minutos.</p>
+    <div class="timer">${d.tEnd ? `<span class="clock big" id="mesa-clock">${fmt(d.tEnd - Date.now())}</span>` : `<button class="mini" data-a="s3timer">Começar os cinco minutos</button>`}</div>
+    <ul class="group">${FOTOS.map((t, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${t}</span></span>
+      <button class="mini ok${d.f[i] ? ' on' : ''}" data-a="s3foto" data-v="${i}" aria-pressed="${!!d.f[i]}">Aprovada</button></li>`).join('')}</ul>`
+    + acts(btn('Receber a prenda', 'winNow', {dis: !all}), `<button class="link" data-a="failGift">O tempo acabou</button>`);
+}
+
+/* ---------- Etapa 4: traidores ---------- */
+function v4(){
+  const d = S.d, P = d.players || [];
+  const active = P.map((p, i) => ({nm: p.nm, role: p.role, i, out: p.out})).filter(p => !p.out);
+  const k = Math.min(3, active.length);
+  switch(S.step){
+    case 'brief': return etapaTag() + `<h1 class="title">Há traidores à mesa</h1>
+      <p class="lead">Bem-vindos à Mesa Redonda. Entre os convidados da Ana há quem tenha vindo almoçar e quem tenha vindo trair.</p>`
+      + rules(['Cada jogador vê em segredo de que lado está.', 'São três rondas. Em cada uma há uma missão de grupo e depois a Ana bane um suspeito.', 'Se a Ana banir todos os que a traem até ao fim da terceira ronda, a prenda é dela. Se sobrar alguém, apaga-se uma tocha.'])
+      + acts(btn('Inscrever os jogadores', 's4go'));
+    case 'nomes': return etapaTag() + `<h1 class="title">Quem está à mesa?</h1>
+      <p class="lead">Escreve todos menos a Ana. Ela lidera os fiéis e nunca trai.</p>
+      <div class="names">${d.names.map((nm, i) => `<div class="namerow"><label for="name-${i}" class="num-s">${i + 1}</label><input id="name-${i}" class="inp" data-bind="name" data-i="${i}" value="${esc(nm)}" placeholder="Nome" autocomplete="off" maxlength="18">${d.names.length > 4 ? `<button class="mini" style="min-width:60px" data-a="s4del" data-v="${i}" aria-label="Tirar o jogador ${i + 1}">Tirar</button>` : '<span></span>'}</div>`).join('')}</div>
+      ${d.names.length < 12 ? `<button class="link" style="align-self:flex-start" data-a="s4add">Adicionar jogador</button>` : ''}
+      <p class="muted small">Com 4 ou 5 jogadores, uma pessoa trai. Com 6 ou mais, duas.</p>
+      ${d.err ? `<p class="fb bad" role="alert">${d.err}</p>` : ''}`
+      + acts(btn('Distribuir os papéis', 's4deal'));
+    case 'papeis': {
+      const p = P[d.idx], nm = esc(p.nm);
+      if(!d.shown) return tag(`Jogador ${d.idx + 1} de ${P.length}`) + `<h1 class="title">Passa o telemóvel a ${nm}</h1>
+        <p class="lead">Só ${nm} pode ver o ecrã seguinte.</p>` + acts(btn(`Sou ${nm}. Mostrar`, 's4show'));
+      const other = P.filter((x, i) => x.role === 'T' && i !== d.idx).map(x => esc(x.nm));
+      return tag(nm) + (p.role === 'T'
+        ? `<h1 class="title role bad">Traição</h1><p class="lead">Estás contra a Ana. Sabota as missões sem dar nas vistas e não te deixes banir.</p>${other.length ? `<p class="lead">Trai contigo: <strong>${other.join(', ')}</strong>.</p>` : ''}`
+        : `<h1 class="title role ok">Lealdade</h1><p class="lead">Estás do lado da Ana. Cumpre as missões e ajuda-a a descobrir quem trai.</p>`)
+        + acts(btn('Esconder e passar', 's4hide'));
+    }
+    case 'pronto': return etapaTag() + `<h1 class="title">Papéis entregues</h1>
+      <p class="lead">Devolvam o telemóvel ao apresentador. Ninguém fala do que viu.</p>` + acts(btn('Começar a ronda 1', 's4begin'));
+    case 'missao': {
+      const M = MISSOES[d.round - 1];
+      return tag(`Ronda ${d.round} de 3 · Missão`) + `<h1 class="title">${M.t}</h1>` + rules(M.r)
+        + (M.frase ? `<div class="phrase"><b class="lbl">Só para a Ana</b><q>${M.frase}</q></div>` : '')
+        + `<p class="muted small" style="padding:0 4px">${M.nota}</p>`
+        + (d.round < 3 ? acts(`<div class="row">${btn('Cumprida', 's4m', {v:'1', cls:'ok'})}${btn('Falhada', 's4m', {v:'0', cls:'bad'})}</div>`)
+                       : acts(btn('Escolher a equipa', 's4team')));
+    }
+    case 'equipa': return tag('Ronda 3 · Equipa') + `<h1 class="title">Quem vai na missão?</h1>
+      <p class="lead">Ana, escolhe ${k} ${k === 1 ? 'nome' : 'nomes'}.</p>
+      <div class="picks">${active.map(p => `<button class="pick${d.team.includes(p.i) ? ' on' : ''}" data-a="s4tog" data-v="${p.i}" aria-pressed="${d.team.includes(p.i)}">${esc(p.nm)}</button>`).join('')}</div>`
+      + acts(btn('Começar a votação', 's4vote0', {dis: d.team.length !== k}));
+    case 'voto': {
+      const nm = esc(P[d.team[d.vi]].nm);
+      if(!d.shown) return tag(`Voto ${d.vi + 1} de ${d.team.length}`) + `<h1 class="title">Passa o telemóvel a ${nm}</h1>
+        <p class="lead">Ninguém mais olha para o ecrã.</p>` + acts(btn(`Sou ${nm}. Votar`, 's4vshow'));
+      return tag(nm) + `<h1 class="title">O teu voto</h1><p class="lead">Carrega e passa o telemóvel de volta, com o ecrã para baixo.</p>`
+        + acts(btn('Cumprir a missão', 's4v', {v:'c', cls:'alt'}), btn('Sabotar a missão', 's4v', {v:'s', cls:'alt'}));
+    }
+    case 'mres': return tag('Ronda 3 · Missão') + `<h1 class="title role ${d.sab ? 'bad' : 'ok'}">${d.sab ? 'Sabotada' : 'Cumprida'}</h1>
+      <p class="lead">Votos de sabotagem: <strong>${d.sab}</strong>.</p>` + acts(btn('Ir para a Mesa Redonda', 's4mesa'));
+    case 'mesa': {
+      const okM = d.log[d.log.length - 1];
+      return tag(`Ronda ${d.round} de 3 · Mesa Redonda`) + `<h1 class="title">Quem trai a Ana?</h1>
+        <p class="lead">A missão ${okM ? 'foi cumprida' : 'falhou'}. Discutam. Depois a Ana bane uma pessoa.</p>
+        <div class="timer">${d.tEnd ? `<span class="clock big" id="mesa-clock">${fmt(d.tEnd - Date.now())}</span>` : `<button class="mini" data-a="s4timer">Dar dois minutos</button>`}</div>
+        <div class="picks">${active.map(p => `<button class="pick${d.pick === p.i ? ' on' : ''}" data-a="s4pick" data-v="${p.i}" aria-pressed="${d.pick === p.i}">${esc(p.nm)}</button>`).join('')}</div>`
+        + acts(btn(d.pick >= 0 ? `Banir ${esc(P[d.pick].nm)}` : 'Escolhe quem banir', 's4ban', {dis: !(d.pick >= 0)}));
+    }
+    case 'ban': {
+      const p = P[d.last], t = p.role === 'T', left = P.filter(x => x.role === 'T' && !x.out).length;
+      return tag(`${esc(p.nm)} sai da mesa`) + `<h1 class="title role ${t ? 'bad' : 'ok'}">${t ? 'Traição' : 'Lealdade'}</h1>
+        <p class="lead">${t ? (left ? 'Apanhaste uma pessoa. Ainda há outra à mesa.' : 'Era a última pessoa a trair-te.') : `${esc(p.nm)} estava do teu lado. Quem trai continua à mesa.`}</p>`
+        + acts(btn(left === 0 || d.round >= 3 ? 'Ver o resultado' : `Ronda ${d.round + 1}`, 's4next'));
+    }
+    default: {
+      const quem = P.filter(x => x.role === 'T' && !x.out).map(x => esc(x.nm)).join(' e ');
+      return d.res === 'win'
+        ? etapaTag() + `<h1 class="title">Mesa limpa</h1><p class="lead">Ana, baniste toda a gente que te traía.</p>` + acts(btn('Receber a prenda', 'winNow'))
+        : etapaTag() + `<h1 class="title">A traição venceu</h1><p class="lead">Continuava à mesa, sem ser apanhado: <strong>${quem}</strong>.</p>` + acts(btn('Continuar', 'failGift'));
+    }
+  }
+}
+
+/* ---------- Etapa 5: cores (resgate dos Warriors) ---------- */
+function vCores(){
+  const d = S.d;
+  if(S.step === 'brief') return etapaTag() + `<h1 class="title">O resgate dos Warriors</h1>
+    <p class="lead">A Corrida Final faz-se a contar: três etapas seguidas, e o relógio só pára no tapete do Pit Stop.</p>
+    <p class="lead">Primeiro vais buscar o que já era teu. Os bilhetes ficaram em território inimigo, entre seis gangues de seis cores.</p>`
+    + rules(['No telemóvel: põe cada cor no seu copo. São seis cores e só há um copo vazio.', 'Na sala: atravessa o território inimigo sem tocar no chão, com duas almofadas e 90 segundos.', 'O relógio da corrida não pára entre provas.'])
+    + acts(btn('Partida', 'sortGo'));
+  if(S.step === 'trav') return parte(2, 2) + `<h1 class="title">A travessia</h1>
+    <p class="lead">As cores estão arrumadas e o caminho está livre. Os teus bilhetes estão do outro lado da sala, e o chão é território inimigo.</p>`
+    + rules(['Tens duas almofadas e 90 segundos. Só podes pisar almofadas.', 'Podes apanhar a de trás e pô-la à frente.', 'Se tocares no chão ou o tempo acabar, apaga-se uma tocha.'])
+    + `<div class="timer">${d.tEnd ? `<span class="clock big" id="mesa-clock">${fmt(d.tEnd - Date.now())}</span>` : `<button class="mini" data-a="s5timer">Começar os 90 segundos</button>`}</div>`
+    + host('Põe o embrulho n.º 5 do outro lado da sala e dá duas almofadas à Ana.')
+    + acts(`<div class="row">${btn('Chegou aos bilhetes', 'winNow', {cls:'ok'})}${btn('Não chegou', 'failGift', {cls:'bad'})}</div>`);
+  return parte(1, 2) + `<h1 class="title">O resgate dos Warriors</h1>
+    <p class="muted small">Uma bola só entra em copo vazio ou em cima da mesma cor. Quatro por copo.</p>
+    <div class="tubes">${d.tubes.map((t, i) => `<button class="tube${d.sel === i ? ' sel' : ''}" data-a="sortT" data-v="${i}" aria-label="Copo ${i + 1}, ${t.length} ${t.length === 1 ? 'bola' : 'bolas'}">${t.map(c => `<span class="ball c${c}"></span>`).join('')}</button>`).join('')}</div>
+    <p class="score"><b>${d.moves}</b> jogadas. O mínimo possível são ${NIVEL_MIN}.</p>
+    ${d.won ? fbx('ok', d.moves <= NIVEL_MIN ? 'Cada gangue no seu território, e no mínimo de jogadas.' : 'Cada gangue no seu território.') : ''}`
+    + acts(d.won ? btn('Continuar', 'sortDone') : `<div class="row">${btn('Anular', 'sortUndo', {cls:'alt small', dis: !d.hist.length})}${btn('Recomeçar', 'sortGo', {cls:'alt small'})}</div>`);
+}
+
+/* ---------- Etapa 6: paciência ---------- */
+function dealGolf(deal){
+  for(;;){
+    const order = []; for(let c = 0; c < 6; c++) order.push(c, c, c, c); shuffle(order);
+    const tab = [], stock = []; let cur = rnd(13), i = 0; stock.push(cur);
+    while(i < 24){
+      const len = Math.min(24 - i, 2 + rnd(4));
+      for(let k = 0; k < len; k++){ cur = (cur + (Math.random() < .5 ? 1 : 12)) % 13; tab.push(cur); i++; }
+      if(i < 24){ cur = rnd(13); stock.push(cur); }
+    }
+    stock.push(rnd(13));
+    const cnt = new Array(13).fill(0);
+    if(tab.concat(stock).some(r => ++cnt[r] > 4)) continue;
+    const pool = []; for(let r = 0; r < 13; r++) pool.push(shuffle([0,1,2,3]));
+    const mk = r => ({r, s: pool[r].pop()});
+    const cols = [[],[],[],[],[],[]];
+    for(let j = 0; j < 24; j++) cols[order[j]].unshift(mk(tab[j]));
+    const st = stock.map(mk);
+    return {cols, top: st.shift(), stock: st, won: false, deal};
+  }
+}
+function card(cd, col){
+  const cls = 'pc' + (cd.s === 1 || cd.s === 2 ? ' red' : ''), lab = `${RANKS[cd.r]} de ${NAIPES[cd.s]}`;
+  const inner = `<span>${RANKS[cd.r]}</span><span class="su">${SUITS[cd.s]}</span>`;
+  return col >= 0 ? `<button class="${cls}" data-a="golfCard" data-v="${col}" aria-label="${lab}">${inner}</button>` : `<div class="${cls}" role="img" aria-label="${lab}">${inner}</div>`;
+}
+function vPaciencia(){
+  const d = S.d;
+  if(S.step === 'brief') return etapaTag() + `<h1 class="title">Luzes apagadas</h1>
+    <p class="lead">Segunda etapa da corrida, e esta começa numa grelha de partida. Do que está no fim, ninguém te falou.</p>`
+    + rules([`No telemóvel: cinco partidas de Fórmula 1. Quando as luzes se apagarem, toca. Precisas de ${LUZ_OK} abaixo de ${seg(LUZ_MAX)}.`, `Depois, uma paciência com 24 cartas na mesa e ${GOLF_DEALS} baralhos para a limpar.`, 'No fim há um desvio: duas tarefas à escolha, e só tens de fazer uma.'])
+    + acts(btn('Para a grelha', 'luzGo'));
+  if(S.step === 'luz'){
+    const fim = d.tries.length >= 5, bons = d.tries.filter(t => t >= 0 && t < LUZ_MAX).length, pass = bons >= LUZ_OK;
+    const val = d.tries.filter(t => t >= 0), melhor = val.length ? Math.min(...val) : 0;
+    return parte(1, 3) + `<div class="shift"><span class="eyebrow">Partida ${Math.min(5, d.tries.length + 1)} de 5</span><span class="eyebrow">${melhor ? 'Melhor: ' + seg(melhor) : ''}</span></div>
+      <div class="lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      ${fim ? '' : '<button class="pad" id="pad" data-p="luz" data-ph="idle">Alinhar na grelha</button>'}
+      <div class="tries">${d.tries.map(t => `<span class="try ${t >= 0 && t < LUZ_MAX ? 'ok' : 'bad'}">${t < 0 ? 'Falsa partida' : seg(t)}</span>`).join('')}</div>
+      <p class="muted small" style="padding:0 4px">As cinco luzes acendem uma a uma. Toca quando se apagarem todas, nem antes. Precisas de ${LUZ_OK} partidas abaixo de ${seg(LUZ_MAX)}.</p>
+      ${fim ? fbx(pass ? 'ok' : 'bad', pass ? `${bons} partidas limpas. Arranque de campeã.` : `Só ${bons} abaixo de ${seg(LUZ_MAX)}. Perdes uma tocha.`) : ''}`
+      + (fim ? acts(btn('Continuar', pass ? 'luzOk' : 'luzFail')) : '');
+  }
+  if(S.step === 'desvio') return parte(3, 3) + `<h1 class="title">Desvio</h1>
+    <p class="lead">Duas tarefas. Escolhe uma, e não podes voltar atrás.</p>
+    ${Object.keys(DESVIO).map(k => `<button class="choice" data-a="s6pick" data-v="${k}"><b>${DESVIO[k].t}</b><span>${DESVIO[k].r}</span></button>`).join('')}`;
+  if(S.step === 'desvioGo'){
+    const D = DESVIO[d.pick];
+    return parte(3, 3, 'Desvio') + `<h1 class="title">${D.t}</h1><p class="lead">${D.r}</p>
+      ${D.s ? `<div class="timer">${d.tEnd ? `<span class="clock big" id="mesa-clock">${fmt(d.tEnd - Date.now())}</span>` : `<button class="mini" data-a="s6timer">Começar os ${D.s} segundos</button>`}</div>` : ''}`
+      + host('O júri decide se a Ana cumpriu.')
+      + acts(`<div class="row">${btn('Conseguiu', 'winNow', {cls:'ok'})}${btn('Falhou', 'failGift', {cls:'bad'})}</div>`);
+  }
+  const stuck = !d.won && !d.stock.length && !d.cols.some(c => c.length && adj(c[c.length - 1].r, d.top.r));
+  const left = GOLF_DEALS - d.deal, dead = stuck && left <= 0;
+  return parte(2, 3, `Baralho ${d.deal} de ${GOLF_DEALS}`) + `<h1 class="title">Paciência</h1>
+    <p class="muted small">Um número acima ou abaixo da carta em jogo. O Rei liga ao Ás.</p>
+    <div class="golf">${d.cols.map((col, c) => `<div class="gcol">${col.length ? col.map((cd, i) => card(cd, i === col.length - 1 ? c : -1)).join('') : '<div class="slot"></div>'}</div>`).join('')}</div>
+    <div class="deckrow">
+      <div class="deck">${card(d.top, -1)}<span class="lbl">Em jogo</span></div>
+      <div class="deck">${d.stock.length ? `<button class="pc back" data-a="golfDraw" aria-label="Virar uma carta do baralho"></button>` : '<div class="slot" style="width:100%"></div>'}<span class="lbl">Baralho · ${d.stock.length}</span></div>
+    </div>
+    ${d.won ? fbx('ok', 'Mesa limpa.') : dead ? fbx('bad', 'Sem jogadas e sem baralhos. Perdes uma tocha.') : stuck ? fbx('bad', 'Ficaste sem jogadas. Baralha de novo.') : ''}`
+    + acts(d.won ? btn('Continuar', 'golfDone') : dead ? btn('Continuar', 'golfFail') : btn(left > 0 ? `Baralhar de novo · ${left === 1 ? 'resta 1' : 'restam ' + left}` : 'Último baralho', 'golfNew', {cls:'alt small', dis: left <= 0}));
+}
+
+/* ---------- Etapa 7: lição ---------- */
+function lesson(i, h){ const L = LICOES[i]; return {li: i, bank: shuffle(L.resp.concat(L.extra)), pick: [], fb: '', h}; }
+function v7(){
+  const d = S.d;
+  if(S.step === 'brief') return etapaTag() + `<h1 class="title">A última lição</h1>
+    <p class="lead">Falta uma prenda e não cabe em nenhum embrulho. Para lá chegares, Ana, vais ter de seguir instruções em holandês.</p>`
+    + rules(['Monta cada frase com as palavras certas, pela ordem certa. Tens três vidas para as três frases.', 'Depois faz o que a frase manda. Em cada sítio há um cartão com dois algarismos.', 'Se ficares sem vidas, apaga-se uma tocha e recomeças a frase.'])
+    + acts(btn('Começar a lição', 's7go'));
+  if(S.step === 'c1' || S.step === 'c2') return tag('Vai lá ver') + `<h1 class="prompt" lang="nl">${LICOES[S.step === 'c1' ? 0 : 1].nl}</h1>
+    <p class="lead">Faz o que a frase manda. Lá está um cartão com dois algarismos.</p>
+    <label class="eyebrow" for="code">O número do cartão</label>
+    <input id="code" class="code" data-bind="code" data-enter="s7code" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" value="${esc(d.code || '')}">
+    ${d.err ? fbx('bad', 'Não é esse. Volta a ler o cartão.') : ''}`
+    + acts(btn('Confirmar', 's7code'));
+  if(S.step === 'tapete') return tag('Volg je man!') + `<h1 class="title">Segue o teu marido</h1>
+    <p class="lead">Duas rodas, Ana. Ele sabe onde estão. O relógio pára quando pisares o tapete do Pit Stop.</p>`
+    + host('Leva a Ana até à bicicleta. Carrega quando ela pisar o tapete.')
+    + acts(btn('A Ana pisou o tapete', 'winNow'));
+  const L = LICOES[d.li], done = d.fb === 'ok', dead = !done && d.h <= 0, tl = L.de === 'pt' ? 'nl' : 'pt-PT';
+  return tag(`Lição ${d.li + 1} de 3`) + (L.pre ? `<p class="lead">${L.pre}</p>` : '') + `<div class="shift"><span class="eyebrow">${L.label}</span><span class="lives" role="img" aria-label="${Math.max(0, d.h)} de 3 vidas">${hearts(d.h, 3)}</span></div>
+    <h1 class="prompt" lang="${L.de === 'nl' ? 'nl' : 'pt-PT'}">${L.frase}</h1>
+    <div class="answer" lang="${tl}" aria-label="A tua resposta">${d.pick.map((j, k) => `<button class="tile" data-a="s7un" data-v="${k}"${done || dead ? ' disabled' : ''}>${d.bank[j]}</button>`).join('')}</div>
+    <div class="bank" lang="${tl}">${d.bank.map((w, j) => `<button class="tile" data-a="s7tile" data-v="${j}"${done || dead || d.pick.includes(j) ? ' disabled' : ''}>${w}</button>`).join('')}</div>
+    ${done ? fbx('ok', 'Certo. ' + L.ok) : dead ? fbx('bad', 'Ficaste sem vidas. Perdes uma tocha.') : d.fb === 'bad' ? fbx('bad', 'Ainda não. Perdeste uma vida.') : ''}`
+    + acts(done ? btn('Continuar', 's7next') : dead ? btn('Continuar', 's7dead') : btn('Verificar', 's7check', {dis: !d.pick.length}));
+}
+
+const VIEWS = {1:v1, 2:v2, 3:v3, 4:v4, 5:vCores, 6:vPaciencia, 7:v7};
+
+/* ---------- Transições ---------- */
+function win(){
+  S.done = Math.max(S.done, S.n); S.screen = 'gift'; S.gstep = 'lock'; S.step = ''; S.d = {};
+  if(S.n === 7 && S.t3 && !S.t3end) S.t3end = Date.now();
+}
+function fail(after){
+  S.torches = Math.max(0, S.torches - 1); S.castigo = rnd(CASTIGOS.length); S.after = after; S.screen = 'fail';
+}
+function startClock(){ if(!S.t3){ S.t3 = Date.now(); S.t3end = 0; } }
+
+const ACT = {
+  start(){ S.screen = S.intro ? 'hub' : 'intro'; },
+  formato(){ S.screen = 'intro'; },
+  introNext(){ S.screen = S.intro ? 'splash' : 'intro2'; },
+  introOk(){ S.intro = true; S.screen = 'hub'; },
+  hub(){ S.screen = 'hub'; },
+  home(){ S.screen = 'splash'; S.pinErr = false; S.ask = false; },
+  play(){
+    const n = S.done + 1;
+    if(n > 7){ S.screen = 'final'; return; }
+    if(S.n !== n || !S.step){ S.n = n; S.step = 'brief'; S.d = {}; }
+    S.screen = 'stage';
+  },
+  winNow(){ win(); },
+  failGift(){ fail('gift'); },
+  castigoOk(){ if(S.after === 'gift') win(); else { S.screen = 'stage'; S.step = S.after; } },
+  giftOpen(){ S.gstep = 'open'; S.open = Math.max(S.open, S.n); },
+  giftOk(){ if(S.done >= 7){ S.screen = 'final'; setTimeout(confetti, 60); } else S.screen = 'hub'; },
+  extra(v){ const e = EXTRAS.find(x => x.id === v); if(!e || S.open < e.de || S.x[v] === 'n') return false; S.xid = v; S.xd = null; S.screen = 'extra'; },
+  xqGo(){ if(!S.x.xq) S.xd = {i:0, ok:0, tEnd: Date.now() + FAQ_T}; },
+  xqAns(v){ const x = S.xd; if(!x) return false; if(FAQ[x.i].a === +v) x.ok++; x.i++; if(x.i >= FAQ.length || Date.now() > x.tEnd) xqEnd(); },
+  extraOk(){ const e = EXTRAS.find(x => x.id === S.xid); if(e && !e.quiz && !S.x[S.xid]){ S.x[S.xid] = S.torches < 3 ? 'r' : 'f'; if(S.torches < 3) S.torches++; } },
+  album(){ S.screen = 'album'; },
+  foto(v){ if(livre(v)){ pend = v; cam.value = ''; cam.click(); } return false; },
+
+  pin(){ S.screen = 'pin'; S.pinErr = false; },
+  pinGo(){ const el = document.getElementById('pin'); if(el && el.value === PIN){ S.screen = 'back'; S.pinErr = false; } else S.pinErr = true; },
+  jump(v){ const n = +v; S.intro = true; S.done = n - 1; S.open = n - 1; S.n = 0; S.step = ''; S.d = {}; if(n <= 5) S.t3 = 0; S.t3end = 0; },
+  relight(){ S.torches = 3; },
+  resetAsk(){ S.ask = true; }, resetNo(){ S.ask = false; },
+  resetYes(){ S = fresh(); S.screen = 'back'; clearFotos(); },
+
+  s1pares(){ const ix = PARES.map((_, i) => i); S.step = 'pares'; S.d = {L: shuffle(ix.slice()), R: shuffle(ix.slice()), selL:-1, selR:-1, ok: ix.map(() => false), bad:false, err:0}; },
+  pairTap(v){ const d = S.d, [side, n] = v.split(':'), i = +n; if(d.ok[i] || d.err > PARES_ERROS) return;
+    if(side === 'L') d.selL = d.selL === i ? -1 : i; else d.selR = d.selR === i ? -1 : i;
+    d.bad = false;
+    if(d.selL >= 0 && d.selR >= 0){ if(d.selL === d.selR) d.ok[d.selL] = true; else { d.bad = true; d.err++; } d.selL = d.selR = -1; } },
+  s1paresFail(){ S.d = {}; fail('venda'); },
+  s1venda(){ S.step = 'venda'; S.d = {}; },
+  s1go(){ S.step = 'play'; S.d = {r:[0,0,0,0,0]}; },
+  s1mark(v){ const [i, x] = v.split(':').map(Number); S.d.r[i] = x; },
+  s1end(){ if(S.d.r.filter(x => x === 1).length >= 4) win(); else fail('gift'); },
+
+  s2regras(){ S.step = 'regras'; S.d = {}; },
+  s2sc(){ const tres = t => shuffle(ENCOMENDAS.map((e, i) => e.t === t ? i : -1).filter(i => i >= 0)).slice(0, 3);
+    S.step = 'sc'; S.d = {order: shuffle([].concat(tres('A'), tres('P'), tres('S'), tres('E'))), i:0, ok:0, wrong:[], tEnd: Date.now() + TURNO}; },
+  s2bin(v){ const d = S.d; if(S.step !== 'sc') return; const k = d.order[d.i];
+    if(ENCOMENDAS[k].a === +v) d.ok++; else d.wrong.push(k);
+    d.i++; if(d.i >= d.order.length || Date.now() > d.tEnd){ d.tEnd = 0; S.step = 'scres'; } },
+  s2scres(){ const pass = S.d.ok >= TURNO_MIN; S.d = {}; if(pass) S.step = 'marca'; else fail('marca'); },
+  s2go(){ S.step = 'play'; S.d = {shots:[]}; },
+  s2shot(v){ if(S.d.shots.length < 5) S.d.shots.push(+v); },
+
+  s3mem(){ S.step = 'mem'; S.d = {cards: shuffle(MEMO.concat(MEMO).map((_, i) => ({k: i % MEMO.length, up:false, ok:false}))), open:[], moves:0, lock:false}; },
+  memTap(v){ const d = S.d, i = +v, c = d.cards[i]; if(d.lock || c.up || c.ok || d.moves >= MEM_MAX) return false;
+    c.up = true; d.open.push(i);
+    if(d.open.length === 2){
+      const [a, b] = d.open; d.moves++;
+      if(d.cards[a].k === d.cards[b].k){ d.cards[a].ok = d.cards[b].ok = true; d.cards[a].up = d.cards[b].up = false; d.open = []; }
+      else { d.lock = true; setTimeout(() => { if(S.screen === 'stage' && S.n === 3 && S.step === 'mem' && S.d.lock){ S.d.cards[a].up = S.d.cards[b].up = false; S.d.open = []; S.d.lock = false; render(); } }, 800); }
+    } },
+  s3memFail(){ S.d = {q:0, score:0, ans:null}; fail('quiz'); },
+  s3go(){ S.step = 'quiz'; S.d = {q:0, score:0, ans:null}; },
+  s3ans(v){ const d = S.d; if(d.ans !== null) return; d.ans = +v; if(d.ans === QUIZ[d.q].a) d.score++; },
+  s3live(v){ const d = S.d; if(d.ans !== null) return; d.ans = v; if(v === 'ok') d.score++; },
+  s3next(){ const d = S.d; if(d.ans === null) return; if(d.q >= QUIZ.length - 1) S.step = 'quizres'; else { d.q++; d.ans = null; } },
+  s3res(){ const pass = S.d.score >= QUIZ_MIN; S.d = {f:[0,0,0], tEnd:0}; if(pass) S.step = 'fotos'; else fail('fotos'); },
+  s3timer(){ S.d.tEnd = Date.now() + 300000; },
+  s3foto(v){ S.d.f[+v] = S.d.f[+v] ? 0 : 1; },
+
+  s4go(){ S.step = 'nomes'; S.d = {names:['','','','',''], err:''}; },
+  s4add(){ if(S.d.names.length < 12) S.d.names.push(''); },
+  s4del(v){ if(S.d.names.length > 4) S.d.names.splice(+v, 1); },
+  s4deal(){
+    const d = S.d, names = d.names.map(x => x.trim()).filter(Boolean);
+    if(names.length < 4){ d.err = 'São precisos pelo menos 4 jogadores além da Ana.'; return; }
+    const nT = names.length >= 6 ? 2 : 1, idx = shuffle(names.map((_, i) => i)).slice(0, nT);
+    S.d = {players: names.map((nm, i) => ({nm, role: idx.includes(i) ? 'T' : 'F', out:false})), idx:0, shown:false, round:1, log:[], team:[], vi:0, sab:0, pick:-1, tEnd:0, last:-1, res:''};
+    S.step = 'papeis';
+  },
+  s4show(){ S.d.shown = true; },
+  s4hide(){ const d = S.d; d.shown = false; d.idx++; if(d.idx >= d.players.length) S.step = 'pronto'; },
+  s4begin(){ S.step = 'missao'; },
+  s4m(v){ const d = S.d; d.log.push(v === '1'); d.pick = -1; d.tEnd = 0; S.step = 'mesa'; },
+  s4team(){ S.d.team = []; S.step = 'equipa'; },
+  s4tog(v){ const d = S.d, i = +v, at = d.team.indexOf(i), k = Math.min(3, d.players.filter(p => !p.out).length); if(at >= 0) d.team.splice(at, 1); else if(d.team.length < k) d.team.push(i); },
+  s4vote0(){ const d = S.d; d.vi = 0; d.sab = 0; d.shown = false; S.step = 'voto'; },
+  s4vshow(){ S.d.shown = true; },
+  s4v(v){ const d = S.d, p = d.players[d.team[d.vi]]; if(v === 's' && p.role === 'T') d.sab++; d.vi++; d.shown = false; if(d.vi >= d.team.length){ d.vi = 0; d.log.push(d.sab === 0); S.step = 'mres'; } },
+  s4mesa(){ const d = S.d; d.pick = -1; d.tEnd = 0; S.step = 'mesa'; },
+  s4timer(){ S.d.tEnd = Date.now() + 120000; },
+  s4pick(v){ S.d.pick = +v; },
+  s4ban(){ const d = S.d; if(d.pick < 0) return; d.players[d.pick].out = true; d.last = d.pick; d.pick = -1; S.step = 'ban'; },
+  s4next(){ const d = S.d, left = d.players.filter(p => p.role === 'T' && !p.out).length;
+    if(left === 0){ d.res = 'win'; S.step = 'fim'; } else if(d.round >= 3){ d.res = 'lose'; S.step = 'fim'; } else { d.round++; S.step = 'missao'; } },
+
+  sortGo(){ startClock(); S.step = 'play'; S.d = {tubes: NIVEL.map(t => t.slice()), sel:-1, hist:[], moves:0, won:false}; },
+  sortT(v){ const d = S.d, i = +v; if(d.won) return;
+    if(d.sel < 0){ if(d.tubes[i].length) d.sel = i; return; }
+    if(d.sel === i){ d.sel = -1; return; }
+    const A = d.tubes[d.sel], B = d.tubes[i], c = A[A.length - 1];
+    if(B.length < 4 && (!B.length || B[B.length - 1] === c)){
+      B.push(A.pop()); d.hist.push([d.sel, i]); d.moves++; d.sel = -1;
+      d.won = d.tubes.every(t => !t.length || (t.length === 4 && t.every(x => x === t[0])));
+    } else d.sel = B.length ? i : -1; },
+  sortDone(){ S.step = 'trav'; S.d = {tEnd:0}; },
+  s5timer(){ S.d.tEnd = Date.now() + 90000; },
+  sortUndo(){ const d = S.d, m = d.hist.pop(); if(m){ d.tubes[m[0]].push(d.tubes[m[1]].pop()); d.moves--; d.sel = -1; } },
+
+  luzGo(){ startClock(); luzReset(); S.step = 'luz'; S.d = {tries:[]}; },
+  luzOk(){ S.step = 'play'; S.d = dealGolf(1); },
+  luzFail(){ S.d = dealGolf(1); fail('play'); },
+  golfGo(){ startClock(); S.step = 'play'; S.d = dealGolf(1); },
+  golfNew(){ const n = (S.d.deal || 1) + 1; if(n <= GOLF_DEALS && !S.d.won) S.d = dealGolf(n); },
+  golfDone(){ S.step = 'desvio'; S.d = {}; },
+  golfFail(){ S.d = {}; fail('desvio'); },
+  s6pick(v){ if(DESVIO[v]){ S.step = 'desvioGo'; S.d = {pick: v, tEnd: 0}; } },
+  s6timer(){ S.d.tEnd = Date.now() + DESVIO[S.d.pick].s * 1000; },
+  golfDraw(){ const d = S.d; if(d.stock.length && !d.won) d.top = d.stock.shift(); },
+  golfCard(v, el){ const d = S.d, col = d.cols[+v]; if(!col.length || d.won) return false;
+    if(adj(col[col.length - 1].r, d.top.r)){ d.top = col.pop(); d.won = d.cols.every(c => !c.length); return true; }
+    el.classList.remove('no'); void el.offsetWidth; el.classList.add('no'); return false; },
+
+  s7go(){ startClock(); S.step = 'l1'; S.d = lesson(0, 3); },
+  s7tile(v){ const d = S.d, j = +v; if(d.fb === 'ok' || d.h <= 0 || d.pick.includes(j)) return; d.pick.push(j); d.fb = ''; },
+  s7un(v){ const d = S.d; if(d.fb === 'ok' || d.h <= 0) return; d.pick.splice(+v, 1); d.fb = ''; },
+  s7check(){ const d = S.d; if(d.pick.map(j => d.bank[j]).join(' ') === LICOES[d.li].resp.join(' ')) d.fb = 'ok'; else { d.fb = 'bad'; d.h--; } },
+  s7dead(){ const li = S.d.li; S.d = lesson(li, 3); fail('l' + (li + 1)); },
+  s7next(){ const li = S.d.li, h = S.d.h; if(li === 0){ S.step = 'c1'; S.d = {code:'', err:false, h}; } else if(li === 1){ S.step = 'c2'; S.d = {code:'', err:false, h}; } else { S.step = 'tapete'; S.d = {}; } },
+  s7code(){ const el = document.getElementById('code'); const v = (el ? el.value : S.d.code || '').replace(/\D/g, ''), h = S.d.h || 3;
+    if(v === CODIGOS[S.step]){ if(S.step === 'c1'){ S.step = 'l2'; S.d = lesson(1, h); } else { S.step = 'l3'; S.d = lesson(2, h); } }
+    else { S.d.code = v; S.d.err = true; } }
+};
+
+/* ---------- Desenho ---------- */
+let lastKey = '';
+function render(){
+  let html, fase = '';
+  const n = Math.min(7, Math.max(1, S.n || 1));
+  switch(S.screen){
+    case 'intro': html = vIntro(); break;
+    case 'intro2': html = vIntro2(); break;
+    case 'hub': html = vHub(); fase = ETAPAS[Math.min(6, S.done)].f; break;
+    case 'stage': html = bar() + VIEWS[n](); fase = ETAPAS[n - 1].f; break;
+    case 'fail': html = vFail(); fase = ETAPAS[n - 1].f; break;
+    case 'gift': html = vGift(); fase = ETAPAS[n - 1].f; break;
+    case 'extra': html = vExtra(); fase = ETAPAS[Math.min(6, S.done)].f; break;
+    case 'album': html = vAlbum(); fase = ETAPAS[Math.min(6, S.done)].f; break;
+    case 'final': html = vFinal(); fase = 3; break;
+    case 'pin': html = vPin(); break;
+    case 'back': html = vBack(); break;
+    default: html = vSplash();
+  }
+  if(!(S.screen === 'stage' && S.n === 6 && S.step === 'luz')) luzReset();
+  document.documentElement.dataset.fase = fase;
+  app.innerHTML = html;
+  luzPaint();
+  const d = S.d || {};
+  const key = [S.screen, S.n, S.step, S.gstep, S.xid, d.q, d.idx, d.vi, d.round, d.li, d.shown].join('|');
+  if(key !== lastKey){ window.scrollTo(0, 0); lastKey = key; }
+  else {
+    /* Actualização no mesmo ecrã: garantir que o aviso e o botão seguinte ficam à vista. */
+    const fb = app.querySelector('.fb');
+    if(fb) (app.querySelector('.actions') || fb).scrollIntoView({block:'nearest'});
+  }
+  save();
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]');
+  if(!el || el.disabled || !ACT[el.dataset.a]) return;
+  if(ACT[el.dataset.a](el.dataset.v, el) !== false) render();
+});
+document.addEventListener('pointerdown', e => { if(e.target.closest && e.target.closest('[data-p="luz"]')) luzPress(); });
+document.addEventListener('input', e => {
+  const t = e.target, b = t.dataset && t.dataset.bind;
+  if(!b) return;
+  if(b === 'name' && S.d.names) S.d.names[+t.dataset.i] = t.value;
+  else if(b === 'code'){ t.value = t.value.replace(/\D/g, '').slice(0, 2); S.d.code = t.value; }
+  save();
+});
+document.addEventListener('keydown', e => {
+  const a = e.key === 'Enter' && e.target.dataset && e.target.dataset.enter;
+  if(a && ACT[a]){ e.preventDefault(); ACT[a](); render(); }
+});
+setInterval(() => {
+  const c = document.getElementById('clock');
+  if(c && S.t3 && !S.t3end) c.textContent = fmt(Date.now() - S.t3);
+  const m = document.getElementById('mesa-clock');
+  if(m && S.d && S.d.tEnd){ const left = S.d.tEnd - Date.now(); m.textContent = fmt(left); m.classList.toggle('over', left <= 0); }
+  if(S.screen === 'extra' && S.xd && S.xd.tEnd){
+    const left = S.xd.tEnd - Date.now(), el = document.getElementById('xq-clock');
+    if(left <= 0){ xqEnd(); render(); } else if(el) el.textContent = fmt(left + 999);
+  }
+  if(S.screen === 'stage' && S.n === 2 && S.step === 'sc' && S.d.tEnd){
+    const left = S.d.tEnd - Date.now(), sc = document.getElementById('sc-clock');
+    if(left <= 0){ S.d.tEnd = 0; S.step = 'scres'; render(); }
+    else if(sc) sc.textContent = fmt(left + 999);
+  }
+}, 500);
+
+function confetti(){
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = document.createElement('canvas'); cv.className = 'confetti'; document.body.appendChild(cv);
+  const ctx = cv.getContext('2d'), W = cv.width = innerWidth, H = cv.height = innerHeight;
+  const cs = getComputedStyle(document.documentElement), cols = ['--g1','--g2','--g3','--c2','--c3'].map(k => cs.getPropertyValue(k).trim() || '#888');
+  const P = []; for(let i = 0; i < 130; i++) P.push({x: Math.random() * W, y: -Math.random() * H * .7, vx: (Math.random() - .5) * 2, vy: 2 + Math.random() * 3.5, s: 5 + Math.random() * 7, r: Math.random() * 6.28, vr: (Math.random() - .5) * .3, c: cols[i % cols.length]});
+  const t0 = performance.now();
+  (function frame(t){
+    ctx.clearRect(0, 0, W, H);
+    P.forEach(p => { p.x += p.vx; p.y += p.vy; p.r += p.vr; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.beginPath(); ctx.roundRect(-p.s / 2, -p.s / 4, p.s, p.s / 2, 2); ctx.fill(); ctx.restore(); });
+    if(t - t0 < 5200) requestAnimationFrame(frame); else cv.remove();
+  })(t0);
+}
+
+/* ---------- Arranque ---------- */
+function boot(data){
+  const o = data && data.v === 3 ? data : load();
+  if(o) S = Object.assign(fresh(), o);
+  if(S.screen === 'pin' || S.screen === 'back' || S.screen === 'intro' || S.screen === 'intro2') S.screen = 'splash';
+  if(S.d && S.d.lock && S.d.cards){ S.d.open.forEach(i => { S.d.cards[i].up = false; }); S.d.open = []; S.d.lock = false; }
+  S.ask = false; S.pinErr = false;
+  if(S.done > S.open && S.screen !== 'gift') S.open = S.done;
+  if(S.step === 'luz' && S.d && !S.d.tries) S.d = {tries:[]};
+  render();
+  loadFotos().then(() => { if(Object.keys(FOTO).length) render(); });
+}
+/* Fora do Claude (alojada num endereço próprio) a página instala-se como app. */
+try{
+  if(window.top === window.self && (location.protocol === 'https:' || location.hostname === 'localhost')){
+    const link = (rel, href) => { const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l); };
+    link('manifest', 'manifest.webmanifest'); link('apple-touch-icon', 'apple-touch-icon.png');
+    if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}catch(e){}
+const hot = window.claude && window.claude.hot;
+if(hot && hot.snapshot) hot.snapshot(() => S);
+if(hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>

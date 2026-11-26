@@ -170,6 +170,7 @@ strong{font-weight:600}
 .opts{display:grid;gap:8px}
 .opt{min-height:54px;text-align:left;padding:14px 16px;background:var(--card);border:0;border-radius:14px;font-weight:500}
 .opt:disabled{cursor:default;color:var(--ink)}
+.opt.on{background:var(--accent);color:var(--on-accent)}
 .opt.right{box-shadow:inset 0 0 0 2px var(--ok);color:var(--ok)}
 .opt.wrong{box-shadow:inset 0 0 0 2px var(--bad);color:var(--bad)}
 
@@ -178,6 +179,9 @@ strong{font-weight:600}
 .namerow{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center}
 .inp{min-height:48px;width:100%;background:var(--card);border:0;border-radius:12px;padding:10px 14px}
 .inp::placeholder{color:var(--ink3)}
+textarea.inp{display:block;min-height:96px;padding:12px 14px;resize:none;line-height:1.35;font:inherit}
+.carta{margin:0;background:var(--card);border-radius:16px;padding:16px 18px;font-size:19px;line-height:1.4;font-weight:500;letter-spacing:-.01em;overflow-wrap:anywhere}
+.carta footer{margin-top:10px;font-size:14px;font-weight:600;color:var(--ink2)}
 .phrase{background:var(--card);border-radius:16px;padding:14px 16px;display:grid;gap:6px}
 .phrase q{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.25;quotes:"«" "»"}
 .picks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -287,6 +291,9 @@ strong{font-weight:600}
 .mc{aspect-ratio:1;border:0;border-radius:14px;padding:0;background:linear-gradient(135deg,var(--g1),var(--g2) 55%,var(--g3));font-size:30px;line-height:1;display:grid;place-items:center}
 .mc.up,.mc.ok{background:var(--card)}
 .mc.ok{opacity:.5}
+.mc svg{height:82%;width:auto;display:block}
+.dch{display:inline-flex;align-items:center;gap:1px;font-size:13px;font-weight:700;color:var(--p1)}
+.dch svg{width:15px;height:15px}
 
 /* Desvio */
 .choice{display:grid;gap:4px;text-align:left;background:var(--card);border:0;border-radius:16px;padding:16px}
@@ -398,7 +405,8 @@ const DB_FIXO = 'https://anos-ana-default-rtdb.europe-west1.firebasedatabase.app
 const SALA = 'festa';
 const QS = new URLSearchParams(location.search);
 const LOCAL = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-const DB = ((LOCAL && QS.get('db')) || DB_FIXO).replace(/\/+$/, '');
+/* Em ensaios locais só se liga à base de dados que vier no endereço, nunca à verdadeira. */
+const DB = (LOCAL ? QS.get('db') || '' : DB_FIXO).replace(/\/+$/, '');
 const APP = QS.get('app') === 'gerir' ? 'gerir' : QS.get('app') === 'mesa' ? 'mesa' : 'jogo';
 const SOLO = (() => { try{ return window.top === window.self; }catch(e){ return false; } })();
 const ONLINE = !!DB && SOLO;
@@ -421,7 +429,7 @@ const ETAPAS = [
 ];
 const PRENDAS = [
   {nome:'Anchovas do Mercadona', nota:'Em qualquer ilha, a primeira recompensa é sempre comida.'},
-  {nome:'Camisola da Liga Europa', nota:'Imunidade ganha. Veste-a já, que ainda vai ser precisa.'},
+  {nome:'Camisola da Liga Europa do SCUT', nota:'Imunidade ganha. Veste-a já, que ainda vai ser precisa.'},
   {nome:'Álbum de fotografias de 2026', nota:'O teu 2026 inteiro em papel. Só faltava a fotografia de hoje.'},
   {nome:'Máscara Omnilux', nota:'Num jogo de traidores, a única máscara que interessa.'},
   {nome:'Bilhetes para Warriors', nota:'Estavam no cofre desde o início do jogo. Voltam a ser teus.', tag:'Prenda recuperada'},
@@ -432,23 +440,27 @@ const MOMENTOS = [
   'A vencedora com a lata na mão e a venda ainda na testa.',
   'A camisola vestida e pose de golo.',
   'O álbum aberto na última página, com o júri atrás.',
-  'A máscara posta, ao lado de quem te traiu.',
+  'A máscara posta, ao lado de quem te tentou enganar.',
   'Os bilhetes na mão, em cima das almofadas.',
   'Os dois juntos, com os bilhetes novos.',
   'Em cima da bicicleta, no tapete do Pit Stop, com toda a gente.'
 ];
 /* Missões do dia: `de` é o número de prendas abertas a partir do qual a missão fica disponível. */
 const EXTRAS = [
-  {id:'x1', de:0, q:'Ao acordar', t:'Confessionário de abertura', r:'Antes de saíres do quarto, grava um vídeo de 20 segundos: como te sentes e quem achas que te vai trair hoje.', f:'Um retrato do confessionário, despenteada e tudo.'},
-  {id:'x2', de:1, q:'Durante a manhã', t:'O ídolo escondido', r:'Há um ídolo de imunidade escondido em casa. O apresentador dá-te uma única pista, e tens até ao almoço para o encontrar.', f:'O ídolo na mão, no sítio onde estava.', h:'Dá a pista em voz alta, uma só vez. Confirma quando a Ana aparecer com o ídolo.'},
-  {id:'xq', de:2, q:'A meio da manhã', t:'Quiz de fã', quiz:true, r:'Nove perguntas sobre as tuas Anices de bancada: Chiefs, Sporting, Lewis Hamilton, os teus podcasts e um certo discurso. Tens 65 segundos, uma só tentativa, e precisas de sete certas.'},
-  {id:'x3', de:3, q:'Ao almoço', t:'Brinde em holandês', r:'Antes da sobremesa, levanta-te e faz um brinde com pelo menos quatro frases em holandês. A mesa decide se convenceu.', f:'O brinde, de copo no ar.'},
-  {id:'x4', de:4, q:'Depois do almoço', t:'Fotografia de elenco', r:'Junta toda a gente para a fotografia oficial do programa: tu ao centro, e quem te traiu a apontar para um inocente.', f:'O elenco completo.'},
-  {id:'x5', de:7, q:'Ao fim da tarde', t:'Volta de honra', r:'Leva a prenda n.º 7 a dar uma volta ao quarteirão e traz uma fotografia tirada no ponto mais longe de casa.', f:'A prova de que foste até lá.'},
-  {id:'x7', de:7, q:'Ao fim da tarde', t:'Episódio especial', r:'Gravem os dois um episódio de dois minutos sobre a Corrida Final, ao estilo do P1: tu és a piloto, o apresentador faz as perguntas. Tem de acabar com a tua previsão para o resto da noite.', f:'Os dois ao microfone.'},
-  {id:'x6', de:7, q:'À noite', t:'O discurso dos 0,4%', r:'De pé e de copo na mão, faz o teu discurso de desfile de campeã, ao estilo do Mamdani na festa dos Knicks. Chama pelo nome toda a gente que jogou hoje, suplentes incluídos. Conta o momento do dia em que só tinhas 0,4% de hipóteses. E fecha a dizer que ganhaste à tua maneira. Depois junta as sete prendas para a fotografia de família.', f:'As sete prendas juntas, contigo no meio.'}
+  {id:'x1', de:0, ate:1, q:'Ao acordar', t:'Confessionário de abertura', r:'Antes de saíres do quarto, grava um vídeo de 20 segundos: como te sentes e quem achas que te vai enganar hoje.', f:'Um retrato do confessionário, despenteada e tudo.'},
+  {id:'x2', de:1, ate:4, q:'Até ao almoço', t:'O ídolo escondido', r:'Há um ídolo de imunidade escondido em casa. O apresentador dá-te uma única pista, e tens até ao almoço para o encontrar.', f:'O ídolo na mão, no sítio onde estava.', h:'Dá a pista em voz alta, uma só vez. Confirma quando a Ana aparecer com o ídolo.'},
+  {id:'xq', de:2, ate:3, q:'A meio da manhã', t:'Quiz de fã', quiz:true, r:'Nove perguntas sobre as tuas Anices de bancada: Chiefs, Sporting, Lewis Hamilton, os teus podcasts e um certo discurso. Tens 65 segundos, uma só tentativa, e precisas de sete certas.'},
+  {id:'xa', de:3, ate:4, net:true, esp:'ioa', q:'À entrada do almoço', t:'Isto ou aquilo', r:'Oito perguntas com duas opções sobre ti. Em cada uma, os convidados tentam adivinhar no telemóvel o que vais escolher. Quem te conhecer melhor ganha um escudo e fica a salvo na primeira ronda da Mesa Redonda.'},
+  {id:'x3', de:3, ate:5, q:'Ao almoço', t:'Brinde em holandês', r:'Antes da sobremesa, levanta-te e faz um brinde com pelo menos quatro frases em holandês. A mesa decide se convenceu.', f:'O brinde, de copo no ar.'},
+  {id:'xb', de:4, ate:5, net:true, esp:'cor', q:'À sobremesa', t:'Correio da mesa', r:'A mesa escreveu-te mensagens sem assinar. Lê cada uma, em voz alta ou só para ti, e diz quem a escreveu. Acerta em metade e a missão está cumprida.'},
+  {id:'x4', de:4, ate:5, q:'Depois do almoço', t:'Fotografia de elenco', r:'Junta toda a gente para a fotografia oficial do programa, contigo ao centro.', f:'O elenco completo.'},
+  {id:'x5', de:7, ate:9, q:'Ao fim da tarde', t:'Volta de honra', r:'Leva a prenda n.º 7 a dar uma volta ao quarteirão e traz uma fotografia.', f:'A prova de que foste até lá.'},
+  {id:'x6', de:7, ate:9, q:'À noite', t:'O discurso dos 0,4%', r:'De pé e de copo na mão, faz o teu discurso de desfile de campeã, ao estilo do Mamdani na festa dos Knicks. Conta um momento do dia em que só tinhas 0,4% de hipóteses e fecha a dizer que ganhaste à tua maneira.', f:'Uma fotografia à tua escolha.'}
 ];
-const ALBUM = ['x1','g1','x2','g2','g3','x3','g4','x4','g5','g6','g7','x5','x7','x6'];
+/* As missões que dependem dos telemóveis dos convidados só existem com a ligação montada. */
+const MISSOES_DIA = () => EXTRAS.filter(e => !e.net || ONLINE);
+const feita = v => v === 'r' || v === 'f' || v === 'd';
+const ALBUM = ['x1','g1','x2','g2','g3','x3','g4','x4','g5','g6','g7','x5','x6'];
 const FAQ = [
   {q:'Em que estado jogam os Kansas City Chiefs?', o:['Kansas','Missouri','Nebraska','Oklahoma'], a:1},
   {q:'Que número usa Patrick Mahomes?', o:['12','15','17','87'], a:1},
@@ -458,15 +470,15 @@ const FAQ = [
   {q:'Em que ano ganhou Lewis Hamilton o primeiro título mundial?', o:['2007','2008','2010','2014'], a:1},
   {q:'Qual é o apelido do Tommy do P1?', o:['Gallagher','Bellingham','Brundle','Clarkson'], a:1},
   {q:'Em que canal passa o First Things First?', o:['ESPN','NFL Network','FS1','CBS Sports'], a:2},
-  {q:'No discurso do desfile dos Knicks, que hipótese davam os modelos à equipa a meio do jogo 4?', o:['0,4%','4%','14%','40%'], a:0}
+  {q:'Que hipótese davam os modelos aos Knicks a menos de dez minutos do fim do jogo 4?', o:['0,4%','4%','14%','40%'], a:0}
 ];
 const FAQ_T = 65000, FAQ_MIN = 7;
 const LUZ_MAX = 350, LUZ_OK = 3;
+const CORRIDA = 3600000;   /* uma hora para as etapas 5, 6 e 7 */
 const CASTIGOS = [
   'Canta os parabéns a ti própria em holandês.',
   'Faz um discurso de vencedora de 30 segundos, com agradecimentos ao júri.',
   'Dança 20 segundos sem música. O júri dá nota.',
-  'Imita o apresentador até alguém se rir.',
   'Diz cinco palavras em holandês que ainda ninguém disse hoje.',
   'Canta o teu cântico preferido do Sporting, de pé e de mão no peito.',
   'Relata os próximos 30 segundos da festa como se fosse a última volta de um Grande Prémio.'
@@ -474,10 +486,9 @@ const CASTIGOS = [
 const PROVAS = [['Mel','honing'],['Mostarda','mosterd'],['Azeitona','olijf'],['Chocolate preto','pure chocolade'],['Anchova','ansjovis']];
 const PARES = [['honing','mel'],['mosterd','mostarda'],['olijf','azeitona'],['pure chocolade','chocolate preto'],['ansjovis','anchova'],['pindakaas','manteiga de amendoim'],['augurk','pepino em conserva'],['kaneel','canela']];
 const PARES_ERROS = 2;
-const TURNO = 100000, TURNO_MIN = 10;
+const TURNO = 80000, TURNO_MIN = 10;
 const PERGUNTAS = {
   A:{q:'Leva documentos aduaneiros?', o:['Sim','Não']},
-  P:{q:'Que peso se cobra?', o:['Até 5 kg','5 a 10 kg','10 a 20 kg','20 a 30 kg']},
   S:{q:'Que sobretaxa leva?', o:['Zona remota','Sobredimensão','Excesso de peso','Nenhuma']},
   E:{q:'Onde está o erro?', o:['Código postal','País','Peso','Não há erro']}
 };
@@ -486,10 +497,6 @@ const ENCOMENDAS = [
   {t:'A', n:'C. Santana', m:'Calle Triana 48', cp:'35002', c:'Las Palmas', p:'ES', kg:'1,5', d:'25 × 20 × 10', a:0, w:'As Canárias estão fora da zona de IVA da UE.'},
   {t:'A', n:'R. Freitas', m:'Rua da Carreira 90', cp:'9000-042', c:'Funchal', p:'PT', kg:'3,0', d:'30 × 30 × 15', a:1, w:'A Madeira está dentro da zona de IVA da UE.'},
   {t:'A', n:'S. Byrne', m:'12 Grafton Street', cp:'D02 X285', c:'Dublin', p:'IE', kg:'4,0', d:'40 × 30 × 20', a:1, w:'A Irlanda faz parte da UE.'},
-  {t:'P', n:'J. de Boer', m:'Oudegracht 110', cp:'3511 AW', c:'Utrecht', p:'NL', kg:'8,0', d:'60 × 40 × 40', a:2, w:'Volumétrico: 96 000 ÷ 5000 = 19,2 kg.'},
-  {t:'P', n:'M. Sousa', m:'Rua de Cedofeita 300', cp:'4050-174', c:'Porto', p:'PT', kg:'3,0', d:'50 × 50 × 50', a:3, w:'Volumétrico: 125 000 ÷ 5000 = 25 kg.'},
-  {t:'P', n:'A. Romero', m:'Calle Sierpes 15', cp:'41004', c:'Sevilla', p:'ES', kg:'4,0', d:'40 × 30 × 20', a:0, w:'Volumétrico: 24 000 ÷ 5000 = 4,8 kg. Passa os 4 kg reais, mas fica abaixo de 5.'},
-  {t:'P', n:'E. Peeters', m:'Veldstraat 44', cp:'9000', c:'Gent', p:'BE', kg:'12,0', d:'40 × 30 × 30', a:2, w:'Volumétrico: 36 000 ÷ 5000 = 7,2 kg. Cobra-se o real, 12 kg.'},
   {t:'S', n:'T. Visser', m:'Weverstraat 8', cp:'1791 AB', c:'Den Burg, Texel', p:'NL', kg:'5,0', d:'30 × 20 × 10', a:0, w:'Texel é uma ilha.'},
   {t:'S', n:'P. Girard', m:'Rue de la République 60', cp:'69002', c:'Lyon', p:'FR', kg:'12,0', d:'150 × 20 × 20', a:1, w:'O lado maior tem 150 cm.'},
   {t:'S', n:'K. Schmidt', m:'Torstraße 101', cp:'10119', c:'Berlin', p:'DE', kg:'31,0', d:'40 × 40 × 40', a:2, w:'31 kg passa o limite dos 30.'},
@@ -499,34 +506,45 @@ const ENCOMENDAS = [
   {t:'E', n:'O. Lambert', m:'Rue Faidherbe 9', cp:'59000', c:'Lille', p:'FR', kg:'0,0', d:'35 × 25 × 10', a:2, w:'Uma encomenda não pesa 0 kg.'},
   {t:'E', n:'V. Dubois', m:'Rue Neuve 25', cp:'1000', c:'Bruxelles', p:'BE', kg:'2,5', d:'30 × 20 × 20', a:3, w:'Na Bélgica o código tem mesmo quatro algarismos.'}
 ];
-const MEMO = ['\u{1F4F7}','✈️','\u{1F3D6}️','⚽','\u{1F384}','\u{1F382}','☀️','\u{1F377}'];
-const MEM_MAX = 16;
+const MEMO = ['\u{1F4F7}','✈️','\u{1F3D6}️','⚽','ANA','\u{1F382}','☀️','\u{1F377}'];   /* 'ANA' desenha o boneco dela */
+const MEM_MAX = 15;
 const GOLF_DEALS = 3;
 const DESVIO = {
   passe:{t:'Passe sem olhar', s:0, r:'À Mahomes: cinco passes com a bola de meias para um cesto a três metros, a olhar para o lado contrário. Precisas de acertar três.'},
-  hot:{t:'Hot take', s:45, r:'Ao estilo do First Things First: 45 segundos a defender a tua opinião mais impopular sobre o dia de hoje, sem te rires e sem dizeres «tipo».'}
+  hot:{t:'Hot take', s:45, r:'Ao estilo do First Things First: 45 segundos a defender a tua opinião mais impopular sobre o dia de hoje. Não te podes rir, e tens de convencer o júri.'}
 };
 const QUIZ = [
   {q:'Quem marcou o golo que deu o Mundial de 2026 à Espanha?', o:['Lamine Yamal','Mikel Oyarzabal','Ferran Torres','Mikel Merino'], a:2},
   {q:'Os Jogos Olímpicos de Inverno de 2026 foram em Milão e em que outra cidade?', o:['Turim','Innsbruck','Cortina d’Ampezzo','Chamonix'], a:2},
   {q:'Com que canção a Bulgária ganhou a Eurovisão de 2026?', o:['Michelle','Wasted Love','Choke Me','Bangaranga'], a:3},
-  {live:true, q:'Esta pergunta é do apresentador, sobre o vosso 2026.'},
+  {live:true, q:'Em quantos países diferentes estiveste este ano?'},
   {live:true, q:'Mais uma do apresentador, sobre o vosso 2026.'}
 ];
 const QUIZ_MIN = 4;
+/* Isto ou aquilo: não há resposta certa de antemão, vale o que a Ana escolher na hora. */
+const IOA = [
+  {q:'Noite perfeita de sofá', o:['Netflix','Desporto']},
+  {q:'Domingo de desporto', o:['Grande Prémio de F1','Jogo dos Chiefs']},
+  {q:'O que custa mais falhar', o:['A lição do dia no Duolingo','Um jogo do Sporting']},
+  {q:'No telemóvel antes de dormir', o:['Podcast','Jogo']},
+  {q:'Para ouvir a caminho do trabalho', o:['First Things First','P1 with Matt and Tommy']},
+  {q:'Numa fotografia', o:['Atrás da câmara','À frente da câmara']},
+  {q:'À mesa', o:['Anchovas','Queijo Manchego']},
+  {q:'Fim-de-semana ideal', o:['Cidade nova','Casa e sofá']}
+];
 const FOTOS = [
-  'A fotografia que falta ao teu 2026: o retrato de hoje, com toda a gente da casa.',
-  'Um retrato do júri a rir. A rir a sério, não a fingir.',
-  'Uma natureza-morta com as duas prendas que já ganhaste.'
+  'A fotografia que falta ao teu 2026: tu com os teus pais, na pose que escolherem.',
+  'Uma fotografia que explique o que estás a sentir neste momento.',
+  'Tu a levantar a Taça de Portugal, com a camisola do SCUT vestida.'
 ];
 const MISSOES = [
   {t:'Telefone estragado',
    r:['A Ana lê a frase em silêncio e di-la ao ouvido de quem está à sua direita.','A frase dá a volta à mesa, de ouvido em ouvido.','A última pessoa diz em voz alta o que ouviu. Se bater certo, a missão está cumprida.'],
-   frase:'Sete prendas, três tochas e alguém a trair nesta mesa.',
-   nota:'Quem trai pode trocar uma palavra. Quem é fiel passa a frase tal como a ouviu.'},
+   frase:'Sete prendas, três tochas e alguém me quer enganar nesta mesa.',
+   nota:'Quem engana pode trocar uma palavra. Quem é fiel passa a frase tal como a ouviu.'},
   {t:'Pontaria',
    r:['A Ana escolhe três jogadores.','Cada um atira três bolas de papel para a taça, a três passos de distância.','Cinco bolas dentro em nove e a missão está cumprida.'],
-   nota:'Quem trai pode falhar de propósito. Convém que pareça azar.'},
+   nota:'Quem engana pode falhar de propósito, sem se notar.'},
   {t:'Voto secreto',
    r:['A Ana escolhe a equipa da última missão.','Cada escolhido vota em segredo no telemóvel: cumprir ou sabotar.','Basta um voto de sabotagem para a missão falhar.'],
    nota:'O voto de quem é fiel conta sempre como cumprir, carregue onde carregar.'}
@@ -546,7 +564,7 @@ const NAIPES = ['espadas','copas','ouros','paus'];
 const TITULOS = ['campeã dos 0,4%','salva pela última chama','finalista de ferro','única sobrevivente'];
 
 /* ---------- Estado ---------- */
-function fresh(){ return {v:3, screen:'splash', intro:false, done:0, torches:3, n:0, step:'', d:{}, after:'', castigo:0, t3:0, t3end:0, pinErr:false, ask:false, open:0, gstep:'', x:{}, xid:'', xd:null, xscore:0, ret:'', menu:false}; }
+function fresh(){ return {v:3, screen:'splash', intro:false, done:0, torches:3, n:0, step:'', d:{}, after:'', castigo:0, t3:0, t3end:0, pinErr:false, ask:false, open:0, gstep:'', x:{}, xid:'', xd:null, xscore:0, ret:'', menu:false, dicas:0, t3out:false, correio:[], escudo:null}; }
 function load(){ try{ const o = JSON.parse(localStorage.getItem(KEY) || 'null'); return o && o.v === 3 ? o : null; }catch(e){ return null; } }
 function save(){ if(APP !== 'jogo') return; try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 let S = fresh();
@@ -594,7 +612,7 @@ function luzPress(){
 }
 function xqEnd(){
   const sc = S.xd ? S.xd.ok : 0; S.xscore = sc; S.xd = null;
-  if(sc >= FAQ_MIN){ S.x.xq = S.torches < 3 ? 'r' : 'f'; if(S.torches < 3) S.torches++; } else S.x.xq = 'n';
+  S.x.xq = sc >= FAQ_MIN ? premio() : 'n';
 }
 
 /* Ligação: API REST da Realtime Database, com escuta por EventSource. */
@@ -633,18 +651,22 @@ if(ONLINE){
 }
 
 /* O telemóvel da Ana é a autoridade: publica o estado, recebe comandos do apresentador e gere a Mesa Redonda. */
-const MESA = {jog:{}, voto:{}};
-const LIG = {host:0, hostT:0, was:false, pub:'', mesa:'', t:0, cmd:'', jog:'{}', voto:'{}', on:false};
+const MESA = {jog:{}, voto:{}, ioa:{}, correio:{}};
+const LIG = {host:0, hostT:0, was:false, pub:'', mesa:'', t:0, cmd:'', jog:'{}', voto:'{}', ioa:'{}', cor:'{}', on:false};
 const hostOn = () => APP === 'jogo' && Date.now() - LIG.host < 25000;
 function pubMesa(){
-  const d = S.d || {};
+  const d = S.d || {}, x = S.xd;
   let o = null;
-  if(S.n === 4 && S.done < 4 && S.step === 'lobby') o = {fase:'lobby'};
+  if(S.screen === 'extra' && S.xid === 'xa' && x && x.tipo === 'ioa') o = x.fim ? {fase:'ioaFim', rank: x.rank, esc: x.esc || '', escId: S.escudo ? S.escudo.id : ''}
+    : {fase:'ioa', q: x.q, n: IOA.length, p: IOA[x.q].q, o: IOA[x.q].o, rev: x.rev, ana: x.rev ? x.ana : -1, certos: x.rev ? x.certos : [], pts: x.pts};
+  else if(S.screen === 'extra' && S.xid === 'xb' && x && x.tipo === 'cor') o = x.fim ? {fase:'correioFim', ok: x.ok, n: x.msgs.length}
+    : {fase:'correio', i: x.i, n: x.msgs.length, rev: x.rev, ult: x.rev ? {nm: x.msgs[x.i].nm, ok: x.pick === x.msgs[x.i].id} : null};
+  else if(S.n === 4 && S.done < 4 && S.step === 'lobby') o = {fase:'lobby'};
   else if(S.n === 4 && S.done < 4 && d.mode === 'on' && d.players){
     const P = d.players;
     o = {fase: S.step, ronda: d.round, jog: P.map(x => ({id: x.id, nm: x.nm, out: !!x.out})), equipa: (d.team || []).map(i => P[i].id), log: d.log || [],
       sab: S.step === 'mres' ? d.sab : -1, last: S.step === 'ban' && d.last >= 0 ? {nm: P[d.last].nm, t: P[d.last].role === 'T'} : null,
-      tEnd: d.tEnd || 0, res: d.res || '', vid: d.vid || '', quem: S.step === 'fim' ? P.filter(x => x.role === 'T' && !x.out).map(x => x.nm) : []};
+      tEnd: d.tEnd || 0, res: d.res || '', vid: d.vid || '', esc: S.escudo ? S.escudo.id : '', quem: S.step === 'fim' ? P.filter(x => x.role === 'T' && !x.out).map(x => x.nm) : []};
   }
   if(!o) return;
   const j = JSON.stringify(o);
@@ -659,6 +681,8 @@ function publish(){
     pubMesa();
   }, 200);
 }
+/* Quem ganhou o «Isto ou aquilo» não pode ser banido na primeira ronda. */
+const escudado = i => { const d = S.d || {}, pl = d.players && d.players[i]; return !!(pl && pl.id && d.round === 1 && S.escudo && S.escudo.id === pl.id); };
 function fechaVotos(forcar){
   const d = S.d;
   if(!(S.screen === 'stage' && S.n === 4 && S.step === 'voto' && d.mode === 'on')) return false;
@@ -756,22 +780,23 @@ const ICO = {
 
 const CHEV = `<svg viewBox="0 0 11 18" width="11" height="18" aria-hidden="true"><path d="M9 2L2.5 9 9 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const LISTA = `<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+const LAMP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 18h5M10.5 21h3M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>';
 function bar(lite){
   const voltar = `<button class="navb" data-a="back">${CHEV}<span>Voltar</span></button>`;
   if(lite) return `<header class="bar"><div class="bar-row">${voltar}</div></header>`;
   let t = ''; for(let i = 0; i < 3; i++) t += flame(i < S.torches);
   let tr = ''; for(let k = 1; k <= 7; k++) tr += `<i class="${k <= S.done ? 'done' : k === S.done + 1 ? 'now' : ''}"></i>`;
-  const clock = S.t3 && !S.t3end ? `<span class="clock" id="clock" aria-label="Tempo da Corrida Final">${fmt(Date.now() - S.t3)}</span>` : '';
-  return `<header class="bar"><div class="bar-row">${voltar}<div class="bar-right">${clock}<span class="torches" role="img" aria-label="${S.torches} de 3 tochas acesas">${t}</span><button class="navb menu" data-a="menu" aria-label="Ver o progresso: ${S.open} de 7 prendas">${LISTA}<span>${S.open}/7</span></button></div></div><div class="track" role="img" aria-label="${S.done} de 7 etapas ganhas">${tr}</div></header>`;
+  const clock = S.t3 && !S.t3end ? `<span class="clock${Date.now() - S.t3 >= CORRIDA ? ' over' : ''}" id="clock" aria-label="Tempo que resta da Corrida Final">${fmt(CORRIDA - (Date.now() - S.t3))}</span>` : '';
+  return `<header class="bar"><div class="bar-row">${voltar}<div class="bar-right">${clock}${S.dicas > 0 ? `<span class="dch" role="img" aria-label="${S.dicas} ${S.dicas === 1 ? 'dica' : 'dicas'} por usar">${LAMP}${S.dicas}</span>` : ''}<span class="torches" role="img" aria-label="${S.torches} de 3 tochas acesas">${t}</span><button class="navb menu" data-a="menu" aria-label="Ver o progresso: ${S.open} de 7 prendas">${LISTA}<span>${S.open}/7</span></button></div></div><div class="track" role="img" aria-label="${S.done} de 7 etapas ganhas">${tr}</div></header>`;
 }
 function vMenu(){
-  const nx = EXTRAS.filter(e => S.x[e.id] && S.x[e.id] !== 'n').length, nf = ALBUM.filter(id => FOTO[id]).length;
+  const nx = MISSOES_DIA().filter(e => feita(S.x[e.id])).length, nf = ALBUM.filter(id => FOTO[id]).length;
   return `<div class="sheet-bg" data-a="menuClose"></div><aside class="sheet" role="dialog" aria-modal="true" aria-label="Progresso">
     <div class="shift"><h2 class="sec" style="margin:0">Progresso</h2><button class="mini" data-a="menuClose">Fechar</button></div>
     <div class="stats four">
       <div class="stat"><span class="lbl">Prendas</span><b>${S.open}/7</b></div>
       <div class="stat"><span class="lbl">Tochas</span><b>${S.torches}/3</b></div>
-      <div class="stat"><span class="lbl">Missões</span><b>${nx}/${EXTRAS.length}</b></div>
+      <div class="stat"><span class="lbl">Missões</span><b>${nx}/${MISSOES_DIA().length}</b></div>
       <div class="stat"><span class="lbl">Fotos</span><b>${nf}</b></div>
     </div>
     <ol class="group won">${ETAPAS.map(e => {
@@ -815,13 +840,21 @@ function vIntro2(){
     + acts(btn('Aceito o desafio', 'introOk'));
 }
 
+/* Missão por resolver que tem de ficar fechada antes da etapa n. */
+const pendente = n => MISSOES_DIA().find(e => e.ate <= n && S.open >= e.de && !S.x[e.id]);
+/* Missão cumprida: reacende uma tocha apagada; com as três acesas, dá uma dica para usar num jogo. */
+function premio(){ if(S.torches < 3){ S.torches++; return 'r'; } S.dicas = (S.dicas || 0) + 1; return 'd'; }
+
 function vHub(){
   const next = S.done + 1;
   let out = bar() + tag('Mapa do jogo');
   out += `<h1 class="title">${S.done === 0 ? 'Tudo por ganhar' : S.done >= 7 ? 'Sete em sete' : S.done + ' de 7 prendas'}</h1>`;
   if(next === 4) out += host('A Fase 2 joga-se à mesa. Espera que os convidados estejam todos sentados.');
-  if(next === 5) out += host('A Fase 3 é a contar. O relógio arranca na partida da etapa 5 e só pára no tapete.');
-  out += S.open < S.done ? btn(`Abrir a prenda n.º ${S.open + 1}`, 'giftBack') : next <= 7 ? btn(`Jogar a etapa ${next}`, 'play') : btn('Ver o final', 'play');
+  if(next === 5) out += host('A Fase 3 é a contar: uma hora para as três etapas. O relógio arranca na partida da etapa 5 e só pára no tapete.');
+  const bloq = S.open >= S.done && next <= 7 ? pendente(next) : null;
+  out += S.open < S.done ? btn(`Abrir a prenda n.º ${S.open + 1}`, 'giftBack')
+    : bloq ? `<p class="muted small" style="padding:0 4px">Antes da etapa ${next} há uma missão obrigatória por resolver.</p>` + btn(`Missão: ${bloq.t}`, 'extra', {v: bloq.id})
+    : next <= 7 ? btn(`Jogar a etapa ${next}`, 'play') : btn('Ver o final', 'play');
   const pos = Math.min(6, S.done), X = i => i % 2 ? 87.5 : 12.5, Y = i => ROW * i + ROW / 2;
   const troco = i => `M${X(i)} ${Y(i)}C${X(i)} ${Y(i) + ROW} ${X(i + 1)} ${Y(i + 1) - ROW} ${X(i + 1)} ${Y(i + 1)}`;
   let todo = '', feito = '';
@@ -833,9 +866,9 @@ function vHub(){
     return `<li class="stop ${cls}${i % 2 ? ' r' : ''}" data-f="${e.f}"><span class="node">${i === pos ? `<span class="eu" role="img" aria-label="A Ana está aqui">${BONECO}</span>` : ''}<span class="dot">${e.n <= S.done ? CHECK : e.n}</span></span><span class="txt">${nova ? `<span class="fz">${FASES[e.f - 1].nome} · ${FASES[e.f - 1].quando}</span>` : ''}<span class="nm">${e.t}</span><span class="st">${st}</span></span></li>`;
   }).join('')}</ol></div>`;
   const nf = ALBUM.filter(id => FOTO[id]).length;
-  out += `<section class="fase"><div class="fase-h"><h2>Missões do dia</h2><span>Cada uma reacende uma tocha apagada</span></div><div class="etapas">${EXTRAS.map(e => {
-    const v = S.x[e.id], ok = !!v && v !== 'n', av = S.open >= e.de && v !== 'n';
-    return `<button class="etapa ${ok ? 'done' : av ? 'now' : 'locked'}" data-a="extra" data-v="${e.id}"${av ? '' : ' disabled'}><span class="num">${ok ? CHECK : v === 'n' ? CROSS : STAR}</span><span><span class="nm">${e.t}</span><span class="st">${ok ? 'Cumprida' : v === 'n' ? 'Falhada' : e.q}</span></span></button>`;
+  out += `<section class="fase"><div class="fase-h"><h2>Missões do dia</h2><span>Obrigatórias. Valem uma tocha ou uma dica</span></div><div class="etapas">${MISSOES_DIA().map(e => {
+    const v = S.x[e.id], ok = feita(v), ab = S.open >= e.de && v !== 'n' && v !== 's';
+    return `<button class="etapa ${ok ? 'done' : ab ? 'now' : 'locked'}" data-a="extra" data-v="${e.id}"${ab ? '' : ' disabled'}><span class="num">${ok ? CHECK : v ? CROSS : STAR}</span><span><span class="nm">${e.t}</span><span class="st">${ok ? 'Cumprida' : v === 'n' ? 'Não cumprida' : v === 's' ? 'Saltada' : ab && e.ate <= 7 ? `${e.q} · antes da etapa ${e.ate}` : e.q}</span></span></button>`;
   }).join('')}</div></section>`;
   out += btn(`Álbum do dia · ${nf} ${nf === 1 ? 'fotografia' : 'fotografias'}`, 'album', {cls:'alt'});
   out += `<button class="link" data-a="pin">Bastidores, só para o apresentador</button>`;
@@ -866,13 +899,13 @@ function vGift(){
 }
 
 function vFinal(){
-  const tempo = S.t3 && S.t3end ? fmt(S.t3end - S.t3) : '', nx = EXTRAS.filter(e => S.x[e.id] && S.x[e.id] !== 'n').length, fotos = ALBUM.filter(id => FOTO[id]);
+  const tempo = S.t3 && S.t3end ? fmt(S.t3end - S.t3) : '', nx = MISSOES_DIA().filter(e => feita(S.x[e.id])).length, fotos = ALBUM.filter(id => FOTO[id]);
   return bar() + tag('Pit Stop') + `<h1 class="title">Ana, chegaste <span class="grad">ao fim</span></h1>
     <p class="lead">Sete etapas, sete prendas. Acabas o jogo como <strong>${TITULOS[S.torches]}</strong>.</p>
     <div class="stats">
       <div class="stat"><span class="lbl">Tochas acesas</span><b>${S.torches}/3</b></div>
-      ${tempo ? `<div class="stat"><span class="lbl">Corrida Final</span><b>${tempo}</b></div>` : ''}
-      <div class="stat"><span class="lbl">Missões do dia</span><b>${nx}/${EXTRAS.length}</b></div>
+      ${tempo ? `<div class="stat"><span class="lbl">Corrida Final${S.t3out ? ' · fora da hora' : ' · em 60:00'}</span><b>${tempo}</b></div>` : ''}
+      <div class="stat"><span class="lbl">Missões do dia</span><b>${nx}/${MISSOES_DIA().length}</b></div>
       <div class="stat"><span class="lbl">Fotografias</span><b>${fotos.length}</b></div>
     </div>
     <ol class="group won">${PRENDAS.map((p, i) => `<li><span class="num-s">${i + 1}</span><span>${p.nome}</span></li>`).join('')}</ol>
@@ -883,7 +916,9 @@ function vFinal(){
 
 function vExtra(){
   const e = EXTRAS.find(x => x.id === S.xid) || EXTRAS[0], ok = S.x[e.id], x = S.xd;
-  const cab = bar() + tag('Missão do dia · ' + e.q);
+  const cab = bar() + tag('Missão obrigatória · ' + e.q);
+  if(e.esp === 'ioa') return vIoa(e, cab);
+  if(e.esp === 'cor') return vCor(e, cab);
   if(e.quiz && x && !ok){
     const Q = FAQ[x.i];
     return cab + `<div class="shift"><span class="eyebrow">Pergunta ${x.i + 1} de ${FAQ.length}</span><span class="clock" id="xq-clock">${fmt(x.tEnd - Date.now() + 999)}</span></div>
@@ -891,13 +926,66 @@ function vExtra(){
       <div class="opts">${Q.o.map((o, i) => `<button class="opt" data-a="xqAns" data-v="${i}">${o}</button>`).join('')}</div>
       <p class="score"><b>${x.ok}</b> certas. São precisas ${FAQ_MIN}.</p>`;
   }
-  const fim = ok === 'n' ? fbx('bad', `Ficaste com ${S.xscore} em ${FAQ.length}. Esta missão não reacende nada.`)
-    : ok ? fbx('ok', (e.quiz ? `${S.xscore} em ${FAQ.length}. ` : '') + (ok === 'r' ? 'Missão cumprida. Reacendeu-se uma tocha.' : 'Missão cumprida. As tochas já estavam todas acesas.')) : '';
-  return cab + `<h1 class="title">${e.t}</h1><p class="lead">${e.r}</p>`
+  const fim = ok === 'n' ? fbx('bad', e.quiz ? `Ficaste com ${S.xscore} em ${FAQ.length}. Esta missão não dá tocha nem dica.` : 'Missão não cumprida. Não dá tocha nem dica.')
+    : ok ? fbx('ok', (e.quiz ? `${S.xscore} em ${FAQ.length}. ` : '') + (ok === 'r' ? 'Missão cumprida. Reacendeu-se uma tocha.' : ok === 'd' ? 'Missão cumprida. Ganhaste uma dica para usar num jogo.' : 'Missão cumprida.')) : '';
+  const prazo = ok ? '' : `<p class="muted small" style="padding:0 4px">${e.ate <= 7 ? `Tem de ficar resolvida antes da etapa ${e.ate}. ` : ''}Cumprida, reacende uma tocha apagada. Com as três acesas, dá uma dica para usar num jogo.</p>`;
+  return cab + `<h1 class="title">${e.t}</h1><p class="lead">${e.r}</p>` + prazo
     + (e.h ? host(e.h) : '')
     + (e.f ? fotoCard(e.id, e.f) : '')
     + fim
-    + acts(ok ? btn('Voltar ao mapa', 'hub') : e.quiz ? btn('Começar o quiz', 'xqGo') + btn('Mais tarde', 'hub', {cls:'alt'}) : `<div class="row">${btn('Cumprida', 'extraOk', {cls:'ok'})}${btn('Mais tarde', 'hub', {cls:'alt'})}</div>`);
+    + acts(ok ? btn('Voltar ao mapa', 'hub') : e.quiz ? btn('Começar o quiz', 'xqGo') + btn('Mais tarde', 'hub', {cls:'alt'}) : `<div class="row">${btn('Cumprida', 'extraOk', {cls:'ok'})}${btn('Não cumpriu', 'extraNo', {cls:'bad'})}</div>` + btn('Mais tarde', 'hub', {cls:'alt small'}));
+}
+
+/* Isto ou aquilo: a mesa adivinha o que a Ana escolhe. Quem acertar mais ganha o escudo da ronda 1. */
+function vIoa(e, cab){
+  const ok = S.x[e.id], x = S.xd && S.xd.tipo === 'ioa' ? S.xd : null;
+  const J = Object.keys(MESA.jog).sort((a, b) => (MESA.jog[a].t || 0) - (MESA.jog[b].t || 0)), nome = id => esc((MESA.jog[id] || {}).nm || '?');
+  if(x && x.fim) return cab + `<h1 class="title">${x.esc ? esc(x.esc) + ' ganha o escudo' : 'Ninguém ganha o escudo'}</h1>
+      <p class="lead">${x.esc ? `Na primeira ronda da Mesa Redonda não podes banir ${esc(x.esc)}.${x.empate ? ' Havia empate no primeiro lugar e decidiu a sorte.' : ''}` : 'Ninguém acertou uma única resposta.'}</p>
+      <ul class="group">${x.rank.map((r, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${esc(r.nm)}</span></span><span class="muted small">${r.p} em ${IOA.length}</span></li>`).join('')}</ul>`
+      + acts(btn('Voltar ao mapa', 'hub'));
+  if(x){
+    const Q = IOA[x.q], resp = J.filter(id => MESA.ioa[id] && MESA.ioa[id].q === x.q).length;
+    return cab + `<div class="shift"><span class="eyebrow">Pergunta ${x.q + 1} de ${IOA.length}</span><span class="muted small">${x.rev ? `${x.certos.length} de ${J.length} acertaram` : `${resp} de ${J.length} já responderam`}</span></div>
+      <h1 class="q">${Q.q}</h1>
+      <div class="opts">${Q.o.map((o, i) => `<button class="opt${x.ana === i ? ' on' : ''}" data-a="ioaPick" data-v="${i}"${x.rev ? ' disabled' : ''} aria-pressed="${x.ana === i}">${o}</button>`).join('')}</div>
+      ${x.rev ? fbx('ok', x.certos.length ? 'Acertaram: ' + x.certos.map(nome).join(', ') + '.' : 'Ninguém acertou esta.') : `<p class="muted small" style="padding:0 4px">Escolhe sem dizer nada. A mesa está a tentar adivinhar.</p>`}`
+      + acts(x.rev ? btn(x.q + 1 < IOA.length ? 'Pergunta seguinte' : 'Ver quem ganhou', 'ioaNext') : btn('Revelar a minha resposta', 'ioaRev', {dis: x.ana < 0}));
+  }
+  if(ok) return cab + `<h1 class="title">${e.t}</h1><p class="lead">${e.r}</p>`
+    + fbx(ok === 'n' ? 'bad' : 'ok', ok === 'n' ? 'Não se jogou. Ninguém tem escudo.' : S.escudo ? `O escudo é de ${esc(S.escudo.nm)}.` : 'Jogada. Ninguém ficou com o escudo.')
+    + acts(btn('Voltar ao mapa', 'hub'));
+  return cab + `<h1 class="title">${e.t}</h1><p class="lead">${e.r}</p>
+    <p class="muted small" style="padding:0 4px">Tem de ficar resolvida antes da etapa ${e.ate}. Joga quem já estiver na app da Mesa Redonda.</p>
+    <ul class="group">${J.map((id, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${nome(id)}</span></span></li>`).join('') || '<li class="chk one"><span class="muted">Ainda ninguém entrou na app da Mesa Redonda.</span></li>'}</ul>`
+    + acts(btn(`Começar · ${J.length} à mesa`, 'ioaGo', {dis: J.length < 2}), `<div class="row">${btn('Mais tarde', 'hub', {cls:'alt small'})}${btn('Não se joga', 'extraNo', {cls:'alt small'})}</div>`);
+}
+
+/* Correio da mesa: mensagens sem assinatura, e a Ana a adivinhar quem escreveu cada uma. */
+function vCor(e, cab){
+  const ok = S.x[e.id], x = S.xd && S.xd.tipo === 'cor' ? S.xd : null;
+  const n = Object.keys(MESA.correio).filter(id => MESA.correio[id] && MESA.correio[id].t).length;
+  if(x && x.fim) return cab + `<h1 class="title">${x.ok} em ${x.msgs.length}</h1>
+      <p class="lead">${ok === 'n' ? 'Não chegou a metade. As mensagens são tuas na mesma: ficam guardadas no álbum.' : 'Conheces bem a tua mesa. As mensagens ficam guardadas no álbum.'}</p>`
+      + fbx(ok === 'n' ? 'bad' : 'ok', ok === 'n' ? 'Missão não cumprida. Não dá tocha nem dica.' : ok === 'r' ? 'Missão cumprida. Reacendeu-se uma tocha.' : 'Missão cumprida. Ganhaste uma dica para usar num jogo.')
+      + acts(btn('Voltar ao mapa', 'hub'));
+  if(x){
+    const m = x.msgs[x.i], lidos = x.msgs.slice(0, x.i).map(k => k.id);
+    const autores = x.msgs.map(k => [k.id, k.nm]).sort((a, b) => a[1].localeCompare(b[1]));
+    return cab + `<div class="shift"><span class="eyebrow">Mensagem ${x.i + 1} de ${x.msgs.length}</span><span class="muted small">${x.ok} ${x.ok === 1 ? 'certa' : 'certas'}</span></div>
+      <blockquote class="carta">${esc(m.t)}</blockquote>
+      <p class="muted small" style="padding:0 4px">Lê em voz alta ou guarda-a só para ti. Quem a escreveu?</p>
+      <div class="picks">${autores.map(([id, nm]) => `<button class="pick${x.pick === id ? ' on' : ''}" data-a="corPick" data-v="${esc(id)}" aria-pressed="${x.pick === id}"${x.rev || lidos.includes(id) ? ' disabled' : ''}>${esc(nm)}</button>`).join('')}</div>
+      ${x.rev ? fbx(x.pick === m.id ? 'ok' : 'bad', (x.pick === m.id ? 'Certo. ' : 'Não. ') + `Era de ${esc(m.nm)}.`) : ''}`
+      + acts(x.rev ? btn(x.i + 1 < x.msgs.length ? 'Mensagem seguinte' : 'Ver o resultado', 'corNext') : btn('Confirmar', 'corRev', {dis: !x.pick}));
+  }
+  if(ok) return cab + `<h1 class="title">${e.t}</h1><p class="lead">${e.r}</p>`
+    + fbx(feita(ok) ? 'ok' : 'bad', feita(ok) ? 'Missão cumprida. As mensagens estão no álbum.' : S.correio && S.correio.length ? 'Missão não cumprida. As mensagens estão no álbum.' : 'Não se jogou.')
+    + acts(btn('Voltar ao mapa', 'hub'));
+  return cab + `<h1 class="title">${e.t}</h1><p class="lead">${e.r}</p>
+    <p class="lead"><strong>${n}</strong> ${n === 1 ? 'mensagem' : 'mensagens'} à tua espera.</p>
+    <p class="muted small" style="padding:0 4px">Tem de ficar resolvida antes da etapa ${e.ate}. Quando abrires o correio, já ninguém pode escrever nem alterar.</p>`
+    + acts(btn('Abrir o correio', 'corGo', {dis: n < 2}), `<div class="row">${btn('Mais tarde', 'hub', {cls:'alt small'})}${btn('Não se joga', 'extraNo', {cls:'alt small'})}</div>`);
 }
 
 function vAlbum(){
@@ -905,6 +993,7 @@ function vAlbum(){
   return bar() + tag('Álbum do dia') + `<h1 class="title">${n} ${n === 1 ? 'fotografia' : 'fotografias'}</h1>
     <p class="muted small" style="padding:0 4px">Tira primeiro a fotografia com a câmara, para ficar na galeria, e depois junta-a aqui. O álbum fica guardado só neste telemóvel.</p>
     <div class="album">${ALBUM.map(id => { const av = livre(id), f = FOTO[id]; return `<button class="ph${av ? '' : ' locked'}" data-a="foto" data-v="${id}"${av ? '' : ' disabled'} aria-label="${f ? 'Trocar' : 'Juntar'} fotografia: ${legenda(id)}"><span class="box">${f ? `<img src="${f}" alt="">` : av ? '+' : ''}</span><span>${legenda(id)}</span></button>`; }).join('')}</div>`
+    + (S.correio && S.correio.length ? `<h2 class="sec">Correio da mesa</h2>` + S.correio.map(m => `<blockquote class="carta">${esc(m.t)}<footer>${esc(m.nm)}</footer></blockquote>`).join('') : '')
     + acts(btn('Voltar ao mapa', 'hub', {cls:'alt'}));
 }
 
@@ -923,24 +1012,26 @@ function guiao(){
       <li><strong>Três apps.</strong> A do jogo fica no telemóvel da Ana, a de gestão no teu, e a da Mesa Redonda abre-se no telemóvel de cada convidado ao almoço.</li>
       <li><strong>Sete embrulhos numerados.</strong> 1 anchovas, 2 camisola, 3 álbum, 4 máscara, 5 Warriors, 6 Hamilton, 7 bicicleta (com um laço).</li>
       <li><strong>Entrega das prendas.</strong> A app só mostra o nome de cada prenda depois de a Ana a abrir. Entrega o embrulho quando o ecrã disser que ela tem direito a ele.</li>
-      <li><strong>Missões do dia.</strong> São oito, espalhadas pelo dia, e aparecem no fim do mapa. Para a do ídolo, esconde um objecto pequeno e pensa numa pista difícil.</li>
+      <li><strong>Missões do dia.</strong> São obrigatórias: cada uma tem de ficar resolvida antes de uma etapa, e és tu que marcas «Cumprida» ou «Não cumpriu». Valem uma tocha ou, com as três acesas, uma dica para usar num jogo. Para a do ídolo, esconde um objecto pequeno e pensa numa pista difícil.</li>
       <li><strong>Fotografias.</strong> Depois de cada prenda e de cada missão a app pede uma fotografia. Tira-a com a câmara e junta-a ao álbum.</li>
       <li><strong>Bilhetes do Warriors.</strong> A Ana já sabe que existem, por isso o jogo começa por confiscá-los. Guarda-os tu até à etapa 5.</li>
       <li><strong>Etapa 1.</strong> Uma venda e cinco colheres por esta ordem: mel, mostarda, azeitona, chocolate preto, anchova. Usa outra lata, para não abrires a prenda. A Ana tem de dizer cada nome em holandês.</li>
-      <li><strong>Etapa 2.</strong> Uma bola de meias, uma baliza marcada no corredor e um guarda-redes. A Ana remata com o pé mais fraco.</li>
-      <li><strong>Etapa 3.</strong> Duas perguntas tuas sobre o vosso 2026, das difíceis. Podes mostrar fotografias do ano e perguntar onde ou quando foram.</li>
+      <li><strong>Etapa 2.</strong> Uma bola de meias, uma baliza marcada no corredor e o pai da Ana na baliza. A Ana remata com o pé mais fraco.</li>
+      <li><strong>Etapa 3.</strong> A quarta pergunta é «Em quantos países diferentes estiveste este ano?» e a quinta é tua. Para a terceira fotografia faz falta uma taça.</li>
+      <li><strong>Almoço.</strong> Antes da Mesa Redonda joga-se o «Isto ou aquilo», e à sobremesa abre-se o «Correio da mesa». Pede aos convidados que entrem na app logo à chegada e que escrevam a mensagem durante o almoço.</li>
       <li><strong>Etapa 4.</strong> Nove bolas de papel e uma taça. Cada convidado entra na app da Mesa Redonda com o seu nome. Se faltar rede, a Ana tem a opção de jogar sem telemóveis.</li>
+      <li><strong>Corrida Final.</strong> As etapas 5, 6 e 7 têm uma hora no total. Se o contador chegar a zero, apaga-se uma tocha.</li>
       <li><strong>Etapa 5.</strong> Duas almofadas. Põe o embrulho 5 do outro lado da sala antes da travessia.</li>
       <li><strong>Etapa 6.</strong> Um cesto e a bola de meias, para o caso de a Ana escolher o passe sem olhar no desvio. A outra hipótese é um hot take de 45 segundos, e o júri decide.</li>
       <li><strong>Etapa 7.</strong> Um cartão com «28» dentro do frigorífico, um cartão com «11» debaixo da almofada da Ana e um tapete ao lado da bicicleta.</li>
     </ul>
     <h2 class="sec">Respostas</h2>
     <ul class="group prep">
-      <li><strong>Perguntas de 2026.</strong> Ferran Torres, Cortina d’Ampezzo, Bangaranga. A quarta e a quinta são tuas.</li>
+      <li><strong>Perguntas de 2026.</strong> Ferran Torres, Cortina d’Ampezzo, Bangaranga. A quarta é o número de países, que tu sabes; a quinta é tua.</li>
       <li><strong>Ementa em holandês.</strong> Honing, mosterd, olijf, pure chocolade, ansjovis. As outras três da lição (pindakaas, augurk, kaneel) são para baralhar.</li>
       <li><strong>Lição de holandês.</strong> «Zoek het kaartje in de koelkast» (cartão 28), «Het tweede kaartje ligt onder je kussen» (cartão 11), «A tua última prenda tem duas rodas».</li>
       <li><strong>Quiz de fã.</strong> Missouri, 15, 1906, Peyroteo, 44, 2008, Bellingham, FS1, 0,4%.</li>
-      <li><strong>Traidores.</strong> Nem tu sabes quem são, a não ser que te calhe. Se a Ana perder, cumpre o castigo e recebe a prenda na mesma.</li>
+      <li><strong>Mesa Redonda.</strong> Nem tu sabes quem a quer enganar, a não ser que te calhe. Se a Ana perder, cumpre o castigo e recebe a prenda na mesma.</li>
     </ul>`;
 }
 
@@ -970,6 +1061,7 @@ function v1(){
     return parte(1, 2) + `<div class="shift"><span class="eyebrow">Lição do dia · a ementa</span><span class="lives" role="img" aria-label="${left} de ${PARES_ERROS + 1} vidas">${hearts(left, PARES_ERROS + 1)}</span></div>
       <h1 class="prompt">Liga os pares</h1>
       <div class="pairs"><div class="paircol">${col('L', d.L, d.selL)}</div><div class="paircol">${col('R', d.R, d.selR)}</div></div>
+      ${!all && !out && S.dicas > 0 ? `<button class="mini" style="align-self:center" data-a="s1dica">Usar uma dica: revelar um par</button>` : ''}
       ${all ? fbx('ok', 'Oito em oito. Cinco destas vão à mesa.') : out ? fbx('bad', 'Três erros. Perdes uma tocha.') : d.bad ? fbx('bad', 'Esse par não existe. Perdeste uma vida.') : ''}`
       + acts(out ? btn('Continuar', 's1paresFail') : btn('Continuar', 's1venda', {dis: !all}));
   }
@@ -998,13 +1090,12 @@ function v2(){
   const d = S.d;
   if(S.step === 'brief') return etapaTag() + `<h1 class="title">Penáltis de imunidade</h1>
     <p class="lead">Na Ilha, a imunidade ganha-se à bola. Mas antes do jogo há um turno de trabalho para fazer.</p>`
-    + rules(['No telemóvel: um turno na Sendcloud. Doze etiquetas para conferir em 100 segundos, e dez têm de sair certas.', 'No corredor: cinco penáltis com a bola de meias, todos com o pé mais fraco. Precisas de três golos.', 'Cada prova falhada apaga uma tocha.'])
+    + rules(['No telemóvel: um turno na Sendcloud. Doze etiquetas para conferir em 80 segundos, e dez têm de sair certas.', 'No corredor: cinco penáltis com a bola de meias, todos com o pé mais fraco. Precisas de três golos.', 'Cada prova falhada apaga uma tocha.'])
     + acts(btn('Ver as regras do turno', 's2regras'));
   if(S.step === 'regras') return parte(1, 2) + `<p class="eyebrow">Turno na Sendcloud</p><h1 class="title">Regras do armazém</h1>
     <ul class="group prep">
       <li><strong>Origem.</strong> Tudo sai de Eindhoven.</li>
       <li><strong>Alfândega.</strong> Leva documentos o que sai da UE ou da zona de IVA da UE.</li>
-      <li><strong>Peso a cobrar.</strong> O maior entre o real e o volumétrico: comprimento × largura × altura ÷ 5000.</li>
       <li><strong>Sobretaxas.</strong> Mais de 30 kg é excesso de peso. Lado maior acima de 120 cm é sobredimensão. Ilha é zona remota.</li>
       <li><strong>Etiqueta.</strong> O código postal tem de bater com o país, e nada pesa zero.</li>
     </ul>
@@ -1017,7 +1108,7 @@ function v2(){
       ${etiqueta(e)}
       <h1 class="q">${Q.q}</h1>
       <div class="bins">${Q.o.map((o, i) => `<button class="bin" data-a="s2bin" data-v="${i}">${o}</button>`).join('')}</div>
-      <p class="muted small" style="padding:0 4px">Volumétrico: C × L × A ÷ 5000. Limites: 30 kg e 120 cm.</p>`;
+      <p class="muted small" style="padding:0 4px">Limites: 30 kg e 120 cm. Ilha é zona remota.</p>`;
   }
   if(S.step === 'scres'){
     const pass = d.ok >= TURNO_MIN, falta = d.order.length - d.i;
@@ -1028,7 +1119,7 @@ function v2(){
   }
   if(S.step === 'marca') return parte(2, 2) + `<h1 class="title">Agora, à bola</h1>
     <p class="lead">Hoje o corredor chama-se Alvalade.</p>`
-    + rules(['Cinco remates com a bola de meias, da marca que o júri fizer no chão. Todos com o pé mais fraco.', 'Na baliza fica quem o júri escolher.', 'Três golos e a prenda é tua. Três defesas apagam uma tocha.'])
+    + rules(['Cinco remates com a bola de meias, da marca que o júri fizer no chão. Todos com o pé mais fraco.', 'Na baliza fica o teu pai.', 'Três golos e a prenda é tua. Três defesas apagam uma tocha.'])
     + acts(btn('Ir para a marca', 's2go'));
   const g = d.shots.filter(x => x === 1).length, m = d.shots.length - g, end = g >= 3 || m >= 3;
   const dots = [0,1,2,3,4].map(i => { const s = d.shots[i]; return `<span class="shot${s === 1 ? ' g' : s === 0 ? ' m' : ''}">${s === 1 ? CHECK : s === 0 ? CROSS : i + 1}</span>`; }).join('');
@@ -1044,12 +1135,13 @@ function v3(){
   const d = S.d;
   if(S.step === 'brief') return etapaTag() + `<h1 class="title">Memória de 2026</h1>
     <p class="lead">A última etapa da Ilha puxa pelo ano que está a acabar: primeiro os dedos, depois a cabeça, no fim a câmara.</p>`
-    + rules([`No telemóvel: um jogo da memória com oito pares e só ${MEM_MAX} tentativas.`, `Cinco perguntas sobre 2026: três do mundo, duas da vossa vida. Precisas de ${QUIZ_MIN} certas.`, 'Três fotografias em cinco minutos, tiradas com a tua câmara e aprovadas pelo júri.'])
+    + rules([`No telemóvel: um jogo da memória com oito pares e só ${MEM_MAX} tentativas.`, `Cinco perguntas sobre 2026: três do mundo, duas da vossa vida. Precisas de ${QUIZ_MIN} certas.`, 'Três fotografias em quatro minutos, tiradas com a tua câmara e aprovadas pelo júri.'])
     + acts(btn('Começar', 's3mem'));
   if(S.step === 'mem'){
-    const all = d.cards.every(c => c.ok), out = !all && !d.lock && d.moves >= MEM_MAX;
+    const all = d.cards.every(c => c.ok), out = !all && !d.lock && d.moves >= MEM_MAX, espreita = (d.peek || 0) > Date.now();
     return parte(1, 3) + `<p class="eyebrow">Jogo da memória</p><h1 class="prompt">Encontra os oito pares</h1>
-      <div class="mem">${d.cards.map((c, i) => `<button class="mc${c.ok ? ' ok' : c.up ? ' up' : ''}" data-a="memTap" data-v="${i}" aria-label="Carta ${i + 1}${c.up || c.ok ? ', virada' : ''}">${c.up || c.ok ? MEMO[c.k] : ''}</button>`).join('')}</div>
+      <div class="mem">${d.cards.map((c, i) => `<button class="mc${c.ok ? ' ok' : c.up || espreita ? ' up' : ''}" data-a="memTap" data-v="${i}" aria-label="Carta ${i + 1}${c.up || c.ok ? ', virada' : ''}">${c.up || c.ok || espreita ? (MEMO[c.k] === 'ANA' ? BONECO : MEMO[c.k]) : ''}</button>`).join('')}</div>
+      ${!all && !out && !espreita && S.dicas > 0 ? `<button class="mini" style="align-self:center" data-a="s3dica">Usar uma dica: espreitar as cartas</button>` : ''}
       <p class="score"><b>${d.moves}</b> de ${MEM_MAX} tentativas</p>
       ${all ? fbx('ok', 'Memória em forma.') : out ? fbx('bad', `Acabaram as ${MEM_MAX} tentativas. Perdes uma tocha.`) : ''}`
       + acts(out ? btn('Continuar', 's3memFail') : btn('Continuar', 's3go', {dis: !all}));
@@ -1058,7 +1150,7 @@ function v3(){
     const Q = QUIZ[d.q], done = d.ans !== null, last = d.q === QUIZ.length - 1;
     let body;
     if(Q.live){
-      body = host('Faz a tua pergunta em voz alta e diz se a Ana acertou.')
+      body = host('A Ana responde em voz alta e tu dizes se acertou.')
         + (done ? fbx(d.ans === 'ok' ? 'ok' : 'bad', d.ans === 'ok' ? 'Certa.' : 'Errada.')
                 : `<div class="row">${btn('Certa', 's3live', {v:'ok', cls:'ok small'})}${btn('Errada', 's3live', {v:'no', cls:'bad small'})}</div>`);
     } else {
@@ -1077,8 +1169,8 @@ function v3(){
   }
   const all = d.f.every(x => x);
   return parte(3, 3) + `<h1 class="title">Três fotografias</h1>
-    <p class="lead">A Ana fotografa, o júri aprova. Tudo em cinco minutos.</p>
-    <div class="timer">${d.tEnd ? `<span class="clock big" id="mesa-clock">${fmt(d.tEnd - Date.now())}</span>` : `<button class="mini" data-a="s3timer">Começar os cinco minutos</button>`}</div>
+    <p class="lead">A Ana fotografa, o júri aprova. Tudo em quatro minutos.</p>
+    <div class="timer">${d.tEnd ? `<span class="clock big" id="mesa-clock">${fmt(d.tEnd - Date.now())}</span>` : `<button class="mini" data-a="s3timer">Começar os quatro minutos</button>`}</div>
     <ul class="group">${FOTOS.map((t, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${t}</span></span>
       <button class="mini ok${d.f[i] ? ' on' : ''}" data-a="s3foto" data-v="${i}" aria-pressed="${!!d.f[i]}">Aprovada</button></li>`).join('')}</ul>`
     + acts(btn('Receber a prenda', 'winNow', {dis: !all}), `<button class="link" data-a="failGift">O tempo acabou</button>`);
@@ -1091,22 +1183,22 @@ function v4(){
   const k = Math.min(3, active.length);
   switch(S.step){
     case 'brief': return etapaTag() + `<h1 class="title">Há traidores à mesa</h1>
-      <p class="lead">Bem-vindos à Mesa Redonda. Entre os convidados da Ana há quem tenha vindo almoçar e quem tenha vindo trair.</p>`
+      <p class="lead">Bem-vindos à Mesa Redonda. Entre os convidados da Ana há quem tenha vindo almoçar e quem tenha vindo enganá-la.</p>`
       + rules(['Cada jogador vê em segredo de que lado está.', 'São três rondas. Em cada uma há uma missão de grupo e depois a Ana bane um suspeito.', 'Se a Ana banir todos os que a traem até ao fim da terceira ronda, a prenda é dela. Se sobrar alguém, apaga-se uma tocha.'])
       + acts(btn('Inscrever os jogadores', 's4go'));
     case 'lobby': {
       const J = Object.keys(MESA.jog).map(id => ({id, nm: MESA.jog[id].nm, t: MESA.jog[id].t || 0})).sort((a, b) => a.t - b.t);
       return etapaTag() + `<h1 class="title">Quem está à mesa?</h1>
-        <p class="lead">Cada convidado abre a app da Mesa Redonda no seu telemóvel e escreve o nome. A Ana não entra: lidera os fiéis e nunca trai.</p>
+        <p class="lead">Cada convidado abre a app da Mesa Redonda no seu telemóvel e escreve o nome. A Ana não entra: lidera os fiéis.</p>
         <ul class="group">${J.map((j, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${esc(j.nm)}</span></span><button class="mini" style="min-width:60px" data-a="s4kick" data-v="${esc(j.id)}">Tirar</button></li>`).join('') || '<li class="chk one"><span class="muted">Ainda ninguém entrou.</span></li>'}</ul>
-        <p class="muted small" style="padding:0 4px">Com 4 ou 5 jogadores, uma pessoa trai. Com 6 ou mais, duas.</p>`
+        <p class="muted small" style="padding:0 4px">Com 4 ou 5 jogadores, uma pessoa vem para enganar. Com 6 ou mais, duas.</p>`
         + acts(btn(`Distribuir os papéis · ${J.length}`, 's4deal', {dis: J.length < 4}), `<button class="link" data-a="s4local">Jogar sem telemóveis</button>`);
     }
     case 'nomes': return etapaTag() + `<h1 class="title">Quem está à mesa?</h1>
-      <p class="lead">Escreve todos menos a Ana. Ela lidera os fiéis e nunca trai.</p>
+      <p class="lead">Escreve todos menos a Ana. Ela lidera os fiéis.</p>
       <div class="names">${d.names.map((nm, i) => `<div class="namerow"><label for="name-${i}" class="num-s">${i + 1}</label><input id="name-${i}" class="inp" data-bind="name" data-i="${i}" value="${esc(nm)}" placeholder="Nome" autocomplete="off" maxlength="18">${d.names.length > 4 ? `<button class="mini" style="min-width:60px" data-a="s4del" data-v="${i}" aria-label="Tirar o jogador ${i + 1}">Tirar</button>` : '<span></span>'}</div>`).join('')}</div>
       ${d.names.length < 12 ? `<button class="link" style="align-self:flex-start" data-a="s4add">Adicionar jogador</button>` : ''}
-      <p class="muted small">Com 4 ou 5 jogadores, uma pessoa trai. Com 6 ou mais, duas.</p>
+      <p class="muted small">Com 4 ou 5 jogadores, uma pessoa vem para enganar. Com 6 ou mais, duas.</p>
       ${d.err ? `<p class="fb bad" role="alert">${d.err}</p>` : ''}`
       + acts(btn('Distribuir os papéis', 's4deal'));
     case 'papeis': {
@@ -1115,8 +1207,8 @@ function v4(){
         <p class="lead">Só ${nm} pode ver o ecrã seguinte.</p>` + acts(btn(`Sou ${nm}. Mostrar`, 's4show'));
       const other = P.filter((x, i) => x.role === 'T' && i !== d.idx).map(x => esc(x.nm));
       return tag(nm) + (p.role === 'T'
-        ? `<h1 class="title role bad">Traição</h1><p class="lead">Estás contra a Ana. Sabota as missões sem dar nas vistas e não te deixes banir.</p>${other.length ? `<p class="lead">Trai contigo: <strong>${other.join(', ')}</strong>.</p>` : ''}`
-        : `<h1 class="title role ok">Lealdade</h1><p class="lead">Estás do lado da Ana. Cumpre as missões e ajuda-a a descobrir quem trai.</p>`)
+        ? `<h1 class="title role bad">Sabotagem</h1><p class="lead">Estás contra a Ana. Sabota as missões sem dar nas vistas e não te deixes banir.</p>${other.length ? `<p class="lead">Está contigo: <strong>${other.join(', ')}</strong>.</p>` : ''}`
+        : `<h1 class="title role ok">Lealdade</h1><p class="lead">Estás do lado da Ana. Cumpre as missões e ajuda-a a descobrir quem a quer enganar.</p>`)
         + acts(btn('Esconder e passar', 's4hide'));
     }
     case 'pronto': return etapaTag() + `<h1 class="title">Papéis entregues</h1>
@@ -1151,23 +1243,23 @@ function v4(){
       <p class="lead">Votos de sabotagem: <strong>${d.sab}</strong>.</p>` + acts(btn('Ir para a Mesa Redonda', 's4mesa'));
     case 'mesa': {
       const okM = d.log[d.log.length - 1];
-      return tag(`Ronda ${d.round} de 3 · Mesa Redonda`) + `<h1 class="title">Quem trai a Ana?</h1>
+      return tag(`Ronda ${d.round} de 3 · Mesa Redonda`) + `<h1 class="title">Quem quer enganar a Ana?</h1>
         <p class="lead">A missão ${okM ? 'foi cumprida' : 'falhou'}. Discutam. Depois a Ana bane uma pessoa.</p>
         <div class="timer">${d.tEnd ? `<span class="clock big" id="mesa-clock">${fmt(d.tEnd - Date.now())}</span>` : `<button class="mini" data-a="s4timer">Dar dois minutos</button>`}</div>
-        <div class="picks">${active.map(p => `<button class="pick${d.pick === p.i ? ' on' : ''}" data-a="s4pick" data-v="${p.i}" aria-pressed="${d.pick === p.i}">${esc(p.nm)}</button>`).join('')}</div>`
+        <div class="picks">${active.map(p => { const prot = escudado(p.i); return `<button class="pick${d.pick === p.i ? ' on' : ''}" data-a="s4pick" data-v="${p.i}" aria-pressed="${d.pick === p.i}"${prot ? ' disabled' : ''}>${esc(p.nm)}${prot ? ' · escudo' : ''}</button>`; }).join('')}</div>`
         + acts(btn(d.pick >= 0 ? `Banir ${esc(P[d.pick].nm)}` : 'Escolhe quem banir', 's4ban', {dis: !(d.pick >= 0)}));
     }
     case 'ban': {
       const p = P[d.last], t = p.role === 'T', left = P.filter(x => x.role === 'T' && !x.out).length;
-      return tag(`${esc(p.nm)} sai da mesa`) + `<h1 class="title role ${t ? 'bad' : 'ok'}">${t ? 'Traição' : 'Lealdade'}</h1>
-        <p class="lead">${t ? (left ? 'Apanhaste uma pessoa. Ainda há outra à mesa.' : 'Era a última pessoa a trair-te.') : `${esc(p.nm)} estava do teu lado. Quem trai continua à mesa.`}</p>`
+      return tag(`${esc(p.nm)} sai da mesa`) + `<h1 class="title role ${t ? 'bad' : 'ok'}">${t ? 'Sabotagem' : 'Lealdade'}</h1>
+        <p class="lead">${t ? (left ? 'Apanhaste uma pessoa. Ainda há outra à mesa.' : 'Era a última pessoa a enganar-te.') : `${esc(p.nm)} estava do teu lado. Quem te quer enganar continua à mesa.`}</p>`
         + acts(btn(left === 0 || d.round >= 3 ? 'Ver o resultado' : `Ronda ${d.round + 1}`, 's4next'));
     }
     default: {
       const quem = P.filter(x => x.role === 'T' && !x.out).map(x => esc(x.nm)).join(' e ');
       return d.res === 'win'
-        ? etapaTag() + `<h1 class="title">Mesa limpa</h1><p class="lead">Ana, baniste toda a gente que te traía.</p>` + acts(btn('Receber a prenda', 'winNow'))
-        : etapaTag() + `<h1 class="title">A traição venceu</h1><p class="lead">Continuava à mesa, sem ser apanhado: <strong>${quem}</strong>.</p>` + acts(btn('Continuar', 'failGift'));
+        ? etapaTag() + `<h1 class="title">Mesa limpa</h1><p class="lead">Ana, baniste toda a gente que te queria enganar.</p>` + acts(btn('Receber a prenda', 'winNow'))
+        : etapaTag() + `<h1 class="title">Enganaram-te</h1><p class="lead">Continuava à mesa, sem ser apanhado: <strong>${quem}</strong>.</p>` + acts(btn('Continuar', 'failGift'));
     }
   }
 }
@@ -1176,7 +1268,7 @@ function v4(){
 function vCores(){
   const d = S.d;
   if(S.step === 'brief') return etapaTag() + `<h1 class="title">O resgate dos Warriors</h1>
-    <p class="lead">A Corrida Final faz-se a contar: três etapas seguidas, e o relógio só pára no tapete do Pit Stop.</p>
+    <p class="lead">A Corrida Final faz-se a contar: tens uma hora para três etapas seguidas, e o relógio só pára no tapete do Pit Stop. Se chegar a zero antes disso, apaga-se uma tocha.</p>
     <p class="lead">Primeiro vais buscar o que já era teu. Os bilhetes ficaram em território inimigo, entre seis gangues de seis cores.</p>`
     + rules(['No telemóvel: põe cada cor no seu copo. São seis cores e só há um copo vazio. De reserva tens três dicas e um copo extra.', 'Na sala: atravessa o território inimigo sem tocar no chão, com duas almofadas e 90 segundos.', 'O relógio da corrida não pára entre provas.'])
     + acts(btn('Partida', 'sortGo'));
@@ -1191,7 +1283,7 @@ function vCores(){
     <div class="tubes" style="grid-template-columns:repeat(${d.tubes.length},1fr)">${d.tubes.map((t, i) => `<button class="tube${d.sel === i ? ' sel' : ''}${d.hint && d.hint[0] === i ? ' hf' : d.hint && d.hint[1] === i ? ' ht' : ''}" data-a="sortT" data-v="${i}" aria-label="Copo ${i + 1}, ${t.length} ${t.length === 1 ? 'bola' : 'bolas'}${d.hint && d.hint[0] === i ? ', dica: tira daqui' : d.hint && d.hint[1] === i ? ', dica: põe aqui' : ''}">${t.map(c => `<span class="ball c${c}"></span>`).join('')}</button>`).join('')}</div>
     <p class="score"><b>${d.moves}</b> jogadas.${d.extra ? '' : ` O mínimo possível são ${NIVEL_MIN}.`}</p>
     ${d.won ? fbx('ok', !d.extra && d.moves <= NIVEL_MIN ? 'Cada gangue no seu território, e no mínimo de jogadas.' : 'Cada gangue no seu território.') : d.msg ? fbx('bad', d.msg) : d.hint ? fbx('ok', 'Dica: tira a bola do copo «de» e põe-na no copo «para».') : ''}`
-    + acts(d.won ? btn('Continuar', 'sortDone') : `<div class="row">${btn(`Dica · ${d.dicas}`, 'sortHint', {cls:'small', dis: d.dicas <= 0 || !!d.hint})}${btn(d.extra ? 'Copo extra usado' : 'Copo extra · 1', 'sortExtra', {cls:'small', dis: d.extra})}</div><div class="row">${btn('Anular', 'sortUndo', {cls:'alt small', dis: !d.hist.length})}${btn('Recomeçar', 'sortGo', {cls:'alt small'})}</div>`);
+    + acts(d.won ? btn('Continuar', 'sortDone') : `<div class="row">${btn(`Dica · ${d.dicas + S.dicas}`, 'sortHint', {cls:'small', dis: d.dicas + S.dicas <= 0 || !!d.hint})}${btn(d.extra ? 'Copo extra usado' : 'Copo extra · 1', 'sortExtra', {cls:'small', dis: d.extra})}</div><div class="row">${btn('Anular', 'sortUndo', {cls:'alt small', dis: !d.hist.length})}${btn('Recomeçar', 'sortGo', {cls:'alt small'})}</div>`);
 }
 
 /* ---------- Etapa 6: paciência ---------- */
@@ -1283,6 +1375,7 @@ function v7(){
     <h1 class="prompt" lang="${L.de === 'nl' ? 'nl' : 'pt-PT'}">${L.frase}</h1>
     <div class="answer" lang="${tl}" aria-label="A tua resposta">${d.pick.map((j, k) => `<button class="tile" data-a="s7un" data-v="${k}"${done || dead ? ' disabled' : ''}>${d.bank[j]}</button>`).join('')}</div>
     <div class="bank" lang="${tl}">${d.bank.map((w, j) => `<button class="tile" data-a="s7tile" data-v="${j}"${done || dead || d.pick.includes(j) ? ' disabled' : ''}>${w}</button>`).join('')}</div>
+    ${!done && !dead && S.dicas > 0 && d.h < 3 ? `<button class="mini" style="align-self:center" data-a="s7dica">Usar uma dica: mais uma vida</button>` : ''}
     ${done ? fbx('ok', 'Certo. ' + L.ok) : dead ? fbx('bad', 'Ficaste sem vidas. Perdes uma tocha.') : d.fb === 'bad' ? fbx('bad', 'Ainda não. Perdeste uma vida.') : ''}`
     + acts(done ? btn('Continuar', 's7next') : dead ? btn('Continuar', 's7dead') : btn('Verificar', 's7check', {dis: !d.pick.length}));
 }
@@ -1320,6 +1413,8 @@ const ACT = {
   play(){
     const n = S.done + 1;
     if(n > 7){ S.screen = 'final'; return; }
+    const antes = S.open >= S.done ? pendente(n) : null;
+    if(antes) return ACT.extra(antes.id);
     if(S.ret === 'fail' && S.n === n){ S.ret = ''; S.screen = 'fail'; return; }
     S.ret = '';
     if(S.n !== n || !S.step){ S.n = n; S.step = 'brief'; S.d = {}; }
@@ -1330,16 +1425,39 @@ const ACT = {
   castigoOk(){ if(S.after === 'gift') win(); else { S.screen = 'stage'; S.step = S.after; } },
   giftOpen(){ S.gstep = 'open'; S.open = Math.max(S.open, S.n); },
   giftOk(){ if(S.open < S.done){ S.n = S.open + 1; S.gstep = 'lock'; } else if(S.done >= 7){ S.screen = 'final'; setTimeout(confetti, 60); } else S.screen = 'hub'; },
-  extra(v){ const e = EXTRAS.find(x => x.id === v); if(!e || S.open < e.de || S.x[v] === 'n') return false; if(S.xid !== v) S.xd = null; S.xid = v; S.screen = 'extra'; },
+  extra(v){ const e = EXTRAS.find(x => x.id === v); if(!e || S.open < e.de || S.x[v] === 'n' || S.x[v] === 's') return false; if(S.xid !== v) S.xd = null; S.xid = v; S.screen = 'extra'; },
   xqGo(){ if(!S.x.xq) S.xd = {i:0, ok:0, tEnd: Date.now() + FAQ_T}; },
   xqAns(v){ const x = S.xd; if(!x) return false; if(FAQ[x.i].a === +v) x.ok++; x.i++; if(x.i >= FAQ.length || Date.now() > x.tEnd) xqEnd(); },
-  extraOk(){ const e = EXTRAS.find(x => x.id === S.xid); if(e && !e.quiz && !S.x[S.xid]){ S.x[S.xid] = S.torches < 3 ? 'r' : 'f'; if(S.torches < 3) S.torches++; } },
+  extraOk(){ const e = EXTRAS.find(x => x.id === S.xid); if(e && !e.quiz && !e.esp && !S.x[S.xid]) S.x[S.xid] = premio(); },
+  ioaGo(){ if(S.xid !== 'xa' || S.x.xa || Object.keys(MESA.jog).length < 2) return false;
+    S.xd = {tipo:'ioa', q:0, ana:-1, rev:false, pts:{}, certos:[]}; MESA.ioa = {}; LIG.ioa = '{}'; net.del('in/ioa'); },
+  ioaPick(v){ const x = S.xd; if(!x || x.tipo !== 'ioa' || x.rev || x.fim) return false; x.ana = +v; },
+  ioaRev(){ const x = S.xd; if(!x || x.tipo !== 'ioa' || x.rev || x.fim || x.ana < 0) return false;
+    x.certos = Object.keys(MESA.jog).filter(id => MESA.ioa[id] && MESA.ioa[id].q === x.q && MESA.ioa[id].a === x.ana);
+    x.certos.forEach(id => { x.pts[id] = (x.pts[id] || 0) + 1; }); x.rev = true; },
+  ioaNext(){ const x = S.xd; if(!x || x.tipo !== 'ioa' || !x.rev || x.fim) return false;
+    if(x.q + 1 < IOA.length){ x.q++; x.ana = -1; x.rev = false; x.certos = []; MESA.ioa = {}; LIG.ioa = '{}'; net.del('in/ioa'); return; }
+    const rank = Object.keys(MESA.jog).map(id => ({id, nm: MESA.jog[id].nm, p: x.pts[id] || 0})).sort((a, b) => b.p - a.p || a.nm.localeCompare(b.nm));
+    const max = rank.length ? rank[0].p : 0, top = max > 0 ? rank.filter(r => r.p === max) : [], g = top.length ? top[rnd(top.length)] : null;
+    S.escudo = g ? {id: g.id, nm: g.nm} : null; S.x.xa = 'f';
+    S.xd = {tipo:'ioa', fim:true, rank: rank.map(r => ({nm: r.nm, p: r.p})), esc: g ? g.nm : '', empate: top.length > 1}; },
+  corGo(){ if(S.xid !== 'xb' || S.x.xb) return false;
+    const ids = Object.keys(MESA.correio).filter(id => MESA.correio[id] && MESA.correio[id].t); if(ids.length < 2) return false;
+    S.xd = {tipo:'cor', msgs: shuffle(ids.map(id => ({id, nm: String(MESA.correio[id].nm || (MESA.jog[id] || {}).nm || 'Alguém').slice(0, 18), t: String(MESA.correio[id].t).slice(0, 200)}))), i:0, pick:'', rev:false, ok:0}; },
+  corPick(v){ const x = S.xd; if(!x || x.tipo !== 'cor' || x.rev || x.fim) return false; x.pick = x.pick === v ? '' : v; },
+  corRev(){ const x = S.xd; if(!x || x.tipo !== 'cor' || x.rev || x.fim || !x.pick) return false; x.rev = true; if(x.pick === x.msgs[x.i].id) x.ok++; },
+  corNext(){ const x = S.xd; if(!x || x.tipo !== 'cor' || !x.rev || x.fim) return false;
+    if(x.i + 1 < x.msgs.length){ x.i++; x.pick = ''; x.rev = false; return; }
+    S.correio = x.msgs.map(m => ({nm: m.nm, t: m.t})); S.x.xb = x.ok * 2 >= x.msgs.length ? premio() : 'n'; x.fim = true; },
+  extraNo(){ const e = EXTRAS.find(x => x.id === S.xid); if(e && !e.quiz && !S.x[S.xid]){ S.x[S.xid] = 'n'; S.xd = null; } },
   album(){ S.screen = 'album'; },
   foto(v){ if(livre(v)){ pend = v; cam.value = ''; cam.click(); } return false; },
 
   pin(){ S.screen = 'pin'; S.pinErr = false; },
   pinGo(){ const el = document.getElementById('pin'); if(el && el.value === PIN){ S.screen = 'back'; S.pinErr = false; } else S.pinErr = true; },
-  jump(v){ const n = +v; S.intro = true; S.ret = ''; S.done = n - 1; S.open = n - 1; S.n = 0; S.step = ''; S.d = {}; if(n <= 5) S.t3 = 0; S.t3end = 0; },
+  jump(v){ const n = +v; S.intro = true; S.ret = ''; S.done = n - 1; S.open = n - 1; S.n = 0; S.step = ''; S.d = {}; if(n <= 5){ S.t3 = 0; S.t3out = false; } S.t3end = 0;
+    /* saltar para uma etapa dá por saltadas as missões que a travavam */
+    MISSOES_DIA().forEach(e => { if(e.ate <= n && !S.x[e.id]) S.x[e.id] = 's'; }); },
   relight(){ S.torches = 3; },
   resetAsk(){ S.ask = true; }, resetNo(){ S.ask = false; },
   resetYes(){ S = fresh(); S.screen = 'back'; clearFotos(); },
@@ -1349,6 +1467,9 @@ const ACT = {
     if(side === 'L') d.selL = d.selL === i ? -1 : i; else d.selR = d.selR === i ? -1 : i;
     d.bad = false;
     if(d.selL >= 0 && d.selR >= 0){ if(d.selL === d.selR) d.ok[d.selL] = true; else { d.bad = true; d.err++; } d.selL = d.selR = -1; } },
+  s1dica(){ const d = S.d; if(S.step !== 'pares' || S.dicas <= 0 || d.err > PARES_ERROS) return false;
+    const i = d.ok.findIndex(x => !x); if(i < 0) return false;
+    d.ok[i] = true; d.selL = d.selR = -1; d.bad = false; S.dicas--; },
   s1paresFail(){ S.d = {}; fail('venda'); },
   s1venda(){ S.step = 'venda'; S.d = {}; },
   s1go(){ S.step = 'play'; S.d = {r:[0,0,0,0,0]}; },
@@ -1356,8 +1477,8 @@ const ACT = {
   s1end(){ if(S.d.r.filter(x => x === 1).length >= 4) win(); else fail('gift'); },
 
   s2regras(){ S.step = 'regras'; S.d = {}; },
-  s2sc(){ const tres = t => shuffle(ENCOMENDAS.map((e, i) => e.t === t ? i : -1).filter(i => i >= 0)).slice(0, 3);
-    S.step = 'sc'; S.d = {order: shuffle([].concat(tres('A'), tres('P'), tres('S'), tres('E'))), i:0, ok:0, wrong:[], tEnd: Date.now() + TURNO}; },
+  s2sc(){
+    S.step = 'sc'; S.d = {order: shuffle(ENCOMENDAS.map((_, i) => i)), i:0, ok:0, wrong:[], tEnd: Date.now() + TURNO}; },
   s2bin(v){ const d = S.d; if(S.step !== 'sc') return; const k = d.order[d.i];
     if(ENCOMENDAS[k].a === +v) d.ok++; else d.wrong.push(k);
     d.i++; if(d.i >= d.order.length || Date.now() > d.tEnd){ d.tEnd = 0; S.step = 'scres'; } },
@@ -1366,20 +1487,23 @@ const ACT = {
   s2shot(v){ if(S.d.shots.length < 5) S.d.shots.push(+v); },
 
   s3mem(){ S.step = 'mem'; S.d = {cards: shuffle(MEMO.concat(MEMO).map((_, i) => ({k: i % MEMO.length, up:false, ok:false}))), open:[], moves:0, lock:false}; },
-  memTap(v){ const d = S.d, i = +v, c = d.cards[i]; if(d.lock || c.up || c.ok || d.moves >= MEM_MAX) return false;
+  memTap(v){ const d = S.d, i = +v, c = d.cards[i]; if(d.lock || c.up || c.ok || d.moves >= MEM_MAX || (d.peek || 0) > Date.now()) return false;
     c.up = true; d.open.push(i);
     if(d.open.length === 2){
       const [a, b] = d.open; d.moves++;
       if(d.cards[a].k === d.cards[b].k){ d.cards[a].ok = d.cards[b].ok = true; d.cards[a].up = d.cards[b].up = false; d.open = []; }
       else { d.lock = true; setTimeout(() => { if(S.screen === 'stage' && S.n === 3 && S.step === 'mem' && S.d.lock){ S.d.cards[a].up = S.d.cards[b].up = false; S.d.open = []; S.d.lock = false; render(); } }, 800); }
     } },
+  s3dica(){ const d = S.d; if(S.step !== 'mem' || S.dicas <= 0 || d.lock || (d.peek || 0) > Date.now() || d.moves >= MEM_MAX || d.cards.every(c => c.ok)) return false;
+    S.dicas--; d.peek = Date.now() + 2500;
+    setTimeout(() => { if(S.screen === 'stage' && S.n === 3 && S.step === 'mem') render(); }, 2600); },
   s3memFail(){ S.d = {q:0, score:0, ans:null}; fail('quiz'); },
   s3go(){ S.step = 'quiz'; S.d = {q:0, score:0, ans:null}; },
   s3ans(v){ const d = S.d; if(d.ans !== null) return; d.ans = +v; if(d.ans === QUIZ[d.q].a) d.score++; },
   s3live(v){ const d = S.d; if(d.ans !== null) return; d.ans = v; if(v === 'ok') d.score++; },
   s3next(){ const d = S.d; if(d.ans === null) return; if(d.q >= QUIZ.length - 1) S.step = 'quizres'; else { d.q++; d.ans = null; } },
   s3res(){ const pass = S.d.score >= QUIZ_MIN; S.d = {f:[0,0,0], tEnd:0}; if(pass) S.step = 'fotos'; else fail('fotos'); },
-  s3timer(){ S.d.tEnd = Date.now() + 300000; },
+  s3timer(){ S.d.tEnd = Date.now() + 240000; },
   s3foto(v){ S.d.f[+v] = S.d.f[+v] ? 0 : 1; },
 
   s4go(){ if(ONLINE){ S.step = 'lobby'; S.d = {mode:'on'}; } else { S.step = 'nomes'; S.d = {names:['','','','',''], err:''}; } },
@@ -1415,7 +1539,7 @@ const ACT = {
   s4v(v){ const d = S.d, p = d.players[d.team[d.vi]]; if(v === 's' && p.role === 'T') d.sab++; d.vi++; d.shown = false; if(d.vi >= d.team.length){ d.vi = 0; d.log.push(d.sab === 0); S.step = 'mres'; } },
   s4mesa(){ const d = S.d; d.pick = -1; d.tEnd = 0; S.step = 'mesa'; },
   s4timer(){ S.d.tEnd = Date.now() + 120000; },
-  s4pick(v){ S.d.pick = +v; },
+  s4pick(v){ if(escudado(+v)) return false; S.d.pick = +v; },
   s4ban(){ const d = S.d; if(d.pick < 0) return; d.players[d.pick].out = true; d.last = d.pick; d.pick = -1; S.step = 'ban'; },
   s4next(){ const d = S.d, left = d.players.filter(p => p.role === 'T' && !p.out).length;
     if(left === 0){ d.res = 'win'; S.step = 'fim'; } else if(d.round >= 3){ d.res = 'lose'; S.step = 'fim'; } else { d.round++; S.step = 'missao'; } },
@@ -1430,9 +1554,9 @@ const ACT = {
       B.push(A.pop()); d.hist.push([d.sel, i]); d.moves++; d.sel = -1; d.hint = null; d.msg = '';
       d.won = d.tubes.every(t => !t.length || (t.length === 4 && t.every(x => x === t[0])));
     } else d.sel = B.length ? i : -1; },
-  sortHint(){ const d = S.d; if(d.won || d.hint || d.dicas <= 0) return;
+  sortHint(){ const d = S.d; if(d.won || d.hint || d.dicas + S.dicas <= 0) return;
     const h = dica(d.tubes);
-    if(h.r === 'ok'){ d.hint = h.move; d.dicas--; d.msg = ''; d.sel = -1; }
+    if(h.r === 'ok'){ d.hint = h.move; if(d.dicas > 0) d.dicas--; else S.dicas--; d.msg = ''; d.sel = -1; }
     else d.msg = h.r === 'none' ? 'Este caminho não tem saída. Anula jogadas ou recomeça.' : 'Não encontrei uma dica a tempo. Anula umas jogadas e tenta outra vez.'; },
   sortExtra(){ const d = S.d; if(d.extra || d.won) return; d.extra = true; d.tubes.push([]); d.hint = null; d.msg = ''; d.sel = -1; },
   sortDone(){ S.step = 'trav'; S.d = {tEnd:0}; },
@@ -1457,6 +1581,7 @@ const ACT = {
   s7tile(v){ const d = S.d, j = +v; if(d.fb === 'ok' || d.h <= 0 || d.pick.includes(j)) return; d.pick.push(j); d.fb = ''; },
   s7un(v){ const d = S.d; if(d.fb === 'ok' || d.h <= 0) return; d.pick.splice(+v, 1); d.fb = ''; },
   s7check(){ const d = S.d; if(d.pick.map(j => d.bank[j]).join(' ') === LICOES[d.li].resp.join(' ')) d.fb = 'ok'; else { d.fb = 'bad'; d.h--; } },
+  s7dica(){ const d = S.d; if(S.dicas <= 0 || !d.bank || d.fb === 'ok' || d.h >= 3 || d.h <= 0) return false; d.h++; S.dicas--; },
   s7dead(){ const li = S.d.li; S.d = lesson(li, 3); fail('l' + (li + 1)); },
   s7next(){ const li = S.d.li, h = S.d.h; if(li === 0){ S.step = 'c1'; S.d = {code:'', err:false, h}; } else if(li === 1){ S.step = 'c2'; S.d = {code:'', err:false, h}; } else { S.step = 'tapete'; S.d = {}; } },
   s7code(){ const el = document.getElementById('code'); const v = (el ? el.value : S.d.code || '').replace(/\D/g, ''), h = S.d.h || 3;
@@ -1465,7 +1590,7 @@ const ACT = {
 };
 
 /* Com a app de gestão ligada, as decisões do júri ficam trancadas no telemóvel da Ana. */
-const JUIZ = new Set(['s1mark', 's1end', 's2shot', 's3live', 's3foto', 's4m', 'castigoOk', 'extraOk']);
+const JUIZ = new Set(['s1mark', 's1end', 's2shot', 's3live', 's3foto', 's4m', 'castigoOk', 'extraOk', 'extraNo']);
 const juiz = a => JUIZ.has(a) || ((a === 'winNow' || a === 'failGift') && S.screen === 'stage' && ((S.n === 5 && S.step === 'trav') || (S.n === 6 && S.step === 'desvioGo') || (S.n === 7 && S.step === 'tapete')));
 function tranca(){
   if(!hostOn()) return;
@@ -1504,7 +1629,10 @@ function ligaJogo(){
     if(h && h !== LIG.hostT){ LIG.hostT = h; if(path !== '/' || Math.abs(Date.now() - h) < 30000) LIG.host = Date.now(); }
     if(LIG.was !== hostOn()){ LIG.was = hostOn(); again = true; }
     const jog = JSON.stringify(all.jog || {}), voto = JSON.stringify(all.voto || {});
-    if(jog !== LIG.jog){ LIG.jog = jog; MESA.jog = JSON.parse(jog); if(S.screen === 'stage' && S.n === 4 && S.step === 'lobby') again = true; }
+    if(jog !== LIG.jog){ LIG.jog = jog; MESA.jog = JSON.parse(jog); if((S.screen === 'stage' && S.n === 4 && S.step === 'lobby') || (S.screen === 'extra' && S.xid === 'xa')) again = true; }
+    const ioa = JSON.stringify(all.ioa || {}), cor = JSON.stringify(all.correio || {});
+    if(ioa !== LIG.ioa){ LIG.ioa = ioa; MESA.ioa = JSON.parse(ioa); if(S.screen === 'extra' && S.xid === 'xa') again = true; }
+    if(cor !== LIG.cor){ LIG.cor = cor; MESA.correio = JSON.parse(cor); if(S.screen === 'extra' && S.xid === 'xb') again = true; }
     if(voto !== LIG.voto){ LIG.voto = voto; MESA.voto = JSON.parse(voto); if(fechaVotos(false)) again = true; }
     const cmds = all.cmd || {};
     Object.keys(cmds).sort().forEach(k => {
@@ -1522,11 +1650,11 @@ function ligaJogo(){
 }
 
 /* ---------- App de gestão (telemóvel do apresentador) ---------- */
-const HOST = new Set(['s1go', 's1mark', 's1end', 's2shot', 's3live', 's3next', 's3timer', 's3foto', 'winNow', 'failGift', 'castigoOk', 's4m', 's4timer', 's4begin', 's4close', 's4deal', 's4kick', 's5timer', 's6timer', 'extraOk', 'giftOpen']);
+const HOST = new Set(['s1go', 's1mark', 's1end', 's2shot', 's3live', 's3next', 's3timer', 's3foto', 'winNow', 'failGift', 'castigoOk', 's4m', 's4timer', 's4begin', 's4close', 's4deal', 's4kick', 's5timer', 's6timer', 'extraOk', 'extraNo', 'giftOpen', 'ioaGo', 'ioaNext', 'corGo', 'corNext']);
 const GK = KEY + '-gerir';
 const G = {ok:false, tab:'vivo', ask:false, spoil:false, err:false, limpa:false};
 try{ const o = JSON.parse(localStorage.getItem(GK) || '{}'); G.ok = !!o.ok; if(o.tab) G.tab = o.tab; }catch(e){}
-const GL = {jogo:0, vivo:0, vt:0, sj:'', jj:'{}', vj:'{}', jog:{}, on:false, qr:0, err:false};
+const GL = {jogo:0, vivo:0, vt:0, sj:'', jj:'{}', vj:'{}', ij:'{}', cj:'{}', jog:{}, on:false, qr:0, err:false};
 const saveG = () => { try{ localStorage.setItem(GK, JSON.stringify({ok: G.ok, tab: G.tab})); }catch(e){} };
 const urlMesa = () => location.origin + location.pathname + '?app=mesa';
 function estadoG(){
@@ -1545,6 +1673,9 @@ function ligaGerir(){
     const inn = all.in || {}, jj = JSON.stringify(inn.jog || {}), vj = JSON.stringify(inn.voto || {});
     if(jj !== GL.jj){ GL.jj = jj; GL.jog = JSON.parse(jj); MESA.jog = GL.jog; mud = true; }
     if(vj !== GL.vj){ GL.vj = vj; MESA.voto = JSON.parse(vj); if(S.n === 4 && S.step === 'voto') mud = true; }
+    const ij = JSON.stringify(inn.ioa || {}), cj = JSON.stringify(inn.correio || {});
+    if(ij !== GL.ij){ GL.ij = ij; MESA.ioa = JSON.parse(ij); mud = true; }
+    if(cj !== GL.cj){ GL.cj = cj; MESA.correio = JSON.parse(cj); mud = true; }
     /* No guião não se redesenha a cada toque dela, para não mexer no que estás a ler. */
     if(mud && G.tab !== 'guiao') renderG();
   });
@@ -1587,10 +1718,11 @@ function renderG(){
     const P = tem && S.n === 4 && S.d && S.d.players ? S.d.players : null, L = P || J;
     html += `<h1 class="title">Mesa Redonda</h1><p class="lead">Cada convidado abre este endereço no seu telemóvel e escreve o nome.</p>
       <div class="moment"><b class="lbl">Endereço para os convidados</b><span class="url">${esc(urlMesa())}</span><div id="qr" class="qr"></div><button class="mini" data-g="copy">Copiar o endereço</button></div>
+      <p class="muted small" style="padding:0 4px">Correio da mesa: ${Object.keys(MESA.correio).length} ${Object.keys(MESA.correio).length === 1 ? 'mensagem escrita' : 'mensagens escritas'}.${tem && S.escudo ? ` Escudo da ronda 1: ${esc(S.escudo.nm)}.` : ''}</p>
       <h2 class="sec">${P ? 'Jogadores' : 'Inscritos'} · ${L.length}</h2>
-      <ul class="group">${L.map((x, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${esc(x.nm)}${x.out ? ' · fora da mesa' : ''}</span></span>${P && G.spoil ? `<span class="small ${x.role === 'T' ? 'tbad' : 'muted'}">${x.role === 'T' ? 'Trai' : 'Fiel'}</span>` : ''}</li>`).join('') || '<li class="chk one"><span class="muted">Ainda ninguém entrou.</span></li>'}</ul>
-      ${P ? `<button class="link" style="align-self:flex-start" data-g="spoil">${G.spoil ? 'Esconder quem trai' : 'Mostrar quem trai'}</button>` : ''}
-      ${G.limpa ? fbx('bad', 'Isto tira toda a gente da lista. Cada convidado tem de voltar a escrever o nome.') + `<div class="row"><button class="btn bad small" data-g="limpar">Limpar</button><button class="btn alt small" data-g="naolimpar">Cancelar</button></div>`
+      <ul class="group">${L.map((x, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${esc(x.nm)}${x.out ? ' · fora da mesa' : ''}</span></span>${P && G.spoil ? `<span class="small ${x.role === 'T' ? 'tbad' : 'muted'}">${x.role === 'T' ? 'Engana' : 'Fiel'}</span>` : ''}</li>`).join('') || '<li class="chk one"><span class="muted">Ainda ninguém entrou.</span></li>'}</ul>
+      ${P ? `<button class="link" style="align-self:flex-start" data-g="spoil">${G.spoil ? 'Esconder quem engana' : 'Mostrar quem engana'}</button>` : ''}
+      ${G.limpa ? fbx('bad', 'Isto tira toda a gente da lista e apaga as mensagens do correio. Cada convidado tem de voltar a escrever o nome.') + `<div class="row"><button class="btn bad small" data-g="limpar">Limpar</button><button class="btn alt small" data-g="naolimpar">Cancelar</button></div>`
                 : J.length ? `<button class="link" style="align-self:flex-start" data-g="limpa">Limpar as inscrições</button>` : ''}`;
   }
   document.documentElement.dataset.fase = fase;
@@ -1613,7 +1745,7 @@ function clickG(e){
     else if(k === 'spoil') G.spoil = !G.spoil;
     else if(k === 'limpa') G.limpa = true;
     else if(k === 'naolimpar') G.limpa = false;
-    else if(k === 'limpar'){ G.limpa = false; GL.jog = {}; MESA.jog = {}; net.del('in/jog'); }
+    else if(k === 'limpar'){ G.limpa = false; GL.jog = {}; MESA.jog = {}; MESA.ioa = {}; MESA.correio = {}; net.del('in/jog'); net.del('in/ioa'); net.del('in/correio'); }
     else if(k === 'copy'){ try{ navigator.clipboard.writeText(urlMesa()).catch(() => {}); }catch(x){} g.textContent = 'Copiado'; return; }
     saveG(); renderG(); return;
   }
@@ -1623,10 +1755,10 @@ function clickG(e){
 
 /* ---------- App da Mesa Redonda (telemóvel de cada convidado) ---------- */
 const MK = KEY + '-mesa';
-const Mz = {pid:'', nm:'', dentro:false, vk:''};
+const Mz = {pid:'', nm:'', dentro:false, vk:'', ia:null, msg:''};
 try{ Object.assign(Mz, JSON.parse(localStorage.getItem(MK) || '{}')); }catch(e){}
 if(!Mz.pid) Mz.pid = 'p' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
-const ML = {pub:null, papel:null, show:false, typing:'', err:'', on:false, pend:false};
+const ML = {pub:null, papel:null, show:false, typing:'', err:'', on:false, pend:false, cor:'', corErr:'', corEdit:false, adia:false, agora:false};
 const saveM = () => { try{ localStorage.setItem(MK, JSON.stringify(Mz)); }catch(e){} };
 const votoKey = pb => pb.vid || (pb.ronda + ':' + (pb.equipa || []).join(','));
 function ligaMesa(){
@@ -1643,23 +1775,41 @@ function ligaMesa(){
   });
 }
 function renderM(){
+  /* Com alguém a escrever, o ecrã só se redesenha quando largar o campo. */
+  const foco = document.activeElement;
+  if(foco && (foco.id === 'mcor' || foco.id === 'mnome') && !ML.agora){ ML.adia = true; return; }
+  ML.adia = false;
   document.documentElement.dataset.fase = '2';
   const pb = ML.pub, eu = pb && pb.jog ? pb.jog.find(j => j.id === Mz.pid) : null;
   let h = `<header class="bar"><div class="bar-row"><b class="gt">Mesa Redonda</b>${Mz.dentro ? `<span class="gstat ok">${esc(Mz.nm)}</span>` : ''}</div></header>`;
   if(!ONLINE) h += `<h1 class="title">Sem ligação</h1><p class="lead">A Mesa Redonda joga-se com rede. Pede ajuda ao apresentador.</p>`;
   else if(!Mz.dentro) h += tag('Há traidores à mesa') + `<h1 class="title">Senta-te à mesa</h1>
-    <p class="lead">Entre os convidados da Ana há quem tenha vindo almoçar e quem tenha vindo trair. Escreve o teu nome para receberes o teu papel em segredo.</p>
+    <p class="lead">Entre os convidados da Ana há quem tenha vindo almoçar e quem tenha vindo enganá-la. Escreve o teu nome para receberes o teu papel em segredo.</p>
     <label class="eyebrow" for="mnome">O teu nome</label>
     <input id="mnome" class="inp" maxlength="18" autocomplete="off" placeholder="Nome" value="${esc(ML.typing)}" data-menter="1">
     ${ML.err ? fbx('bad', ML.err) : ''}` + acts(`<button class="btn" data-m="join"${ML.pend ? ' disabled' : ''}>${ML.pend ? 'A entrar…' : 'Entrar'}</button>`);
+  else if(pb && pb.fase === 'ioa'){
+    const meu = Mz.ia && Mz.ia.q === pb.q ? Mz.ia.a : -1, pts = (pb.pts || {})[Mz.pid] || 0, certo = (pb.certos || []).includes(Mz.pid);
+    h += tag(`Isto ou aquilo · ${pb.q + 1} de ${pb.n}`) + `<h1 class="title">${esc(pb.p)}</h1>`;
+    h += pb.rev ? `<p class="lead">A Ana escolheu <strong>${esc(pb.o[pb.ana])}</strong>.</p>` + fbx(certo ? 'ok' : 'bad', certo ? 'Acertaste.' : meu < 0 ? 'Não respondeste a tempo.' : 'Desta vez não.') + `<p class="score"><b>${pts}</b> ${pts === 1 ? 'ponto' : 'pontos'}.</p>`
+      : `<p class="lead">O que achas que a Ana vai escolher?</p><div class="opts">${pb.o.map((o, i) => `<button class="opt${meu === i ? ' on' : ''}" data-m="ioa:${i}" aria-pressed="${meu === i}">${esc(o)}</button>`).join('')}</div>${meu >= 0 ? '<p class="muted small" style="padding:0 4px">Resposta entregue. Podes mudar até a Ana revelar.</p>' : ''}`;
+  }
+  else if(pb && pb.fase === 'ioaFim') h += tag('Isto ou aquilo') + `<h1 class="title">${pb.esc ? esc(pb.esc) + ' ganha o escudo' : 'Ninguém ganha o escudo'}</h1>
+    <p class="lead">${pb.escId === Mz.pid ? 'És tu. Na primeira ronda da Mesa Redonda, a Ana não te pode banir.' : pb.esc ? 'Fica a salvo na primeira ronda da Mesa Redonda.' : 'Ninguém acertou uma única resposta.'}</p>
+    <ul class="group">${(pb.rank || []).map((r, i) => `<li class="chk one"><span class="lab"><span class="num-s">${i + 1}</span><span>${esc(r.nm)}</span></span><span class="muted small">${r.p} em ${IOA.length}</span></li>`).join('')}</ul>`;
+  else if(pb && pb.fase === 'correio') h += tag(`Correio da mesa · ${pb.i + 1} de ${pb.n}`) + (pb.rev && pb.ult
+    ? `<h1 class="title">Era de ${esc(pb.ult.nm)}</h1><p class="lead">${pb.ult.ok ? 'A Ana acertou.' : 'A Ana não adivinhou.'}</p>`
+    : `<h1 class="title">A Ana está a ler</h1><p class="lead">Não te denuncies.</p>`);
+  else if(pb && pb.fase === 'correioFim') h += tag('Correio da mesa') + `<h1 class="title">${pb.ok} em ${pb.n}</h1><p class="lead">Foi quantas a Ana adivinhou. As mensagens ficam guardadas no álbum dela.</p>`;
   else if(!pb || pb.fase === 'lobby' || !pb.jog) h += tag('Inscrição feita') + `<h1 class="title">Estás à mesa, ${esc(Mz.nm)}</h1>
-    <p class="lead">Quando a Ana distribuir os papéis, o teu aparece aqui. Deixa esta página aberta.</p>` + acts(`<button class="btn alt small" data-m="sair">Mudar o nome</button>`);
+    <p class="lead">O jogo aparece aqui quando a Ana der o sinal. Deixa esta página aberta.</p>` + acts(`<button class="btn alt small" data-m="sair">Mudar o nome</button>`);
   else if(!eu) h += tag('Jogo a decorrer') + `<h1 class="title">Ficaste de fora</h1>
     <p class="lead">Os papéis já estavam distribuídos quando entraste. Podes assistir, mas não jogas esta partida.</p>`;
   else {
     const T = ML.papel && ML.papel.r === 'T', com = (ML.papel && ML.papel.com) || [], M = MISSOES[Math.min(3, Math.max(1, pb.ronda || 1)) - 1];
-    h += `<div class="papel"><b class="lbl">O teu papel</b>${ML.show && ML.papel ? `<b class="w ${T ? 'tbad' : ''}" style="${T ? '' : 'color:var(--ok)'}">${T ? 'Traição' : 'Lealdade'}</b><span>${T ? 'Estás contra a Ana. Sabota as missões sem dar nas vistas e não te deixes banir.' + (com.length ? ' Trai contigo: ' + com.map(esc).join(', ') + '.' : '') : 'Estás do lado da Ana. Cumpre as missões e ajuda-a a descobrir quem trai.'}</span>` : `<span class="muted">Escondido. Vê-o sem ninguém ao lado.</span>`}<button class="mini" data-m="papel">${ML.show ? 'Esconder' : 'Ver o meu papel'}</button></div>`;
+    h += `<div class="papel"><b class="lbl">O teu papel</b>${ML.show && ML.papel ? `<b class="w ${T ? 'tbad' : ''}" style="${T ? '' : 'color:var(--ok)'}">${T ? 'Sabotagem' : 'Lealdade'}</b><span>${T ? 'Estás contra a Ana. Sabota as missões sem dar nas vistas e não te deixes banir.' + (com.length ? ' Está contigo: ' + com.map(esc).join(', ') + '.' : '') : 'Estás do lado da Ana. Cumpre as missões e ajuda-a a descobrir quem a quer enganar.'}</span>` : `<span class="muted">Escondido. Vê-o sem ninguém ao lado.</span>`}<button class="mini" data-m="papel">${ML.show ? 'Esconder' : 'Ver o meu papel'}</button></div>`;
     if(eu.out) h += fbx('bad', 'Saíste da mesa. Podes assistir, mas já não votas nem vais em missões.');
+    else if(pb.esc && pb.ronda === 1){ const dono = pb.jog.find(j => j.id === pb.esc); if(dono) h += fbx('ok', dono.id === Mz.pid ? 'Tens o escudo: nesta ronda a Ana não te pode banir.' : `${esc(dono.nm)} tem o escudo e fica a salvo nesta ronda.`); }
     const nomes = (pb.equipa || []).map(id => (pb.jog.find(j => j.id === id) || {}).nm).filter(Boolean).map(esc).join(', ');
     const okM = pb.log && pb.log.length ? pb.log[pb.log.length - 1] : true;
     switch(pb.fase){
@@ -1674,12 +1824,18 @@ function renderM(){
         } else h += tag('Ronda 3 · Voto secreto') + `<h1 class="title">A equipa está a votar</h1><p class="lead">Na missão: ${nomes}.</p>`;
         break;
       case 'mres': h += tag('Ronda 3 · Missão') + `<h1 class="title role ${pb.sab ? 'bad' : 'ok'}">${pb.sab ? 'Sabotada' : 'Cumprida'}</h1><p class="lead">Votos de sabotagem: <strong>${Math.max(0, pb.sab)}</strong>.</p>`; break;
-      case 'mesa': h += tag(`Ronda ${pb.ronda} de 3 · Mesa Redonda`) + `<h1 class="title">Quem trai a Ana?</h1><p class="lead">A missão ${okM ? 'foi cumprida' : 'falhou'}. Discutam. Depois a Ana bane uma pessoa.</p>${pb.tEnd ? `<div class="timer"><span class="clock big" id="mz-clock">${fmt(pb.tEnd - Date.now())}</span></div>` : ''}`; break;
-      case 'ban': h += pb.last ? tag(`${esc(pb.last.nm)} sai da mesa`) + `<h1 class="title role ${pb.last.t ? 'bad' : 'ok'}">${pb.last.t ? 'Traição' : 'Lealdade'}</h1><p class="lead">${pb.last.t ? 'A Ana apanhou uma pessoa que a traía.' : 'A Ana baniu uma pessoa fiel.'}</p>` : ''; break;
-      case 'fim': h += pb.res === 'win' ? tag('Fim do jogo') + `<h1 class="title">Mesa limpa</h1><p class="lead">A Ana baniu toda a gente que a traía.</p>`
-        : tag('Fim do jogo') + `<h1 class="title">A traição venceu</h1><p class="lead">Ficou por apanhar: <strong>${(pb.quem || []).map(esc).join(' e ')}</strong>.</p>`; break;
+      case 'mesa': h += tag(`Ronda ${pb.ronda} de 3 · Mesa Redonda`) + `<h1 class="title">Quem quer enganar a Ana?</h1><p class="lead">A missão ${okM ? 'foi cumprida' : 'falhou'}. Discutam. Depois a Ana bane uma pessoa.</p>${pb.tEnd ? `<div class="timer"><span class="clock big" id="mz-clock">${fmt(pb.tEnd - Date.now())}</span></div>` : ''}`; break;
+      case 'ban': h += pb.last ? tag(`${esc(pb.last.nm)} sai da mesa`) + `<h1 class="title role ${pb.last.t ? 'bad' : 'ok'}">${pb.last.t ? 'Sabotagem' : 'Lealdade'}</h1><p class="lead">${pb.last.t ? 'A Ana apanhou uma pessoa que a queria enganar.' : 'A Ana baniu uma pessoa fiel.'}</p>` : ''; break;
+      case 'fim': h += pb.res === 'win' ? tag('Fim do jogo') + `<h1 class="title">Mesa limpa</h1><p class="lead">A Ana baniu toda a gente que a queria enganar.</p>`
+        : tag('Fim do jogo') + `<h1 class="title">A Ana foi enganada</h1><p class="lead">Ficou por apanhar: <strong>${(pb.quem || []).map(esc).join(' e ')}</strong>.</p>`; break;
       default: h += `<h1 class="title">Mesa Redonda</h1><p class="lead">O jogo continua no telemóvel da Ana.</p>`;
     }
+  }
+  /* O correio fica aberto para escrever até a Ana começar a ler. */
+  if(ONLINE && Mz.dentro && !(pb && /^correio/.test(pb.fase || ''))){
+    h += `<div class="papel" style="justify-items:stretch"><b class="lbl">Correio da mesa</b>` + (Mz.msg && !ML.corEdit
+      ? `<span>Mensagem entregue. A Ana lê-a à sobremesa, sem saber de quem é.</span><button class="mini" style="justify-self:start" data-m="coredit">Alterar</button>`
+      : `<span>Escreve à Ana uma coisa que só tu podias escrever: uma memória, um elogio, uma história vossa ou uma frase ao acaso. Não assines. É opcional.</span><textarea id="mcor" class="inp" rows="3" maxlength="200" placeholder="A tua mensagem" style="background:var(--fill)">${esc(ML.cor)}</textarea>${ML.corErr ? fbx('bad', ML.corErr) : ''}<button class="mini" style="justify-self:start" data-m="cor"${ML.pend ? ' disabled' : ''}>Enviar</button>`) + `</div>`;
   }
   app.innerHTML = h;
 }
@@ -1700,6 +1856,20 @@ function clickM(e){
   }
   else if(k === 'sair'){ Mz.dentro = false; ML.typing = Mz.nm; saveM(); ML.pend = true; net.del('in/jog/' + Mz.pid).then(() => { ML.pend = false; }); }
   else if(k === 'papel') ML.show = !ML.show;
+  else if(k === 'ioa' && ML.pub && ML.pub.fase === 'ioa' && !ML.pub.rev){ const a = +v ? 1 : 0; Mz.ia = {q: ML.pub.q, a}; saveM(); net.put('in/ioa/' + Mz.pid, {q: ML.pub.q, a}); }
+  else if(k === 'coredit'){ ML.corEdit = true; ML.cor = Mz.msg || ''; ML.corErr = ''; }
+  else if(k === 'cor' && !ML.pend){
+    const el = document.getElementById('mcor'), t = (el ? el.value : ML.cor).trim().slice(0, 200);
+    if(!t) ML.corErr = 'Escreve qualquer coisa primeiro.';
+    else {
+      ML.pend = true; ML.corErr = ''; ML.cor = t;
+      net.put('in/correio/' + Mz.pid, {t, nm: Mz.nm, ts: Date.now()}).then(r => {
+        ML.pend = false;
+        if(r && r.ok){ Mz.msg = t; ML.corEdit = false; saveM(); } else ML.corErr = 'A mensagem não seguiu. Vê se tens rede e tenta outra vez.';
+        ML.agora = true; renderM(); ML.agora = false;
+      });
+    }
+  }
   else if(k === 'voto' && ML.pub && !ML.pend){
     const chave = votoKey(ML.pub);
     ML.pend = true; ML.err = '';
@@ -1709,7 +1879,7 @@ function clickM(e){
       renderM();
     });
   }
-  renderM();
+  ML.agora = true; renderM(); ML.agora = false;
 }
 
 /* ---------- Desenho ---------- */
@@ -1762,10 +1932,12 @@ document.addEventListener('click', e => {
   if(el.dataset.a !== 'menu') S.menu = false;
   if(ACT[el.dataset.a](el.dataset.v, el) !== false) render();
 });
+document.addEventListener('focusout', e => { if(APP === 'mesa' && ML.adia && e.target && (e.target.id === 'mcor' || e.target.id === 'mnome')) setTimeout(() => { if(ML.adia) renderM(); }, 250); });
 document.addEventListener('pointerdown', e => { if(APP === 'jogo' && e.target.closest && e.target.closest('[data-p="luz"]')) luzPress(); });
 document.addEventListener('input', e => {
   const t = e.target, b = t.dataset && t.dataset.bind;
   if(t.id === 'mnome') ML.typing = t.value;
+  if(t.id === 'mcor') ML.cor = t.value;
   if(!b || APP !== 'jogo') return;
   if(b === 'name' && S.d.names) S.d.names[+t.dataset.i] = t.value;
   else if(b === 'code'){ t.value = t.value.replace(/\D/g, '').slice(0, 2); S.d.code = t.value; }
@@ -1779,7 +1951,7 @@ document.addEventListener('keydown', e => {
 });
 setInterval(() => {
   const c = document.getElementById('clock');
-  if(c && S.t3 && !S.t3end) c.textContent = fmt(Date.now() - S.t3);
+  if(c && S.t3 && !S.t3end){ const resta = CORRIDA - (Date.now() - S.t3); c.textContent = fmt(resta); c.classList.toggle('over', resta <= 0); }
   const m = document.getElementById('mesa-clock');
   if(m && S.d && S.d.tEnd){ const left = S.d.tEnd - Date.now(); m.textContent = fmt(left); m.classList.toggle('over', left <= 0); }
   const mz = document.getElementById('mz-clock');
@@ -1790,6 +1962,8 @@ setInterval(() => {
     if(xq && S.xd && S.xd.tEnd) xq.textContent = fmt(Math.max(0, S.xd.tEnd - Date.now()) + 999);
   }
   if(APP !== 'jogo') return;
+  /* A hora da Corrida Final acabou: apaga-se uma tocha, uma só vez, e o jogo continua. */
+  if(S.t3 && !S.t3end && !S.t3out && Date.now() - S.t3 >= CORRIDA){ S.t3out = true; S.torches = Math.max(0, S.torches - 1); render(); }
   if(S.screen === 'extra' && S.xd && S.xd.tEnd){
     const left = S.xd.tEnd - Date.now(), el = document.getElementById('xq-clock');
     if(left <= 0){ xqEnd(); render(); } else if(el) el.textContent = fmt(left + 999);

@@ -1020,6 +1020,7 @@ function guiao(){
       <li><strong>Etapa 3.</strong> A quarta pergunta é «Em quantos países diferentes estiveste este ano?» e a quinta é tua. Para a terceira fotografia faz falta uma taça.</li>
       <li><strong>Almoço.</strong> Antes da Mesa Redonda joga-se o «Isto ou aquilo», e à sobremesa abre-se o «Correio da mesa». Pede aos convidados que entrem na app logo à chegada e que escrevam a mensagem durante o almoço.</li>
       <li><strong>Etapa 4.</strong> Nove bolas de papel e uma taça. Cada convidado entra na app da Mesa Redonda com o seu nome. Se faltar rede, a Ana tem a opção de jogar sem telemóveis.</li>
+      <li><strong>Passar à frente.</strong> Se o ambiente não estiver para jogos, há dois botões por baixo do ecrã ao vivo: um passa a prova ou a missão em curso, o outro passa a etapa inteira e dá logo a prenda. Nenhum apaga tochas.</li>
       <li><strong>Corrida Final.</strong> As etapas 5, 6 e 7 têm uma hora no total. Se o contador chegar a zero, apaga-se uma tocha.</li>
       <li><strong>Etapa 5.</strong> Duas almofadas. Põe o embrulho 5 do outro lado da sala antes da travessia.</li>
       <li><strong>Etapa 6.</strong> Um cesto e a bola de meias, para o caso de a Ana escolher o passe sem olhar no desvio. A outra hipótese é um hot take de 45 segundos, e o júri decide.</li>
@@ -1039,6 +1040,9 @@ function vBack(){
   return bar(true) + tag('Bastidores') + `<h1 class="title">Guião do apresentador</h1>
     <p class="lead">O jogo corre todo neste telemóvel. Passa-o à Ana quando o ecrã falar com ela e fica com ele quando disser «Apresentador».</p>
     ${guiao()}
+    <h2 class="sec">Passar à frente</h2>
+    <p class="muted small">Para quando o ambiente não estiver para jogos. Não apaga tochas nem dá castigo.</p>
+    ${(P => btn(P.prova ? 'Passar ' + P.prova : 'Nenhuma prova a decorrer', 'passaProva', {cls:'alt small', dis: !P.prova}) + btn(P.etapa ? `Passar a etapa ${P.etapa} inteira` : 'Nenhuma etapa para passar', 'passaEtapa', {cls:'alt small', dis: !P.etapa}))(passavel())}
     <h2 class="sec">Controlo</h2>
     <p class="muted small">Etapas ganhas: ${S.done} de 7. Toca num número para pôr o jogo no início dessa etapa.</p>
     <div class="jump">${ETAPAS.map(e => `<button class="mini${e.n === S.done + 1 ? ' on ok' : ''}" data-a="jump" data-v="${e.n}" aria-label="Ir para a etapa ${e.n}">${e.n}</button>`).join('')}</div>
@@ -1449,6 +1453,19 @@ const ACT = {
   corNext(){ const x = S.xd; if(!x || x.tipo !== 'cor' || !x.rev || x.fim) return false;
     if(x.i + 1 < x.msgs.length){ x.i++; x.pick = ''; x.rev = false; return; }
     S.correio = x.msgs.map(m => ({nm: m.nm, t: m.t})); S.x.xb = x.ok * 2 >= x.msgs.length ? premio() : 'n'; x.fim = true; },
+  passaProva(){
+    const o = onde(), n = S.done + 1;
+    if(o === 'fail'){ S.ret = ''; ACT.castigoOk(); }
+    else if(o === 'stage' && n <= 7){ const pr = provaAgora(); S.ret = ''; if(pr.vai){ pr.vai(); S.screen = 'stage'; } else fimEtapa(); }
+    else if(o === 'extra'){ const e = EXTRAS.find(x => x.id === S.xid); if(!e || S.x[e.id]) return false; S.x[e.id] = 's'; S.xd = null; S.screen = 'hub'; }
+    else if(o === 'hub'){ const b = S.open >= S.done && n <= 7 ? pendente(n) : null; if(!b) return false; S.x[b.id] = 's'; S.screen = 'hub'; }
+    else return false;
+  },
+  passaEtapa(){
+    const n = S.done + 1; if(n > 7 || S.open < S.done || S.screen === 'gift') return false;
+    MISSOES_DIA().forEach(e => { if(e.ate <= n && S.open >= e.de && !S.x[e.id]) S.x[e.id] = 's'; });
+    S.n = n; S.ret = ''; S.xd = null; fimEtapa();
+  },
   extraNo(){ const e = EXTRAS.find(x => x.id === S.xid); if(e && !e.quiz && !S.x[S.xid]){ S.x[S.xid] = 'n'; S.xd = null; } },
   album(){ S.screen = 'album'; },
   foto(v){ if(livre(v)){ pend = v; cam.value = ''; cam.click(); } return false; },
@@ -1601,8 +1618,43 @@ function tranca(){
   const a = app.querySelector('.actions'); if(a) a.parentNode.insertBefore(nota, a); else app.appendChild(nota);
 }
 
+/* ---------- Passar à frente, para quando o ambiente não está para jogos ---------- */
+/* Por etapa: as provas, os passos de cada uma e como arranca a seguinte. A última não tem `vai`: acaba na prenda. */
+const SALTOS = {
+  1: [{nm:'Ligar os pares', de:['brief','pares'], vai(){ S.step = 'venda'; S.d = {}; }}, {nm:'Cinco colheres', de:['venda','play']}],
+  2: [{nm:'Turno na Sendcloud', de:['brief','regras','sc','scres'], vai(){ S.step = 'marca'; S.d = {}; }}, {nm:'Penáltis', de:['marca','play']}],
+  3: [{nm:'Jogo da memória', de:['brief','mem'], vai(){ S.step = 'quiz'; S.d = {q:0, score:0, ans:null}; }}, {nm:'Perguntas de 2026', de:['quiz','quizres'], vai(){ S.step = 'fotos'; S.d = {f:[0,0,0], tEnd:0}; }}, {nm:'Três fotografias', de:['fotos']}],
+  4: [{nm:'Mesa Redonda', de:null}],
+  5: [{nm:'Copos de cores', de:['brief','play'], vai(){ startClock(); S.step = 'trav'; S.d = {tEnd:0}; }}, {nm:'Travessia', de:['trav']}],
+  6: [{nm:'Partidas de F1', de:['brief','luz'], vai(){ startClock(); S.step = 'play'; S.d = dealGolf(1); }}, {nm:'Paciência', de:['play'], vai(){ S.step = 'desvio'; S.d = {}; }}, {nm:'Desvio', de:['desvio','desvioGo']}],
+  7: [{nm:'Lição de holandês', de:['brief','l1','c1','l2','c2','l3'], vai(){ startClock(); S.step = 'tapete'; S.d = {}; }}, {nm:'Chegada ao tapete', de:['tapete']}]
+};
+/* Onde a Ana está de facto, mesmo que tenha voltado ao mapa a meio de uma prova. */
+function onde(){
+  const fora = S.screen === 'hub' || S.screen === 'back' || S.screen === 'pin', emCurso = S.n === S.done + 1 && !!S.step;
+  if(S.screen === 'fail' || (fora && emCurso && S.ret === 'fail')) return 'fail';
+  if(S.screen === 'stage' || (fora && emCurso)) return 'stage';
+  return fora ? 'hub' : S.screen;
+}
+const provaAgora = () => { const L = SALTOS[S.done + 1] || []; return L.find(q => !q.de || q.de.includes(S.step)) || L[0]; };
+/* O que se pode passar neste momento: texto para os botões do apresentador. */
+function passavel(){
+  const o = onde(), n = S.done + 1;
+  let prova = '';
+  if(o === 'fail') prova = 'o castigo';
+  else if(o === 'stage' && n <= 7) prova = `a prova «${provaAgora().nm}»`;
+  else if(o === 'extra'){ const e = EXTRAS.find(x => x.id === S.xid); if(e && !S.x[e.id]) prova = `a missão «${e.t}»`; }
+  else if(o === 'hub'){ const b = S.open >= S.done && n <= 7 ? pendente(n) : null; if(b) prova = `a missão «${b.t}»`; }
+  return {prova, etapa: n <= 7 && S.open >= S.done && S.screen !== 'gift' ? n : 0};
+}
+function fimEtapa(){
+  win();
+  /* Mesa Redonda passada à frente: os telemóveis dos convidados voltam ao ecrã de espera. */
+  if(S.n === 4 && ONLINE && APP === 'jogo'){ const j = JSON.stringify({fase:'pausa'}); LIG.mesa = j; net.put('mesa/pub', j); }
+}
+
 /* ---------- Comandos do apresentador (executados no telemóvel da Ana) ---------- */
-const ADMIN = new Set(['jump', 'relight', 'resetYes']);
+const ADMIN = new Set(['jump', 'relight', 'resetYes', 'passaProva', 'passaEtapa']);
 function runCmd(c){
   if(!c || !ACT[c.a]) return;
   const v = c.v === undefined || c.v === null ? '' : String(c.v);
@@ -1653,7 +1705,7 @@ function ligaJogo(){
 /* ---------- App de gestão (telemóvel do apresentador) ---------- */
 const HOST = new Set(['s1go', 's1mark', 's1end', 's2shot', 's3live', 's3next', 's3timer', 's3foto', 'winNow', 'failGift', 'castigoOk', 's4m', 's4timer', 's4begin', 's4close', 's4deal', 's4kick', 's5timer', 's6timer', 'extraOk', 'extraNo', 'giftOpen', 'ioaGo', 'ioaNext', 'corGo', 'corNext']);
 const GK = KEY + '-gerir';
-const G = {ok:false, tab:'vivo', ask:false, spoil:false, err:false, limpa:false};
+const G = {ok:false, tab:'vivo', ask:false, spoil:false, err:false, limpa:false, passa:''};
 try{ const o = JSON.parse(localStorage.getItem(GK) || '{}'); G.ok = !!o.ok; if(o.tab) G.tab = o.tab; }catch(e){}
 const GL = {jogo:0, vivo:0, vt:0, sj:'', jj:'{}', vj:'{}', ij:'{}', cj:'{}', jog:{}, on:false, qr:0, err:false};
 const saveG = () => { try{ localStorage.setItem(GK, JSON.stringify({ok: G.ok, tab: G.tab})); }catch(e){} };
@@ -1707,7 +1759,11 @@ function renderG(){
   let html = `<header class="bar"><div class="bar-row"><b class="gt">Bastidores</b><span class="gstat ${e[0]}" id="gstat">${e[1]}</span></div><div class="seg">${abas}</div></header>`, fase = '';
   if(G.tab === 'vivo'){
     if(!tem) html += `<h1 class="title">Ainda sem jogo</h1><p class="lead">${ONLINE ? 'Abre a app do jogo no telemóvel da Ana. Assim que ela arrancar, o ecrã aparece aqui.' : 'Esta versão ainda não tem a base de dados ligada, por isso não há nada para acompanhar.'}</p>`;
-    else { const x = ecra(); fase = x[1]; html += `<p class="muted small" style="padding:0 4px">O ecrã da Ana, ao vivo. Os botões a cheio são os teus: valida a partir daqui.</p><div class="mirror">${x[0]}</div>`; }
+    else { const x = ecra(); fase = x[1]; html += `<p class="muted small" style="padding:0 4px">O ecrã da Ana, ao vivo. Os botões a cheio são os teus: valida a partir daqui.</p><div class="mirror">${x[0]}</div>`;
+      const P = passavel(); if((G.passa === 'pp' && !P.prova) || (G.passa === 'pe' && !P.etapa)) G.passa = '';
+      html += `<h2 class="sec">Passar à frente</h2><p class="muted small" style="padding:0 4px">Para quando o ambiente não estiver para jogos. Não apaga tochas nem dá castigo.</p>`
+        + (G.passa ? fbx('bad', G.passa === 'pp' ? `Passar ${P.prova}?` : `Passar a etapa ${P.etapa} inteira e dar já a prenda n.º ${P.etapa}?`) + `<div class="row"><button class="btn small" data-g="passaSim">Confirmar</button><button class="btn alt small" data-g="passaNao">Cancelar</button></div>`
+          : `<button class="btn alt small" data-g="pp"${P.prova ? '' : ' disabled'}>${P.prova ? 'Passar ' + P.prova : 'Nenhuma prova a decorrer'}</button><button class="btn alt small" data-g="pe"${P.etapa ? '' : ' disabled'}>${P.etapa ? `Passar a etapa ${P.etapa} inteira` : 'Nenhuma etapa para passar'}</button>`); }
   } else if(G.tab === 'guiao'){
     html += `<h1 class="title">Guião</h1>` + guiao() + `<h2 class="sec">Controlo à distância</h2>
       <p class="muted small" style="padding:0 4px">Etapas ganhas: ${tem ? S.done : 0} de 7. Toca num número para pôr o jogo da Ana no início dessa etapa.</p>
@@ -1740,6 +1796,9 @@ function clickG(e){
     else if(k === 'tab') G.tab = v;
     else if(k === 'jump'){ cmd('jump', v); G.tab = 'vivo'; }
     else if(k === 'relight') cmd('relight');
+    else if(k === 'pp' || k === 'pe') G.passa = k;
+    else if(k === 'passaNao') G.passa = '';
+    else if(k === 'passaSim'){ if(G.passa) cmd(G.passa === 'pp' ? 'passaProva' : 'passaEtapa'); G.passa = ''; }
     else if(k === 'ask') G.ask = true;
     else if(k === 'noreset') G.ask = false;
     else if(k === 'reset'){ G.ask = false; cmd('resetYes'); G.tab = 'vivo'; }

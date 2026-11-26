@@ -1629,6 +1629,7 @@ function ligaJogo(){
     if(h && h !== LIG.hostT){ LIG.hostT = h; if(path !== '/' || Math.abs(Date.now() - h) < 30000) LIG.host = Date.now(); }
     if(LIG.was !== hostOn()){ LIG.was = hostOn(); again = true; }
     const jog = JSON.stringify(all.jog || {}), voto = JSON.stringify(all.voto || {});
+    if(jog !== LIG.jog || path === '/'){ const ids = {}; Object.keys(all.jog || {}).forEach(k => { ids[k] = all.jog[k].t || 1; }); net.put('mesa/ins', {ids, t: Date.now()}); }
     if(jog !== LIG.jog){ LIG.jog = jog; MESA.jog = JSON.parse(jog); if((S.screen === 'stage' && S.n === 4 && S.step === 'lobby') || (S.screen === 'extra' && S.xid === 'xa')) again = true; }
     const ioa = JSON.stringify(all.ioa || {}), cor = JSON.stringify(all.correio || {});
     if(ioa !== LIG.ioa){ LIG.ioa = ioa; MESA.ioa = JSON.parse(ioa); if(S.screen === 'extra' && S.xid === 'xa') again = true; }
@@ -1756,7 +1757,7 @@ function clickG(e){
 /* ---------- App da Mesa Redonda (telemóvel de cada convidado) ---------- */
 /* Para ensaiar no computador: ?app=mesa&c=1, &c=2… dá um convidado diferente por separador. */
 const MK = KEY + '-mesa' + ((QS.get('c') || '').replace(/[^a-z0-9]/gi, '').slice(0, 8) ? '-' + (QS.get('c') || '').replace(/[^a-z0-9]/gi, '').slice(0, 8) : '');
-const Mz = {pid:'', nm:'', dentro:false, vk:'', ia:null, msg:''};
+const Mz = {pid:'', nm:'', dentro:false, vk:'', ia:null, msg:'', jt:0, ack:0};
 try{ Object.assign(Mz, JSON.parse(localStorage.getItem(MK) || '{}')); }catch(e){}
 if(!Mz.pid) Mz.pid = 'p' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
 const ML = {pub:null, papel:null, show:false, typing:'', err:'', on:false, pend:false, cor:'', corErr:'', corEdit:false, adia:false, agora:false};
@@ -1764,15 +1765,18 @@ const saveM = () => { try{ localStorage.setItem(MK, JSON.stringify(Mz)); }catch(
 const votoKey = pb => pb.vid || (pb.ronda + ':' + (pb.equipa || []).join(','));
 function ligaMesa(){
   if(ML.on || !ONLINE) return; ML.on = true;
-  watch('mesa/pub', v => { try{ ML.pub = v ? JSON.parse(v) : null; }catch(e){ ML.pub = null; } renderM(); });
-  watch('mesa/papel/' + Mz.pid, v => { ML.papel = v || null; renderM(); });
-  /* Se o nome sair da lista (tirado pela Ana ou pelo apresentador), volta-se ao ecrã de entrada. */
-  watch('in/jog/' + Mz.pid, v => {
-    if(ML.pend) return;
-    const dentro = !!(v && v.nm);
-    if(dentro === Mz.dentro) return;
-    Mz.dentro = dentro; if(dentro) Mz.nm = v.nm; else ML.typing = Mz.nm;
-    saveM(); renderM();
+  /* Uma só escuta por convidado: o estado público, o papel de cada um e a lista de inscritos vista pelo telemóvel da Ana. */
+  watch('mesa', v => {
+    v = v || {};
+    try{ ML.pub = v.pub ? JSON.parse(v.pub) : null; }catch(e){ ML.pub = null; }
+    ML.papel = (v.papel && v.papel[Mz.pid]) || null;
+    /* O telemóvel da Ana confirma cada inscrição devolvendo a hora dela. Confirmada e depois desaparecida = tirada da lista. */
+    const ids = (v.ins && v.ins.ids) || {};
+    if(Mz.dentro && !ML.pend && Mz.jt){
+      if(ids[Mz.pid] === Mz.jt){ if(Mz.ack !== Mz.jt){ Mz.ack = Mz.jt; saveM(); } }
+      else if(Mz.ack === Mz.jt){ Mz.dentro = false; Mz.jt = 0; Mz.ack = 0; ML.typing = Mz.nm; saveM(); }
+    }
+    renderM();
   });
 }
 function renderM(){
@@ -1847,15 +1851,16 @@ function clickM(e){
     const el = document.getElementById('mnome'), nm = (el ? el.value : ML.typing).trim().slice(0, 18);
     if(!nm){ ML.err = 'Escreve o teu nome primeiro.'; }
     else {
+      const jt = Date.now();
       ML.pend = true; ML.err = ''; ML.typing = nm;
-      net.put('in/jog/' + Mz.pid, {nm, t: Date.now()}).then(r => {
+      net.put('in/jog/' + Mz.pid, {nm, t: jt}).then(r => {
         ML.pend = false;
-        if(r && r.ok){ Mz.nm = nm; Mz.dentro = true; saveM(); } else ML.err = 'Não deu para entrar. Vê se tens rede e tenta outra vez.';
+        if(r && r.ok){ Mz.nm = nm; Mz.dentro = true; Mz.jt = jt; Mz.ack = 0; saveM(); } else ML.err = 'Não deu para entrar. Vê se tens rede e tenta outra vez.';
         renderM();
       });
     }
   }
-  else if(k === 'sair'){ Mz.dentro = false; ML.typing = Mz.nm; saveM(); ML.pend = true; net.del('in/jog/' + Mz.pid).then(() => { ML.pend = false; }); }
+  else if(k === 'sair'){ Mz.dentro = false; Mz.jt = 0; Mz.ack = 0; ML.typing = Mz.nm; saveM(); ML.pend = true; net.del('in/jog/' + Mz.pid).then(() => { ML.pend = false; }); }
   else if(k === 'papel') ML.show = !ML.show;
   else if(k === 'ioa' && ML.pub && ML.pub.fase === 'ioa' && !ML.pub.rev){ const a = +v ? 1 : 0; Mz.ia = {q: ML.pub.q, a}; saveM(); net.put('in/ioa/' + Mz.pid, {q: ML.pub.q, a}); }
   else if(k === 'coredit'){ ML.corEdit = true; ML.cor = Mz.msg || ''; ML.corErr = ''; }

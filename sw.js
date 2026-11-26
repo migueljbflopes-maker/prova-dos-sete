@@ -1,5 +1,5 @@
 /* A Prova dos Sete: guarda as três apps para abrirem sem rede. Rede primeiro, cópia guardada quando não há rede. */
-const CACHE = 'prova-dos-sete-v9';
+const CACHE = 'prova-dos-sete-v10';
 const SHELL = ['./', 'index.html', 'qrcode.js', 'manifest.webmanifest', 'manifest-gerir.webmanifest', 'manifest-mesa.webmanifest',
   'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'icon-gerir-192.png', 'apple-touch-icon-gerir.png', 'icon-mesa-192.png', 'apple-touch-icon-mesa.png'];
 self.addEventListener('install', e => {

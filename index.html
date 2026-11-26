@@ -1456,8 +1456,8 @@ const ACT = {
   pin(){ S.screen = 'pin'; S.pinErr = false; },
   pinGo(){ const el = document.getElementById('pin'); if(el && el.value === PIN){ S.screen = 'back'; S.pinErr = false; } else S.pinErr = true; },
   jump(v){ const n = +v; S.intro = true; S.ret = ''; S.done = n - 1; S.open = n - 1; S.n = 0; S.step = ''; S.d = {}; if(n <= 5){ S.t3 = 0; S.t3out = false; } S.t3end = 0;
-    /* saltar para uma etapa dá por saltadas as missões que a travavam */
-    MISSOES_DIA().forEach(e => { if(e.ate <= n && !S.x[e.id]) S.x[e.id] = 's'; }); },
+    /* saltar para uma etapa dá por saltadas as missões das etapas anteriores; as dessa etapa ficam por resolver */
+    MISSOES_DIA().forEach(e => { if(e.ate < n && !S.x[e.id]) S.x[e.id] = 's'; }); },
   relight(){ S.torches = 3; },
   resetAsk(){ S.ask = true; }, resetNo(){ S.ask = false; },
   resetYes(){ S = fresh(); S.screen = 'back'; clearFotos(); },
@@ -1754,7 +1754,8 @@ function clickG(e){
 }
 
 /* ---------- App da Mesa Redonda (telemóvel de cada convidado) ---------- */
-const MK = KEY + '-mesa';
+/* Para ensaiar no computador: ?app=mesa&c=1, &c=2… dá um convidado diferente por separador. */
+const MK = KEY + '-mesa' + ((QS.get('c') || '').replace(/[^a-z0-9]/gi, '').slice(0, 8) ? '-' + (QS.get('c') || '').replace(/[^a-z0-9]/gi, '').slice(0, 8) : '');
 const Mz = {pid:'', nm:'', dentro:false, vk:'', ia:null, msg:''};
 try{ Object.assign(Mz, JSON.parse(localStorage.getItem(MK) || '{}')); }catch(e){}
 if(!Mz.pid) Mz.pid = 'p' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);

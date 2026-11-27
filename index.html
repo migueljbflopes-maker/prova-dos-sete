@@ -244,6 +244,9 @@ textarea.inp{display:block;min-height:96px;padding:12px 14px;resize:none;line-he
 .stat b{font:700 34px/1.1 var(--round);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .won li{display:flex;gap:12px;align-items:center;padding:12px 16px;font-weight:500}
 .prep li{padding:12px 16px;font-size:15px;line-height:1.4}
+.jgs{display:flex;flex-wrap:wrap;gap:8px}
+.jgs .mini{min-width:0}
+.jgs .mini:disabled{opacity:.4}
 .jump{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .jump .mini{min-width:0;padding:0;aspect-ratio:1;font:700 16px/1 var(--round)}
 .confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9}
@@ -306,7 +309,7 @@ textarea.inp{display:block;min-height:96px;padding:12px 14px;resize:none;line-he
 .gstat{font-size:13px;font-weight:600;padding:5px 10px;border-radius:999px;max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gstat.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
 .gstat.bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--fill);border-radius:10px;padding:2px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--fill);border-radius:10px;padding:2px}
 .segb{border:0;background:none;border-radius:8px;min-height:34px;font-size:14px;font-weight:600}
 .segb.on{background:var(--card);box-shadow:var(--lift)}
 .mirror{display:flex;flex-direction:column;gap:16px;min-height:440px;border-radius:24px;padding:0 16px 18px;background:var(--bg);box-shadow:0 0 0 1px var(--sep);overflow:hidden}
@@ -564,7 +567,7 @@ const NAIPES = ['espadas','copas','ouros','paus'];
 const TITULOS = ['campeã dos 0,4%','salva pela última chama','finalista de ferro','única sobrevivente'];
 
 /* ---------- Estado ---------- */
-function fresh(){ return {v:3, screen:'splash', intro:false, done:0, torches:3, n:0, step:'', d:{}, after:'', castigo:0, t3:0, t3end:0, pinErr:false, ask:false, open:0, gstep:'', x:{}, xid:'', xd:null, xscore:0, ret:'', menu:false, dicas:0, t3out:false, correio:[], escudo:null}; }
+function fresh(){ return {v:3, screen:'splash', intro:false, done:0, torches:3, n:0, step:'', d:{}, after:'', castigo:0, t3:0, t3end:0, pinErr:false, ask:false, open:0, gstep:'', x:{}, xid:'', xd:null, xscore:0, ret:'', menu:false, dicas:0, t3out:false, correio:[], escudo:null, fe:{}, ab:{}}; }
 function load(){ try{ const o = JSON.parse(localStorage.getItem(KEY) || 'null'); return o && o.v === 3 ? o : null; }catch(e){ return null; } }
 function save(){ if(APP !== 'jogo') return; try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 let S = fresh();
@@ -661,8 +664,8 @@ function pubMesa(){
     : {fase:'ioa', q: x.q, n: IOA.length, p: IOA[x.q].q, o: IOA[x.q].o, rev: x.rev, ana: x.rev ? x.ana : -1, certos: x.rev ? x.certos : [], pts: x.pts};
   else if(S.screen === 'extra' && S.xid === 'xb' && x && x.tipo === 'cor') o = x.fim ? {fase:'correioFim', ok: x.ok, n: x.msgs.length}
     : {fase:'correio', i: x.i, n: x.msgs.length, rev: x.rev, ult: x.rev ? {nm: x.msgs[x.i].nm, ok: x.pick === x.msgs[x.i].id} : null};
-  else if(S.n === 4 && S.done < 4 && S.step === 'lobby') o = {fase:'lobby'};
-  else if(S.n === 4 && S.done < 4 && d.mode === 'on' && d.players){
+  else if(S.n === 4 && !feitaE(4) && S.step === 'lobby') o = {fase:'lobby'};
+  else if(S.n === 4 && !feitaE(4) && d.mode === 'on' && d.players){
     const P = d.players;
     o = {fase: S.step, ronda: d.round, jog: P.map(x => ({id: x.id, nm: x.nm, out: !!x.out})), equipa: (d.team || []).map(i => P[i].id), log: d.log || [],
       sab: S.step === 'mres' ? d.sab : -1, last: S.step === 'ban' && d.last >= 0 ? {nm: P[d.last].nm, t: P[d.last].role === 'T'} : null,
@@ -727,8 +730,8 @@ function dica(tubes){
 const FOTO = {};
 let idb = null, pend = '';
 const cam = document.getElementById('cam');
-const livre = id => id[0] === 'g' ? +id.slice(1) <= S.open : EXTRAS.some(e => e.id === id && S.open >= e.de);
-const legenda = id => { if(id[0] === 'g'){ const n = +id.slice(1); return n <= S.open ? PRENDAS[n - 1].nome : `Prenda n.º ${n}`; } return EXTRAS.find(e => e.id === id).t; };
+const livre = id => id[0] === 'g' ? abertaE(+id.slice(1)) : EXTRAS.some(e => e.id === id && S.open >= e.de);
+const legenda = id => { if(id[0] === 'g'){ const n = +id.slice(1); return abertaE(n) ? PRENDAS[n - 1].nome : `Prenda n.º ${n}`; } return EXTRAS.find(e => e.id === id).t; };
 const fotoCard = (id, texto) => `<div class="moment"><b class="lbl">Momento para a fotografia</b><span>${texto}</span>${FOTO[id] ? `<img src="${FOTO[id]}" alt="Fotografia do momento">` : ''}<button class="mini" data-a="foto" data-v="${id}">${FOTO[id] ? 'Trocar a fotografia' : 'Juntar ao álbum'}</button></div>`;
 function loadFotos(){
   return new Promise(done => {
@@ -785,7 +788,7 @@ function bar(lite){
   const voltar = `<button class="navb" data-a="back">${CHEV}<span>Voltar</span></button>`;
   if(lite) return `<header class="bar"><div class="bar-row">${voltar}</div></header>`;
   let t = ''; for(let i = 0; i < 3; i++) t += flame(i < S.torches);
-  let tr = ''; for(let k = 1; k <= 7; k++) tr += `<i class="${k <= S.done ? 'done' : k === S.done + 1 ? 'now' : ''}"></i>`;
+  let tr = ''; for(let k = 1; k <= 7; k++) tr += `<i class="${feitaE(k) ? 'done' : k === aseguir() ? 'now' : ''}"></i>`;
   const clock = S.t3 && !S.t3end ? `<span class="clock${Date.now() - S.t3 >= CORRIDA ? ' over' : ''}" id="clock" aria-label="Tempo que resta da Corrida Final">${fmt(CORRIDA - (Date.now() - S.t3))}</span>` : '';
   return `<header class="bar"><div class="bar-row">${voltar}<div class="bar-right">${clock}${S.dicas > 0 ? `<span class="dch" role="img" aria-label="${S.dicas} ${S.dicas === 1 ? 'dica' : 'dicas'} por usar">${LAMP}${S.dicas}</span>` : ''}<span class="torches" role="img" aria-label="${S.torches} de 3 tochas acesas">${t}</span><button class="navb menu" data-a="menu" aria-label="Ver o progresso: ${S.open} de 7 prendas">${LISTA}<span>${S.open}/7</span></button></div></div><div class="track" role="img" aria-label="${S.done} de 7 etapas ganhas">${tr}</div></header>`;
 }
@@ -800,8 +803,8 @@ function vMenu(){
       <div class="stat"><span class="lbl">Fotos</span><b>${nf}</b></div>
     </div>
     <ol class="group won">${ETAPAS.map(e => {
-      const st = e.n <= S.open ? 'Ganhaste: ' + PRENDAS[e.n - 1].nome : e.n <= S.done ? 'Prenda por abrir' : e.n === S.done + 1 ? 'A seguir' : 'Bloqueada';
-      return `<li><span class="num-s${e.n <= S.done ? ' ok' : ''}">${e.n <= S.done ? CHECK : e.n}</span><span>${e.t}<small>${st}</small></span></li>`;
+      const st = abertaE(e.n) ? 'Ganhaste: ' + PRENDAS[e.n - 1].nome : feitaE(e.n) ? 'Prenda por abrir' : e.n === aseguir() ? 'A seguir' : 'Por jogar';
+      return `<li><span class="num-s${feitaE(e.n) ? ' ok' : ''}">${feitaE(e.n) ? CHECK : e.n}</span><span>${e.t}<small>${st}</small></span></li>`;
     }).join('')}</ol>
     <div class="row">${btn('Mapa', 'hub', {cls:'alt small'})}${btn('Álbum', 'album', {cls:'alt small'})}</div>
   </aside>`;
@@ -840,30 +843,46 @@ function vIntro2(){
     + acts(btn('Aceito o desafio', 'introOk'));
 }
 
+/* As etapas contam-se por conjunto e não por ordem: qualquer uma pode ser a seguinte. `done` e `open` ficam como contagens. */
+const feitaE = n => !!(S.fe && S.fe[n]);                 /* etapa concluída */
+const abertaE = n => !!(S.ab && S.ab[n]);                /* prenda dessa etapa já aberta */
+const prox = () => { for(let n = 1; n <= 7; n++) if(!feitaE(n)) return n; return 8; };
+const porAbrir = () => { for(let n = 1; n <= 7; n++) if(feitaE(n) && !abertaE(n)) return n; return 0; };
+/* A etapa em que a Ana está a meio, se houver; senão, a primeira por fazer. */
+const aseguir = () => (S.n >= 1 && S.n <= 7 && !feitaE(S.n) && S.step ? S.n : prox());
+function conta(){ S.done = Object.keys(S.fe).length; S.open = Object.keys(S.ab).length; }
+/* Estados guardados por versões anteriores só tinham as contagens. */
+function norm(o){
+  if(!o.fe){ o.fe = {}; for(let n = 1; n <= Math.min(7, o.done || 0); n++) o.fe[n] = 1; }
+  if(!o.ab){ o.ab = {}; for(let n = 1; n <= Math.min(7, o.open || 0); n++) o.ab[n] = 1; }
+  o.done = Object.keys(o.fe).length; o.open = Object.keys(o.ab).length;
+  return o;
+}
+
 /* Missão por resolver que tem de ficar fechada antes da etapa n. */
 const pendente = n => MISSOES_DIA().find(e => e.ate <= n && S.open >= e.de && !S.x[e.id]);
 /* Missão cumprida: reacende uma tocha apagada; com as três acesas, dá uma dica para usar num jogo. */
 function premio(){ if(S.torches < 3){ S.torches++; return 'r'; } S.dicas = (S.dicas || 0) + 1; return 'd'; }
 
 function vHub(){
-  const next = S.done + 1;
+  const next = aseguir(), meio = next <= 7 && next === S.n && !!S.step;
   let out = bar() + tag('Mapa do jogo');
   out += `<h1 class="title">${S.done === 0 ? 'Tudo por ganhar' : S.done >= 7 ? 'Sete em sete' : S.done + ' de 7 prendas'}</h1>`;
   if(next === 4) out += host('A Fase 2 joga-se à mesa. Espera que os convidados estejam todos sentados.');
   if(next === 5) out += host('A Fase 3 é a contar: uma hora para as três etapas. O relógio arranca na partida da etapa 5 e só pára no tapete.');
-  const bloq = S.open >= S.done && next <= 7 ? pendente(next) : null;
-  out += S.open < S.done ? btn(`Abrir a prenda n.º ${S.open + 1}`, 'giftBack')
+  const bloq = S.open >= S.done && next <= 7 && !meio ? pendente(S.done + 1) : null;
+  out += S.open < S.done ? btn(`Abrir a prenda n.º ${porAbrir()}`, 'giftBack')
     : bloq ? `<p class="muted small" style="padding:0 4px">Antes da etapa ${next} há uma missão obrigatória por resolver.</p>` + btn(`Missão: ${bloq.t}`, 'extra', {v: bloq.id})
-    : next <= 7 ? btn(`Jogar a etapa ${next}`, 'play') : btn('Ver o final', 'play');
-  const pos = Math.min(6, S.done), X = i => i % 2 ? 87.5 : 12.5, Y = i => ROW * i + ROW / 2;
+    : next <= 7 ? btn(`${meio ? 'Continuar' : 'Jogar'} a etapa ${next}`, 'play') : btn('Ver o final', 'play');
+  const pos = Math.min(6, next - 1), X = i => i % 2 ? 87.5 : 12.5, Y = i => ROW * i + ROW / 2;
   const troco = i => `M${X(i)} ${Y(i)}C${X(i)} ${Y(i) + ROW} ${X(i + 1)} ${Y(i + 1) - ROW} ${X(i + 1)} ${Y(i + 1)}`;
   let todo = '', feito = '';
   for(let i = 0; i < 6; i++){ todo += troco(i); if(i < pos) feito += troco(i); }
   out += `<div class="mapa"><svg class="trilho" viewBox="0 0 100 ${ROW * 7}" preserveAspectRatio="none" aria-hidden="true"><path class="t0" d="${todo}"/>${feito ? `<path class="t1" d="${feito}"/>` : ''}</svg><ol class="stops" style="grid-auto-rows:${ROW}px">${ETAPAS.map((e, i) => {
-    const cls = e.n <= S.done ? 'done' : e.n === next ? 'now' : 'locked';
-    const st = e.n <= S.open ? 'Ganhaste: ' + PRENDAS[e.n - 1].nome : e.n <= S.done ? 'Prenda por abrir' : e.j;
+    const cls = feitaE(e.n) ? 'done' : e.n === next ? 'now' : 'locked';
+    const st = abertaE(e.n) ? 'Ganhaste: ' + PRENDAS[e.n - 1].nome : feitaE(e.n) ? 'Prenda por abrir' : e.j;
     const nova = i === 0 || ETAPAS[i - 1].f !== e.f;
-    return `<li class="stop ${cls}${i % 2 ? ' r' : ''}" data-f="${e.f}"><span class="node">${i === pos ? `<span class="eu" role="img" aria-label="A Ana está aqui">${BONECO}</span>` : ''}<span class="dot">${e.n <= S.done ? CHECK : e.n}</span></span><span class="txt">${nova ? `<span class="fz">${FASES[e.f - 1].nome} · ${FASES[e.f - 1].quando}</span>` : ''}<span class="nm">${e.t}</span><span class="st">${st}</span></span></li>`;
+    return `<li class="stop ${cls}${i % 2 ? ' r' : ''}" data-f="${e.f}"><span class="node">${i === pos ? `<span class="eu" role="img" aria-label="A Ana está aqui">${BONECO}</span>` : ''}<span class="dot">${feitaE(e.n) ? CHECK : e.n}</span></span><span class="txt">${nova ? `<span class="fz">${FASES[e.f - 1].nome} · ${FASES[e.f - 1].quando}</span>` : ''}<span class="nm">${e.t}</span><span class="st">${st}</span></span></li>`;
   }).join('')}</ol></div>`;
   const nf = ALBUM.filter(id => FOTO[id]).length;
   out += `<section class="fase"><div class="fase-h"><h2>Missões do dia</h2><span>Obrigatórias. Valem uma tocha ou uma dica</span></div><div class="etapas">${MISSOES_DIA().map(e => {
@@ -1020,6 +1039,7 @@ function guiao(){
       <li><strong>Etapa 3.</strong> A quarta pergunta é «Em quantos países diferentes estiveste este ano?» e a quinta é tua. Para a terceira fotografia faz falta uma taça.</li>
       <li><strong>Almoço.</strong> Antes da Mesa Redonda joga-se o «Isto ou aquilo», e à sobremesa abre-se o «Correio da mesa». Pede aos convidados que entrem na app logo à chegada e que escrevam a mensagem durante o almoço.</li>
       <li><strong>Etapa 4.</strong> Nove bolas de papel e uma taça. Cada convidado entra na app da Mesa Redonda com o seu nome. Se faltar rede, a Ana tem a opção de jogar sem telemóveis.</li>
+      <li><strong>Escolher os jogos.</strong> No separador Jogos escolhes qualquer etapa por fazer e a prova por onde começa, ou dás a prenda sem jogar. A ordem do mapa deixa de mandar.</li>
       <li><strong>Passar à frente.</strong> Se o ambiente não estiver para jogos, há dois botões por baixo do ecrã ao vivo: um passa a prova ou a missão em curso, o outro passa a etapa inteira e dá logo a prenda. Nenhum apaga tochas.</li>
       <li><strong>Corrida Final.</strong> As etapas 5, 6 e 7 têm uma hora no total. Se o contador chegar a zero, apaga-se uma tocha.</li>
       <li><strong>Etapa 5.</strong> Duas almofadas. Põe o embrulho 5 do outro lado da sala antes da travessia.</li>
@@ -1043,9 +1063,12 @@ function vBack(){
     <h2 class="sec">Passar à frente</h2>
     <p class="muted small">Para quando o ambiente não estiver para jogos. Não apaga tochas nem dá castigo.</p>
     ${(P => btn(P.prova ? 'Passar ' + P.prova : 'Nenhuma prova a decorrer', 'passaProva', {cls:'alt small', dis: !P.prova}) + btn(P.etapa ? `Passar a etapa ${P.etapa} inteira` : 'Nenhuma etapa para passar', 'passaEtapa', {cls:'alt small', dis: !P.etapa}))(passavel())}
+    <h2 class="sec">Escolher o jogo</h2>
+    <p class="muted small">Qualquer etapa por fazer, a começar na prova que quiseres. A ordem do mapa deixa de mandar.</p>
+    ${jogosHTML(false)}
     <h2 class="sec">Controlo</h2>
     <p class="muted small">Etapas ganhas: ${S.done} de 7. Toca num número para pôr o jogo no início dessa etapa.</p>
-    <div class="jump">${ETAPAS.map(e => `<button class="mini${e.n === S.done + 1 ? ' on ok' : ''}" data-a="jump" data-v="${e.n}" aria-label="Ir para a etapa ${e.n}">${e.n}</button>`).join('')}</div>
+    <div class="jump">${ETAPAS.map(e => `<button class="mini${e.n === prox() ? ' on ok' : ''}" data-a="jump" data-v="${e.n}" aria-label="Ir para a etapa ${e.n}">${e.n}</button>`).join('')}</div>
     ${S.ask
       ? `<p class="fb bad" role="alert">Isto apaga todo o progresso.</p><div class="row">${btn('Apagar tudo', 'resetYes', {cls:'bad small'})}${btn('Cancelar', 'resetNo', {cls:'alt small'})}</div>`
       : `<div class="row">${btn('Reacender tochas', 'relight', {cls:'alt small'})}${btn('Recomeçar', 'resetAsk', {cls:'alt small'})}</div>`}`
@@ -1388,8 +1411,10 @@ const VIEWS = {1:v1, 2:v2, 3:v3, 4:v4, 5:vCores, 6:vPaciencia, 7:v7};
 
 /* ---------- Transições ---------- */
 function win(){
-  S.done = Math.max(S.done, S.n); S.screen = 'gift'; S.gstep = 'lock'; S.step = ''; S.d = {};
-  if(S.n === 7 && S.t3 && !S.t3end) S.t3end = Date.now();
+  if(S.n >= 1 && S.n <= 7) S.fe[S.n] = 1;
+  conta(); S.screen = 'gift'; S.gstep = 'lock'; S.step = ''; S.d = {};
+  /* A Corrida Final acaba quando as etapas 5, 6 e 7 estiverem as três fechadas, por qualquer ordem. */
+  if(S.t3 && !S.t3end && feitaE(5) && feitaE(6) && feitaE(7)) S.t3end = Date.now();
 }
 function fail(after){
   S.torches = Math.max(0, S.torches - 1); S.castigo = rnd(CASTIGOS.length); S.after = after; S.screen = 'fail';
@@ -1413,11 +1438,11 @@ const ACT = {
   },
   menu(){ S.menu = !S.menu; },
   menuClose(){ S.menu = false; },
-  giftBack(){ if(S.open < S.done){ S.n = S.open + 1; S.gstep = 'lock'; S.screen = 'gift'; } },
+  giftBack(){ const g = porAbrir(); if(g){ S.n = g; S.gstep = 'lock'; S.screen = 'gift'; } },
   play(){
-    const n = S.done + 1;
+    const n = aseguir();
     if(n > 7){ S.screen = 'final'; return; }
-    const antes = S.open >= S.done ? pendente(n) : null;
+    const antes = S.open >= S.done && !(n === S.n && S.step) ? pendente(S.done + 1) : null;
     if(antes) return ACT.extra(antes.id);
     if(S.ret === 'fail' && S.n === n){ S.ret = ''; S.screen = 'fail'; return; }
     S.ret = '';
@@ -1427,8 +1452,8 @@ const ACT = {
   winNow(){ win(); },
   failGift(){ fail('gift'); },
   castigoOk(){ if(S.after === 'gift') win(); else { S.screen = 'stage'; S.step = S.after; } },
-  giftOpen(){ S.gstep = 'open'; S.open = Math.max(S.open, S.n); },
-  giftOk(){ if(S.open < S.done){ S.n = S.open + 1; S.gstep = 'lock'; } else if(S.done >= 7){ S.screen = 'final'; setTimeout(confetti, 60); } else S.screen = 'hub'; },
+  giftOpen(){ S.gstep = 'open'; if(S.n >= 1 && S.n <= 7) S.ab[S.n] = 1; conta(); },
+  giftOk(){ const g = porAbrir(); if(g){ S.n = g; S.gstep = 'lock'; } else if(S.done >= 7){ S.screen = 'final'; setTimeout(confetti, 60); } else S.screen = 'hub'; },
   extra(v){ const e = EXTRAS.find(x => x.id === v); if(!e || S.open < e.de || S.x[v] === 'n' || S.x[v] === 's') return false; if(S.xid !== v) S.xd = null; S.xid = v; S.screen = 'extra'; },
   xqGo(){ if(!S.x.xq) S.xd = {i:0, ok:0, tEnd: Date.now() + FAQ_T}; },
   xqAns(v){ const x = S.xd; if(!x) return false; if(FAQ[x.i].a === +v) x.ok++; x.i++; if(x.i >= FAQ.length || Date.now() > x.tEnd) xqEnd(); },
@@ -1454,17 +1479,30 @@ const ACT = {
     if(x.i + 1 < x.msgs.length){ x.i++; x.pick = ''; x.rev = false; return; }
     S.correio = x.msgs.map(m => ({nm: m.nm, t: m.t})); S.x.xb = x.ok * 2 >= x.msgs.length ? premio() : 'n'; x.fim = true; },
   passaProva(){
-    const o = onde(), n = S.done + 1;
+    const o = onde(), n = aseguir();
     if(o === 'fail'){ S.ret = ''; ACT.castigoOk(); }
     else if(o === 'stage' && n <= 7){ const pr = provaAgora(); S.ret = ''; if(pr.vai){ pr.vai(); S.screen = 'stage'; } else fimEtapa(); }
     else if(o === 'extra'){ const e = EXTRAS.find(x => x.id === S.xid); if(!e || S.x[e.id]) return false; S.x[e.id] = 's'; S.xd = null; S.screen = 'hub'; }
-    else if(o === 'hub'){ const b = S.open >= S.done && n <= 7 ? pendente(n) : null; if(!b) return false; S.x[b.id] = 's'; S.screen = 'hub'; }
+    else if(o === 'hub'){ const b = S.open >= S.done && n <= 7 ? pendente(S.done + 1) : null; if(!b) return false; S.x[b.id] = 's'; S.screen = 'hub'; }
     else return false;
   },
-  passaEtapa(){
-    const n = S.done + 1; if(n > 7 || S.open < S.done || S.screen === 'gift') return false;
-    MISSOES_DIA().forEach(e => { if(e.ate <= n && S.open >= e.de && !S.x[e.id]) S.x[e.id] = 's'; });
-    S.n = n; S.ret = ''; S.xd = null; fimEtapa();
+  /* Sem argumento passa a etapa que vem a seguir; com um número, dá a prenda dessa etapa sem a jogar. */
+  passaEtapa(v){
+    const n = v ? +v : aseguir(); if(!(n >= 1 && n <= 7) || feitaE(n) || S.open < S.done || S.screen === 'gift') return false;
+    if(!v) MISSOES_DIA().forEach(e => { if(e.ate <= S.done + 1 && S.open >= e.de && !S.x[e.id]) S.x[e.id] = 's'; });
+    S.n = n; S.ret = ''; S.xd = null; S.step = ''; fimEtapa();
+  },
+  /* Escolha do apresentador: põe a Ana numa etapa por fazer, a começar na prova indicada («etapa-prova»), fora da ordem do mapa. */
+  irPara(v){
+    const [n, i] = String(v).split('-').map(Number), L = SALTOS[n];
+    if(!L || !(i >= 0 && i < L.length) || feitaE(n) || porAbrir() || S.screen === 'gift') return false;
+    S.intro = true; S.ret = ''; S.xd = null; S.after = ''; S.n = n; S.d = {}; S.step = 'brief';
+    if(i > 0) L[i - 1].vai();
+    S.screen = 'stage';
+  },
+  irMissao(v){
+    const e = EXTRAS.find(x => x.id === v); if(!e || S.x[v] || S.screen === 'gift') return false;
+    S.intro = true; if(S.xid !== v) S.xd = null; S.xid = v; S.screen = 'extra';
   },
   extraNo(){ const e = EXTRAS.find(x => x.id === S.xid); if(e && !e.quiz && !S.x[S.xid]){ S.x[S.xid] = 'n'; S.xd = null; } },
   album(){ S.screen = 'album'; },
@@ -1472,7 +1510,7 @@ const ACT = {
 
   pin(){ S.screen = 'pin'; S.pinErr = false; },
   pinGo(){ const el = document.getElementById('pin'); if(el && el.value === PIN){ S.screen = 'back'; S.pinErr = false; } else S.pinErr = true; },
-  jump(v){ const n = +v; S.intro = true; S.ret = ''; S.done = n - 1; S.open = n - 1; S.n = 0; S.step = ''; S.d = {}; if(n <= 5){ S.t3 = 0; S.t3out = false; } S.t3end = 0;
+  jump(v){ const n = +v; S.intro = true; S.ret = ''; S.fe = {}; S.ab = {}; for(let k = 1; k < n; k++){ S.fe[k] = 1; S.ab[k] = 1; } conta(); S.n = 0; S.step = ''; S.d = {}; if(n <= 5){ S.t3 = 0; S.t3out = false; } S.t3end = 0;
     /* saltar para uma etapa dá por saltadas as missões das etapas anteriores; as dessa etapa ficam por resolver */
     MISSOES_DIA().forEach(e => { if(e.ate < n && !S.x[e.id]) S.x[e.id] = 's'; }); },
   relight(){ S.torches = 3; },
@@ -1631,21 +1669,34 @@ const SALTOS = {
 };
 /* Onde a Ana está de facto, mesmo que tenha voltado ao mapa a meio de uma prova. */
 function onde(){
-  const fora = S.screen === 'hub' || S.screen === 'back' || S.screen === 'pin', emCurso = S.n === S.done + 1 && !!S.step;
+  const fora = S.screen === 'hub' || S.screen === 'back' || S.screen === 'pin', emCurso = S.n >= 1 && !feitaE(S.n) && !!S.step;
   if(S.screen === 'fail' || (fora && emCurso && S.ret === 'fail')) return 'fail';
   if(S.screen === 'stage' || (fora && emCurso)) return 'stage';
   return fora ? 'hub' : S.screen;
 }
-const provaAgora = () => { const L = SALTOS[S.done + 1] || []; return L.find(q => !q.de || q.de.includes(S.step)) || L[0]; };
+const provaAgora = () => { const L = SALTOS[aseguir()] || []; return L.find(q => !q.de || q.de.includes(S.step)) || L[0]; };
 /* O que se pode passar neste momento: texto para os botões do apresentador. */
 function passavel(){
-  const o = onde(), n = S.done + 1;
+  const o = onde(), n = aseguir();
   let prova = '';
   if(o === 'fail') prova = 'o castigo';
   else if(o === 'stage' && n <= 7) prova = `a prova «${provaAgora().nm}»`;
   else if(o === 'extra'){ const e = EXTRAS.find(x => x.id === S.xid); if(e && !S.x[e.id]) prova = `a missão «${e.t}»`; }
-  else if(o === 'hub'){ const b = S.open >= S.done && n <= 7 ? pendente(n) : null; if(b) prova = `a missão «${b.t}»`; }
+  else if(o === 'hub'){ const b = S.open >= S.done && n <= 7 ? pendente(S.done + 1) : null; if(b) prova = `a missão «${b.t}»`; }
   return {prova, etapa: n <= 7 && S.open >= S.done && S.screen !== 'gift' ? n : 0};
+}
+/* Menu de jogos do apresentador: qualquer etapa por fazer, a começar em qualquer prova, ou a prenda sem jogar. */
+function jogosHTML(remoto){
+  const trava = !!porAbrir() || S.screen === 'gift';
+  const b = (rot, cmd, v, dis) => remoto ? `<button class="mini" data-g="${cmd}:${v}"${dis ? ' disabled' : ''}>${rot}</button>` : `<button class="mini" data-a="${cmd === 'jg' ? 'irPara' : cmd === 'jp' ? 'passaEtapa' : 'irMissao'}" data-v="${v}"${dis ? ' disabled' : ''}>${rot}</button>`;
+  const ms = MISSOES_DIA().filter(e => !S.x[e.id]);
+  return (trava ? fbx('bad', 'Há uma prenda por abrir. Primeiro abre-se essa, depois escolhe-se o jogo seguinte.') : '')
+    + ETAPAS.map(e => {
+      const f = feitaE(e.n), curso = !f && S.n === e.n && !!S.step;
+      return `<div class="moment"><b class="lbl">Etapa ${e.n} · ${f ? (abertaE(e.n) ? 'feita' : 'prenda por abrir') : curso ? 'a decorrer' : 'por jogar'}</b><strong>${e.t}</strong>
+        <div class="jgs">${SALTOS[e.n].map((q, i) => b(q.nm, 'jg', e.n + '-' + i, f || trava)).join('')}${b('Dar a prenda sem jogar', 'jp', e.n, f || trava)}</div></div>`;
+    }).join('')
+    + (ms.length ? `<div class="moment"><b class="lbl">Missões por resolver</b><div class="jgs">${ms.map(e => b(e.t, 'jm', e.id, S.screen === 'gift')).join('')}</div></div>` : '');
 }
 function fimEtapa(){
   win();
@@ -1654,7 +1705,7 @@ function fimEtapa(){
 }
 
 /* ---------- Comandos do apresentador (executados no telemóvel da Ana) ---------- */
-const ADMIN = new Set(['jump', 'relight', 'resetYes', 'passaProva', 'passaEtapa']);
+const ADMIN = new Set(['jump', 'relight', 'resetYes', 'passaProva', 'passaEtapa', 'irPara', 'irMissao']);
 function runCmd(c){
   if(!c || !ACT[c.a]) return;
   const v = c.v === undefined || c.v === null ? '' : String(c.v);
@@ -1705,7 +1756,7 @@ function ligaJogo(){
 /* ---------- App de gestão (telemóvel do apresentador) ---------- */
 const HOST = new Set(['s1go', 's1mark', 's1end', 's2shot', 's3live', 's3next', 's3timer', 's3foto', 'winNow', 'failGift', 'castigoOk', 's4m', 's4timer', 's4begin', 's4close', 's4deal', 's4kick', 's5timer', 's6timer', 'extraOk', 'extraNo', 'giftOpen', 'ioaGo', 'ioaNext', 'corGo', 'corNext']);
 const GK = KEY + '-gerir';
-const G = {ok:false, tab:'vivo', ask:false, spoil:false, err:false, limpa:false, passa:''};
+const G = {ok:false, tab:'vivo', ask:false, spoil:false, err:false, limpa:false, passa:'', jogo:null};
 try{ const o = JSON.parse(localStorage.getItem(GK) || '{}'); G.ok = !!o.ok; if(o.tab) G.tab = o.tab; }catch(e){}
 const GL = {jogo:0, vivo:0, vt:0, sj:'', jj:'{}', vj:'{}', ij:'{}', cj:'{}', jog:{}, on:false, qr:0, err:false};
 const saveG = () => { try{ localStorage.setItem(GK, JSON.stringify({ok: G.ok, tab: G.tab})); }catch(e){} };
@@ -1720,7 +1771,7 @@ function ligaGerir(){
     all = all || {};
     let mud = false;
     const j = all.jogo;
-    if(j && j.s && j.s !== GL.sj){ GL.sj = j.s; try{ S = Object.assign(fresh(), JSON.parse(j.s)); GL.jogo = Date.now(); }catch(e){} mud = true; }
+    if(j && j.s && j.s !== GL.sj){ GL.sj = j.s; try{ S = Object.assign(fresh(), norm(JSON.parse(j.s))); GL.jogo = Date.now(); }catch(e){} mud = true; }
     const vt = all.vivo && all.vivo.t;
     if(vt && vt !== GL.vt){ GL.vt = vt; if(path !== '/' || Math.abs(Date.now() - vt) < 30000){ const antes = estadoG()[1]; GL.vivo = Date.now(); if(antes !== estadoG()[1]) mud = true; } }
     const inn = all.in || {}, jj = JSON.stringify(inn.jog || {}), vj = JSON.stringify(inn.voto || {});
@@ -1730,7 +1781,7 @@ function ligaGerir(){
     if(ij !== GL.ij){ GL.ij = ij; MESA.ioa = JSON.parse(ij); mud = true; }
     if(cj !== GL.cj){ GL.cj = cj; MESA.correio = JSON.parse(cj); mud = true; }
     /* No guião não se redesenha a cada toque dela, para não mexer no que estás a ler. */
-    if(mud && G.tab !== 'guiao') renderG();
+    if(mud && G.tab !== 'guiao' && !(G.tab === 'jogos' && G.jogo)) renderG();
   });
   const pinta = () => { const el = document.getElementById('gstat'), e = estadoG(); if(el && el.textContent !== e[1]){ el.textContent = e[1]; el.className = 'gstat ' + e[0]; } };
   const sinal = () => net.put('in/host', {t: Date.now()}).then(r => { GL.err = !(r && r.ok); pinta(); });
@@ -1755,7 +1806,7 @@ function renderG(){
     return;
   }
   const tem = !!GL.jogo, e = estadoG();
-  const abas = [['vivo', 'Ao vivo'], ['guiao', 'Guião'], ['mesa', 'Mesa']].map(([k, t]) => `<button class="segb${G.tab === k ? ' on' : ''}" data-g="tab:${k}" aria-pressed="${G.tab === k}">${t}</button>`).join('');
+  const abas = [['vivo', 'Ao vivo'], ['jogos', 'Jogos'], ['guiao', 'Guião'], ['mesa', 'Mesa']].map(([k, t]) => `<button class="segb${G.tab === k ? ' on' : ''}" data-g="tab:${k}" aria-pressed="${G.tab === k}">${t}</button>`).join('');
   let html = `<header class="bar"><div class="bar-row"><b class="gt">Bastidores</b><span class="gstat ${e[0]}" id="gstat">${e[1]}</span></div><div class="seg">${abas}</div></header>`, fase = '';
   if(G.tab === 'vivo'){
     if(!tem) html += `<h1 class="title">Ainda sem jogo</h1><p class="lead">${ONLINE ? 'Abre a app do jogo no telemóvel da Ana. Assim que ela arrancar, o ecrã aparece aqui.' : 'Esta versão ainda não tem a base de dados ligada, por isso não há nada para acompanhar.'}</p>`;
@@ -1764,10 +1815,16 @@ function renderG(){
       html += `<h2 class="sec">Passar à frente</h2><p class="muted small" style="padding:0 4px">Para quando o ambiente não estiver para jogos. Não apaga tochas nem dá castigo.</p>`
         + (G.passa ? fbx('bad', G.passa === 'pp' ? `Passar ${P.prova}?` : `Passar a etapa ${P.etapa} inteira e dar já a prenda n.º ${P.etapa}?`) + `<div class="row"><button class="btn small" data-g="passaSim">Confirmar</button><button class="btn alt small" data-g="passaNao">Cancelar</button></div>`
           : `<button class="btn alt small" data-g="pp"${P.prova ? '' : ' disabled'}>${P.prova ? 'Passar ' + P.prova : 'Nenhuma prova a decorrer'}</button><button class="btn alt small" data-g="pe"${P.etapa ? '' : ' disabled'}>${P.etapa ? `Passar a etapa ${P.etapa} inteira` : 'Nenhuma etapa para passar'}</button>`); }
+  } else if(G.tab === 'jogos'){
+    const j = G.jogo, rot = !j ? '' : j.k === 'jg' ? `Pôr a Ana a jogar «${SALTOS[+j.v.split('-')[0]][+j.v.split('-')[1]].nm}», da etapa ${j.v.split('-')[0]}?` : j.k === 'jp' ? `Dar já a prenda n.º ${j.v}, sem jogar a etapa?` : `Abrir a missão «${(EXTRAS.find(e => e.id === j.v) || {}).t}» no telemóvel da Ana?`;
+    html += `<h1 class="title">Escolher o jogo</h1><p class="lead">Qualquer etapa por fazer, a começar na prova que quiseres. A ordem do mapa deixa de mandar, e cada etapa continua a dar a sua prenda.</p>`
+      + (!tem ? fbx('bad', 'Ainda não há jogo para comandar. Abre a app do jogo no telemóvel da Ana.')
+        : j ? fbx('bad', rot) + `<div class="row"><button class="btn small" data-g="jogoSim">Confirmar</button><button class="btn alt small" data-g="jogoNao">Cancelar</button></div>`
+        : jogosHTML(true));
   } else if(G.tab === 'guiao'){
     html += `<h1 class="title">Guião</h1>` + guiao() + `<h2 class="sec">Controlo à distância</h2>
       <p class="muted small" style="padding:0 4px">Etapas ganhas: ${tem ? S.done : 0} de 7. Toca num número para pôr o jogo da Ana no início dessa etapa.</p>
-      <div class="jump">${ETAPAS.map(x => `<button class="mini${tem && x.n === S.done + 1 ? ' on ok' : ''}" data-g="jump:${x.n}" aria-label="Pôr o jogo na etapa ${x.n}">${x.n}</button>`).join('')}</div>
+      <div class="jump">${ETAPAS.map(x => `<button class="mini${tem && x.n === prox() ? ' on ok' : ''}" data-g="jump:${x.n}" aria-label="Pôr o jogo na etapa ${x.n}">${x.n}</button>`).join('')}</div>
       ${G.ask ? fbx('bad', 'Isto apaga todo o progresso no telemóvel da Ana.') + `<div class="row"><button class="btn bad small" data-g="reset">Apagar tudo</button><button class="btn alt small" data-g="noreset">Cancelar</button></div>`
               : `<div class="row"><button class="btn alt small" data-g="relight">Reacender tochas</button><button class="btn alt small" data-g="ask">Recomeçar</button></div>`}`;
   } else {
@@ -1796,6 +1853,9 @@ function clickG(e){
     else if(k === 'tab') G.tab = v;
     else if(k === 'jump'){ cmd('jump', v); G.tab = 'vivo'; }
     else if(k === 'relight') cmd('relight');
+    else if(k === 'jg' || k === 'jp' || k === 'jm') G.jogo = {k, v};
+    else if(k === 'jogoNao') G.jogo = null;
+    else if(k === 'jogoSim'){ const j = G.jogo; G.jogo = null; if(j){ cmd(j.k === 'jg' ? 'irPara' : j.k === 'jp' ? 'passaEtapa' : 'irMissao', j.v); G.tab = 'vivo'; } }
     else if(k === 'pp' || k === 'pe') G.passa = k;
     else if(k === 'passaNao') G.passa = '';
     else if(k === 'passaSim'){ if(G.passa) cmd(G.passa === 'pp' ? 'passaProva' : 'passaEtapa'); G.passa = ''; }
@@ -1955,12 +2015,12 @@ function ecra(){
   switch(S.screen){
     case 'intro': html = vIntro(); break;
     case 'intro2': html = vIntro2(); break;
-    case 'hub': html = vHub(); fase = ETAPAS[Math.min(6, S.done)].f; break;
+    case 'hub': html = vHub(); fase = ETAPAS[Math.min(6, aseguir() - 1)].f; break;
     case 'stage': html = bar() + VIEWS[n](); fase = ETAPAS[n - 1].f; break;
     case 'fail': html = vFail(); fase = ETAPAS[n - 1].f; break;
     case 'gift': html = vGift(); fase = ETAPAS[n - 1].f; break;
-    case 'extra': html = vExtra(); fase = ETAPAS[Math.min(6, S.done)].f; break;
-    case 'album': html = vAlbum(); fase = ETAPAS[Math.min(6, S.done)].f; break;
+    case 'extra': html = vExtra(); fase = ETAPAS[Math.min(6, aseguir() - 1)].f; break;
+    case 'album': html = vAlbum(); fase = ETAPAS[Math.min(6, aseguir() - 1)].f; break;
     case 'final': html = vFinal(); fase = 3; break;
     case 'pin': html = vPin(); break;
     case 'back': html = vBack(); break;
@@ -2059,7 +2119,7 @@ function boot(data){
   if(APP === 'gerir'){ if(G.ok) ligaGerir(); return renderG(); }
   if(APP === 'mesa'){ ligaMesa(); return renderM(); }
   const o = data && data.v === 3 ? data : load();
-  if(o) S = Object.assign(fresh(), o);
+  if(o) S = Object.assign(fresh(), norm(o));
   if(S.screen === 'pin' || S.screen === 'back' || S.screen === 'intro' || S.screen === 'intro2') S.screen = 'splash';
   if(S.d && S.d.lock && S.d.cards){ S.d.open.forEach(i => { S.d.cards[i].up = false; }); S.d.open = []; S.d.lock = false; }
   S.ask = false; S.pinErr = false;
